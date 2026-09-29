@@ -81,6 +81,8 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 #prompt b.more{color:#2fae63}#prompt b.less{color:#e07a10}
 .stageOuter{flex:1;overflow:auto;display:flex;padding:4px 12px;min-height:0}
 #stage{margin:auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2.4vmin,26px);max-width:100%;padding:6px 0}
+#stage.cnt-st{--obj:clamp(28px,7.4vmin,58px);--cell:clamp(30px,7.8vmin,60px)}
+#stage.cnt-st.small{--obj:clamp(22px,4.6vmin,40px);--cell:clamp(24px,5.6vmin,44px)}
 #stage.small{--obj:clamp(28px,7vmin,52px);--cell:clamp(34px,8vmin,64px)}
 .fb{min-height:clamp(78px,14vmin,120px);display:flex;align-items:center;justify-content:center;gap:16px;padding:6px 14px calc(8px + env(safe-area-inset-bottom));text-align:center}
 .fbtext{font-size:clamp(22px,5vmin,40px);font-weight:900;display:flex;gap:.5em;align-items:center;flex-wrap:wrap;justify-content:center}
@@ -243,6 +245,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 @keyframes toast{0%{transform:translate(-50%,-30px);opacity:0}15%,80%{transform:translate(-50%,0);opacity:1}100%{opacity:0}}
 
 @media (max-height:560px){
+  .cbtn{height:48px;font-size:24px}
+  #stage.cnt-st{--obj:clamp(20px,5.4vmin,40px);--cell:clamp(22px,6vmin,42px)}
+  #stage.cnt-st.small{--obj:clamp(16px,4.2vmin,30px);--cell:clamp(20px,5vmin,34px)}
   :root{--obj:clamp(26px,7.2vmin,56px);--btn:clamp(54px,13vmin,90px);--cell:clamp(28px,8vmin,60px);--box:clamp(42px,10vmin,76px)}
   .promptbar{min-height:44px;font-size:clamp(20px,5vmin,34px)}
   .fb{min-height:64px}
@@ -254,6 +259,30 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
   .card{min-height:100px}
   .shapebig{width:min(30vmin,150px);height:min(30vmin,150px)}
 }
+
+.lay{display:flex;gap:clamp(8px,2vmin,20px);align-items:center;justify-content:center;flex-wrap:wrap;background:#fff9;border-radius:28px;padding:clamp(8px,2vmin,18px);border:3px dashed #ffffffcc}
+.lay .item{position:relative;display:flex;align-items:center;justify-content:center;line-height:1;cursor:default}
+.dice{display:grid;grid-template-columns:repeat(3,calc(var(--obj)*1.1));grid-template-rows:repeat(3,calc(var(--obj)*1.1));background:#fff;border:5px solid #e7d9b8;border-radius:22px;padding:6px;box-shadow:0 5px 0 #e7d9b8;align-items:center;justify-items:center}
+.dice .item{width:100%;height:100%;font-size:calc(var(--obj)*.9)}
+.tf-cell .item{width:100%;height:100%;font-size:calc(var(--cell)*.72)}
+.tf-cell .item .badge{font-size:calc(var(--cell)*.32);right:-3px;bottom:-3px}
+.frow{display:flex;background:#fff;border:5px solid #e7d9b8;border-radius:18px;padding:4px;box-shadow:0 4px 0 #e7d9b8}
+.frow .item,.frow .slot{width:calc(var(--obj)*1.1);height:calc(var(--obj)*1.1);font-size:var(--obj)}
+.cnt-st .fives{gap:3px}
+.cnt-st .fives .frow.gap{margin-bottom:6px}
+.cnt-st .lay{padding:6px 10px}
+.frow .slot{border-right:3px dashed #eee6d2}.frow .slot:last-child{border-right:0}
+.frow .item{border-right:3px dashed #eee6d2}.frow .item:last-child{border-right:0}
+.fives{display:flex;flex-direction:column;gap:clamp(4px,1vmin,10px);align-items:center}
+.fives .frow.gap{margin-bottom:clamp(6px,1.6vmin,16px)}
+.cbtn{min-width:clamp(120px,24vmin,200px);height:clamp(58px,11vmin,84px);font-size:clamp(26px,5.6vmin,42px);padding:0 1em;border-radius:999px;background:var(--blue);color:#fff;font-weight:900;text-shadow:0 2px 0 #0003;box-shadow:0 7px 0 #2f97cc,0 10px 16px #0002;display:inline-flex;align-items:center;justify-content:center;gap:.4em}
+.cbtn:active{transform:translateY(5px);box-shadow:0 2px 0 #2f97cc}
+.cbtn.busy{opacity:.55;pointer-events:none}
+.gpick{display:flex;gap:clamp(10px,3vmin,28px);flex-wrap:wrap;justify-content:center;--obj:clamp(22px,6vmin,44px);--cell:clamp(26px,7vmin,50px)}
+.gbtn{background:#fff;border:6px solid #fff;border-radius:26px;padding:clamp(6px,1.6vmin,14px);box-shadow:0 8px 0 #e7d9b8,0 12px 16px #0002;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;transition:transform .1s}
+.gbtn:active{transform:translateY(6px);box-shadow:0 2px 0 #e7d9b8}
+.gbtn.soft{opacity:.3;pointer-events:none}.gbtn.right{border-color:var(--green);animation:hop .6s}.gbtn.glow{animation:glowb 1s infinite}
+.gbtn .lay{background:none;border:0;padding:0}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
 .confetti{position:absolute;font-size:clamp(22px,5vmin,40px)}
 </style>
@@ -329,47 +358,88 @@ let S=load();
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 function sk(key){return S.skills[key]||(S.skills[key]={lvl:1,streak:0,miss:0,att:0,ok:0,rounds:0})}
 
-/* ---------- audio ---------- */
-let AC=null;
+/* ---------- audio (soft sine/triangle chimes; started only after a user tap) ---------- */
+let AC=null,MASTER=null;
 function ac(){
-  if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){AC=null}}
-  if(AC&&AC.state==='suspended'){try{AC.resume()}catch(e){}}
+  if(!AC){
+    try{
+      AC=new (window.AudioContext||window.webkitAudioContext)();
+      const lp=AC.createBiquadFilter();lp.type='lowpass';lp.frequency.value=2200;lp.Q.value=.3;
+      MASTER=AC.createGain();MASTER.gain.value=.9;MASTER.connect(lp);lp.connect(AC.destination);
+    }catch(e){AC=null;MASTER=null}
+  }
+  if(AC&&AC.state!=='running'){try{AC.resume()}catch(e){}}
   return AC;
 }
-function tone(f,t=0,d=.18,type='sine',v=.12){
-  if(!S.sound)return;const a=ac();if(!a)return;
+/* one soft note: slow attack, gentle exponential release, optional quiet 2nd harmonic for a "chime" colour */
+function tone(f,t=0,d=.35,type='sine',v=.05,att=.04,bell=0){
+  if(!S.sound)return;const a=ac();if(!a||!MASTER)return;
+  if(type!=='triangle')type='sine';
   try{
-    const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=f;
-    const t0=a.currentTime+t;g.gain.setValueAtTime(0.0001,t0);g.gain.linearRampToValueAtTime(v,t0+.02);g.gain.exponentialRampToValueAtTime(.0001,t0+d);
-    o.connect(g);g.connect(a.destination);o.start(t0);o.stop(t0+d+.05);
+    const t0=a.currentTime+t+.005;
+    const voice=(freq,vol)=>{
+      const o=a.createOscillator(),g=a.createGain();o.type=type;o.frequency.value=freq;
+      g.gain.setValueAtTime(0.0001,t0);
+      g.gain.linearRampToValueAtTime(vol,t0+att);
+      g.gain.exponentialRampToValueAtTime(0.0001,t0+att+d);
+      o.connect(g);g.connect(MASTER);o.start(t0);o.stop(t0+att+d+.05);
+    };
+    voice(f,v);
+    if(bell)voice(f*2,v*bell);
   }catch(e){}
 }
-const NT={C:523.25,E:659.25,G:783.99,B:987.77,C2:1046.5,E2:1318.5};
+const NT={A4:440,C5:523.25,D5:587.33,E5:659.25,G5:783.99,A5:880,C6:1046.5,E6:1318.5};
 const sfx={
-  tap(i=0){tone(400+Math.min(i,20)*35,0,.14,'triangle',.1)},
-  pop(){tone(620,0,.09,'sine',.1)},
-  ok(){[NT.C,NT.E,NT.G,NT.C2].forEach((f,i)=>tone(f,i*.09,.25,'triangle',.12))},
-  oops(){tone(330,0,.25,'sine',.07);tone(262,.2,.35,'sine',.07)},
-  win(){[NT.C,NT.E,NT.G,NT.C2,NT.G,NT.C2,NT.E2].forEach((f,i)=>tone(f,i*.12,.3,'triangle',.13))},
-  up(){[NT.G,NT.B,NT.E2].forEach((f,i)=>tone(f,i*.1,.25,'square',.06))}
+  tap(i=0){tone(392+Math.min(i,20)*22,0,.22,'sine',.04,.03)},
+  pop(){tone(523.25,0,.14,'sine',.035,.02)},
+  ok(){[NT.C5,NT.E5,NT.G5].forEach((f,i)=>tone(f,i*.13,.8,'sine',.05,.05,.25))},
+  oops(){tone(220,0,.6,'sine',.03,.12)},
+  win(){[NT.C5,NT.E5,NT.G5,NT.C6].forEach((f,i)=>tone(f,i*.18,1.0,'sine',.05,.06,.25))},
+  up(){[NT.G5,NT.C6,NT.E6].forEach((f,i)=>tone(f,i*.14,.7,'sine',.04,.05,.2))}
 };
 
-/* ---------- speech ---------- */
-let voiceObj=null;
+/* ---------- speech (female English voice by preference, iOS-safe) ---------- */
+const VOICE_PREF=['samantha','ava','allison','karen','moira','tessa','serena','google uk english female','google us english','zira','aria','jenny'];
+const MALE_RE=/(^|[^a-z])(male|fred|alex|daniel|david|mark|george|rishi|aaron|arthur|gordon|guy|ryan|thomas|oliver|junior|ralph|albert|bruce|eddy|reed|rocko|sandy|shelley|grandpa|grandma|flo)([^a-z]|$)/i;
+let voiceObj=null,speechOK='speechSynthesis' in window,speechUnlocked=false,lastUtt=null;
 function pickVoice(){
+  if(!speechOK)return;
   try{
-    const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
-    voiceObj=vs.find(v=>/samantha|zira|google us|female|jenny|aria/i.test(v.name))||vs[0]||null;
+    const all=speechSynthesis.getVoices()||[];
+    const en=all.filter(v=>/^en([-_]|$)/i.test(v.lang)||/english/i.test(v.name));
+    if(!en.length)return;
+    let best=null;
+    for(const p of VOICE_PREF){
+      const re=new RegExp('(^|[^a-z])'+p.replace(/ /g,'\\s+'),'i');
+      const hits=en.filter(v=>re.test(v.name));
+      if(hits.length){best=hits.find(v=>/^en[-_](us|gb)/i.test(v.lang))||hits[0];break}
+    }
+    if(!best)best=en.find(v=>/female/i.test(v.name));
+    if(!best)best=en.find(v=>!MALE_RE.test(v.name)&&/^en[-_](us|gb)/i.test(v.lang));
+    voiceObj=best||en[0];
   }catch(e){}
 }
-try{speechSynthesis.onvoiceschanged=pickVoice;pickVoice()}catch(e){}
+try{
+  pickVoice();
+  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);else speechSynthesis.onvoiceschanged=pickVoice;
+  [300,1000,2500].forEach(ms=>setTimeout(()=>{if(!voiceObj)pickVoice()},ms)); /* iOS/Safari may load voices lazily without an event */
+}catch(e){speechOK=false}
+/* iOS only allows speech after a real tap: speak one silent utterance on the first tap to unlock it */
+function unlockSpeech(){
+  if(speechUnlocked||!speechOK)return;speechUnlocked=true;
+  try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
+}
 function say(t){
-  if(!S.voice||!t||!('speechSynthesis' in window))return;
+  if(!S.voice||!t||!speechOK||!speechUnlocked)return;
   try{
+    if(!voiceObj)pickVoice();
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(String(t).replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals '));
-    u.rate=.85;u.pitch=1.2;u.lang='en-US';if(voiceObj)u.voice=voiceObj;
+    u.rate=.85;u.pitch=1.1;u.volume=1;
+    if(voiceObj){u.voice=voiceObj;u.lang=voiceObj.lang||'en-US'}else u.lang='en-US';
+    lastUtt=u; /* keep a reference: Safari can drop utterances that get garbage-collected */
     speechSynthesis.speak(u);
+    if(speechSynthesis.paused)speechSynthesis.resume();
   }catch(e){}
 }
 
@@ -440,7 +510,7 @@ ctl.correct=()=>{
   recSkill(first);
   R.marks[R.idx]=first?2:1;
   sfx.ok();burst();
-  const pr=pick(['Great job!','Awesome!','You did it!','Super!','Wonderful!','Yay!','Fantastic!']);
+  const pr=pick(['Great job!','Wonderful!','You did it!','Lovely!','That is right!','Yay, well done!','Super!']);
   $('#fbtext').innerHTML=`<span class="praise">${pr}</span>${q.note?`<span class="note">${q.note}</span>`:''}`;
   say(pr+' '+q.nsay);
   finishQ();
@@ -449,15 +519,15 @@ ctl.wrong=()=>{
   const q=R.q;if(q.done)return;q.tries++;
   if(q.tries===1){
     recSkill(false);sfx.oops();
-    $('#fbtext').innerHTML=`<span class="oops">Try again! 💛 Look…</span>`;
-    say('Almost! Look with me, then try again.');
+    $('#fbtext').innerHTML=`<span class="oops">Let’s look together 💛</span>`;
+    say('Oops, not quite. Let us look together, then try again.');
     if(q.hint)later(q.hint,150);
   }else{
     q.done=true;R.marks[R.idx]=1;sfx.oops();
     if(q.reveal)q.reveal();
     if(q.glow)q.glow();
     $('#fbtext').innerHTML=`<span class="oops">Here it is!</span>${q.note?`<span class="note">${q.note}</span>`:''}`;
-    say('Here it is. '+q.nsay);
+    say('That is okay. Here it is. '+q.nsay);
     finishQ();
   }
 };
@@ -507,7 +577,7 @@ function finishRound(){
   $('#resBody').innerHTML=h;
   R.token++;R=null;
   show('res');sfx.win();burst();setTimeout(burst,500);
-  say(`Well done! You earned ${W[Math.min(stars,20)]} stars.`+(newSt?' You got a new sticker!':''));
+  say(`Well done, you! You earned ${W[Math.min(stars,20)]} stars.`+(newSt?' And look, a new sticker!':''));
   $('#againBtn').onclick=()=>startRound(id);
   $('#resHome').onclick=goHome;
 }
@@ -593,52 +663,98 @@ function countAll(items){
 /* =====================================================================  Activities */
 const ACTS={};
 
-/* 1. COUNT */
-ACTS.count={name:'Count',color:['#ff7a6b','#d4493a'],icon:'🍎',m20:true,skill:'Counting objects (one-to-one correspondence)',
- note:'Taps each object to count it (one-to-one), then picks the numeral. Also "tap N objects" tasks and zero.',
+/* 1. COUNT - subitising layouts (dice / ten frame / rows of five) + "count together" */
+const DICE={1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+function mkItem(e){return el('div','item','<span class="emo">'+e+'</span>')}
+function diceEl(n,e,items){
+  const d=el('div','dice');const on=new Set(DICE[n]);
+  for(let i=0;i<9;i++){if(on.has(i)){const it=mkItem(e);d.appendChild(it);items.push(it)}else d.appendChild(el('div',''))}
+  return d;
+}
+function frameEl(n,e,items){
+  const f=el('div','tf');
+  for(let i=0;i<10;i++){const c=el('div','tf-cell');if(i<n){const it=mkItem(e);c.appendChild(it);items.push(it)}f.appendChild(c)}
+  return f;
+}
+function rowEl(n,e,items,gap){
+  const r=el('div','frow'+(gap?' gap':''));
+  for(let i=0;i<5;i++){if(i<n){const it=mkItem(e);r.appendChild(it);items.push(it)}else r.appendChild(el('div','slot'))}
+  return r;
+}
+/* kind: dice (1-6) | two (two dice, up to 12) | frame (ten frame, up to 10) | fives (rows of five) | teen (two ten frames, 11-20) */
+function layoutFor(n,kind,e){
+  const items=[];const w=el('div','lay');
+  if(n===0){w.appendChild(el('div','item','<span class="emo" style="font-size:var(--obj)">🍽️</span>'));return {el:w,items}}
+  if(kind==='dice')w.appendChild(diceEl(n,e,items));
+  else if(kind==='two'){const a=Math.ceil(n/2),b=n-a;w.appendChild(diceEl(a,e,items));w.appendChild(diceEl(b,e,items))}
+  else if(kind==='frame')w.appendChild(frameEl(n,e,items));
+  else if(kind==='teen'){
+    const p=el('div','tfpair');
+    const wrap=x=>{const q=el('div','tfwrap');q.appendChild(x);return q};
+    p.appendChild(wrap(frameEl(10,e,items)));p.appendChild(wrap(frameEl(n-10,e,items)));w.appendChild(p);
+  }else{
+    const f=el('div','fives');const rows=Math.ceil(n/5);
+    for(let r=0;r<rows;r++)f.appendChild(rowEl(Math.min(5,n-r*5),e,items,n>10&&r===1));
+    w.appendChild(f);
+  }
+  return {el:w,items};
+}
+function kindsFor(c,n){
+  if(c.m20)return c.lvl===1?['teen','fives']:['teen','fives','fives'];
+  if(c.lvl===1)return n<=5?['dice','fives']:['frame'];
+  if(c.lvl===2)return n<=6?['dice','frame','fives']:['frame','two','fives'];
+  return n<=6?['dice','frame','two']:['frame','two','fives'];
+}
+ACTS.count={name:'Count',color:['#ff7a6b','#d4493a'],icon:'🍎',m20:true,skill:'Counting objects and subitising (dice patterns, ten frames, groups of five)',
+ note:'Objects are shown in dice / ten-frame / groups-of-five layouts so she can see the number at a glance. A "count together" button highlights and says each object in turn; then she picks the numeral. Also "which group has N?" and zero.',
  make(c,st){
   const lo=loOf(c),hi=hiOf(c);const o=pick(OBJ);
   const type=(!c.m20&&c.lvl>=2&&Math.random()<.3)?'give':'count';
   st.dataset.type=type;
   if(type==='count'){
     const n=(!c.m20&&c.lvl===3&&Math.random()<.1)?0:rnd(lo,hi);
-    ctl.ask(`<span class="emo">${o.e}</span> How many?`,`How many ${o.p}? Tap each one to count.`);
-    ctl.note(n===0?'0 – none!':`${n} ${plu(n,o)}`,`${W[n]} ${n===0?'':plu(n,o)}`);
-    let f;
-    if(n===0){const e=el('div','field');e.appendChild(el('div','item','<span class="emo">🍽️</span>'));f={el:e,items:[]}}
-    else if(c.m20)f=field(n,o.e,{cols:5,rows:4,showEmpty:false});
-    else if(c.lvl===1)f=field(n,o.e,{cols:5,rows:1});
-    else f=field(n,o.e,{cols:5,rows:2,scatter:true});
-    const items=f.items;st.appendChild(f.el);
+    const kind=pick(kindsFor(c,n));
+    st.dataset.kind=kind;st.classList.add('cnt-st');
+    ctl.ask(`<span class="emo">${o.e}</span> How many?`,n===0?`How many ${o.p} are on the plate?`:`How many ${o.p} can you see? You can press the button and we will count together.`);
+    ctl.note(n===0?'0 – none!':`${n} ${plu(n,o)}`,n===0?'zero, none at all':`${W[n]} ${plu(n,o)}`);
+    const lay=layoutFor(n,kind,o.e);const items=lay.items;st.appendChild(lay.el);
+    const cb=el('button','cbtn','▶ 1 · 2 · 3');cb.type='button';cb.id='countBtn';cb.setAttribute('aria-label','Count together');
+    st.appendChild(cb);
     const ch=makeChoices(st,numOpts(n,c.m20?11:0,c.m20?20:Math.max(hi,n+2),nChoices(c)),n);
-    let cnt=0;
-    if(n>0){
-      ch.box.classList.add('locked');
-      items.forEach(i=>i.classList.add('wig'));
-      items.forEach(it=>it.addEventListener('click',()=>{
-        if(it.classList.contains('counted')||R.q.done)return;
-        cnt++;it.classList.remove('wig');it.classList.add('counted');it.appendChild(badgeEl(cnt));sfx.tap(cnt);say(W[cnt]);
-        if(cnt===n){ch.box.classList.remove('locked');items.forEach(i=>i.classList.remove('wig'))}
-      }));
-    }
-    ctl.hint(()=>{ch.box.classList.remove('locked');items.forEach(i=>i.classList.remove('wig'));countAll(items)});
-    ctl.reveal(()=>countAll(items));
+    let running=false;
+    const run=()=>{
+      if(running)return;
+      if(n===0){say('There are none. That is zero.');return}
+      running=true;cb.classList.add('busy');countAll(items);
+      later(()=>{running=false;cb.classList.remove('busy')},300+items.length*countGap()+200);
+    };
+    cb.addEventListener('click',()=>{sfx.pop();run()});
+    ctl.hint(()=>{if(!running&&!items.some(i=>i.querySelector('.badge')))run()});
+    ctl.reveal(()=>{if(!running&&!items.some(i=>i.querySelector('.badge')))run();else if(n===0)say('There are none. That is zero.')});
   }else{
-    const t=rnd(1,hi);
-    ctl.ask(`Tap <b class="big">${t}</b> <span class="emo">${o.e}</span>`,`Tap ${W[t]} ${plu(t,o)}. Then press the check.`);
+    /* "which group has N?" - choose between 2-3 groups, no per-object tapping */
+    const t=rnd(2,Math.min(hi,c.lvl===2?6:9));
+    const k=c.lvl===2?2:3;
+    const cand=[];for(let x=1;x<=Math.min(hi,10);x++)if(x!==t)cand.push({x,d:Math.abs(x-t)+Math.random()*1.5});
+    cand.sort((a,b)=>a.d-b.d);
+    const nums=shuffle([t,...cand.slice(0,k-1).map(q=>q.x)]);
+    const kind=nums.every(x=>x<=6)?pick(['dice','frame']):'frame';
+    ctl.ask(`Find <b class="big">${t}</b> <span class="emo">${o.e}</span>`,`Which group has ${W[t]} ${o.p}? Tap the group.`);
     ctl.note(`${t} ${plu(t,o)}`,`${W[t]} ${plu(t,o)}`);
-    const f=field(10,o.e,{cols:5,rows:2});st.appendChild(f.el);
-    let sel=[];
-    const renum=()=>{f.items.forEach(i=>{const b=i.querySelector('.badge');if(b)b.remove()});sel.forEach((it,k)=>it.appendChild(badgeEl(k+1)))};
-    f.items.forEach(it=>it.addEventListener('click',()=>{
-      if(R.q.done)return;
-      if(sel.includes(it)){sel=sel.filter(x=>x!==it);it.classList.remove('sel')}
-      else{sel.push(it);it.classList.add('sel');sfx.tap(sel.length);say(W[sel.length])}
-      renum();
-    }));
-    checkBtn(st,()=>{sel.length===t?ctl.correct():ctl.wrong()});
-    const auto=()=>{sel.forEach(i=>i.classList.remove('sel'));sel=[];renum();seqRun(f.items.slice(0,t),(it,k)=>{sel.push(it);it.classList.add('sel');renum();sfx.tap(k+1);say(W[k+1])},countGap())};
-    ctl.hint(auto);ctl.reveal(auto);
+    const box=el('div','gpick');const groups=[];
+    nums.forEach(x=>{
+      const g=el('button','gbtn');g.type='button';const lay=layoutFor(x,kind,o.e);g.appendChild(lay.el);
+      g.dataset.n=x;if(x===t)g.dataset.correct='1';groups.push({g,items:lay.items,x});box.appendChild(g);
+      g.addEventListener('click',()=>{
+        if(R.q.done||g.classList.contains('soft'))return;sfx.pop();
+        if(x===t){g.classList.add('right');ctl.correct()}else{g.classList.add('soft');ctl.wrong()}
+      });
+    });
+    st.appendChild(box);
+    const target=groups.find(q=>q.x===t);
+    const cnt=()=>{if(!target.items.some(i=>i.querySelector('.badge')))countAll(target.items)};
+    ctl.hint(cnt);ctl.reveal(cnt);
+    R.q.glow=()=>{target.g.classList.add('glow')};
   }
  }};
 
@@ -1103,7 +1219,7 @@ function renderHome(){
     const key=id+(S.mode===20?'20':'');const s=sk(key);
     const b=el('button','card');b.type='button';b.dataset.act=id;b.style.setProperty('--c',a.color[0]);b.style.setProperty('--d',a.color[1]);
     b.innerHTML=`<div class="ic">${a.icon}</div><div class="nm">${S.mode===20&&a.m20name?a.m20name:a.name}</div><div class="lv">${lvDots(s.lvl)}</div>`;
-    b.addEventListener('click',()=>{ac();startRound(id)});
+    b.addEventListener('click',()=>{ac();unlockSpeech();startRound(id)});
     box.appendChild(b);
   });
 }
@@ -1136,8 +1252,8 @@ function renderParent(){
 }
 
 /* ---------- wiring ---------- */
-$('#tSound').onclick=()=>{S.sound=!S.sound;save();renderHome();if(S.sound){ac();sfx.pop()}};
-$('#tVoice').onclick=()=>{S.voice=!S.voice;save();renderHome();if(S.voice)say('Hello! Let us play with numbers!')};
+$('#tSound').onclick=()=>{S.sound=!S.sound;save();renderHome();if(S.sound){ac();sfx.ok()}};
+$('#tVoice').onclick=()=>{S.voice=!S.voice;save();renderHome();if(S.voice){unlockSpeech();say('Hello, friend! Let us play with numbers together.')}};
 $('#m10').onclick=()=>{S.mode=10;save();renderHome()};
 $('#m20').onclick=()=>{S.mode=20;save();renderHome()};
 $('#stkBtn').onclick=()=>{renderStickers();show('stk')};
@@ -1146,7 +1262,7 @@ $('#parBack').onclick=goHome;
 $('#homeBtn').onclick=goHome;
 $('#replayBtn').onclick=()=>{if(R&&R.q){const v=S.voice;S.voice=true;say(R.q.speech);S.voice=v}};
 $('#nextBtn').onclick=()=>{if(R&&R.q&&R.q.done)advance()};
-document.addEventListener('pointerdown',()=>ac(),{passive:true});
+['pointerup','touchend','click'].forEach(ev=>document.addEventListener(ev,()=>{ac();unlockSpeech()},{capture:true,passive:true}));
 document.addEventListener('contextmenu',e=>e.preventDefault());
 
 (function(){ /* parent corner: hold 3 seconds */
