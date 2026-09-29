@@ -232,6 +232,14 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .bar2{height:12px;background:#eee;border-radius:6px;overflow:hidden;min-width:60px}.bar2>i{display:block;height:100%;background:var(--green)}
 .pset{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:14px 0}
 .pset .modebtn{font-size:clamp(16px,3vmin,24px)}
+.vlist{max-height:clamp(150px,30vh,260px);overflow:auto;background:#fff;border-radius:16px;padding:6px;box-shadow:0 4px 0 #e7d9b8;width:100%}
+.vrow{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px;border-bottom:2px solid #f2ead8}
+.vrow.on{background:#eefbe9;border-radius:12px}
+.vsel,.vplay{font:inherit;font-weight:800;border-radius:14px;padding:8px 12px;min-height:44px;background:#f4f1fb;border:2px solid #d9d0ef;color:var(--ink);text-align:left}
+.vsel{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.vsel small{opacity:.6;font-weight:700}
+.vplay{background:#7a5cff;border-color:#4a2fc4;color:#fff;white-space:nowrap}
+.vpick{flex-direction:column;align-items:stretch}
 .small-note{font-size:.85em;opacity:.75;margin:6px 0;font-weight:600}
 .toast{position:fixed;left:50%;top:14%;transform:translateX(-50%);background:var(--purple);color:#fff;padding:.4em 1.2em;border-radius:999px;font-size:clamp(24px,6vmin,44px);font-weight:900;z-index:100;box-shadow:0 8px 18px #0004;animation:toast 2s forwards;pointer-events:none}
 @keyframes toast{0%{transform:translate(-50%,-30px);opacity:0}15%,80%{transform:translate(-50%,0);opacity:1}100%{opacity:0}}
@@ -496,7 +504,7 @@ const W=['zero','one','two','three','four','five','six','seven','eight','nine','
 /* ---------- persistence ---------- */
 const KEY='mathgarden.v1';
 const STICKERS=['🦄','🐶','🐱','🐰','🦋','🐞','🐢','🐙','🦁','🐼','🐸','🐥','🌈','🌻','🍓','🍦','🚀','🎈','🎨','👑','🐬','🦊','🐝','🍭'];
-const DEFAULTS=()=>({stars:0,stickers:[],skills:{},sound:true,voice:true,mode:10,perRound:8});
+const DEFAULTS=()=>({stars:0,stickers:[],skills:{},sound:true,voice:true,voiceName:'',mode:10,perRound:8});
 function load(){
   try{const r=localStorage.getItem(KEY);if(r)return Object.assign(DEFAULTS(),JSON.parse(r))}catch(e){}
   return DEFAULTS();
@@ -545,50 +553,68 @@ const sfx={
   up(){[NT.G5,NT.C6,NT.E6].forEach((f,i)=>tone(f,i*.14,.7,'sine',.04,.05,.2))}
 };
 
-/* ---------- speech (female English voice by preference, iOS-safe) ---------- */
-const VOICE_PREF=['samantha','ava','allison','karen','moira','tessa','serena','google uk english female','google us english','zira','aria','jenny'];
-const MALE_RE=/(^|[^a-z])(male|fred|alex|daniel|david|mark|george|rishi|aaron|arthur|gordon|guy|ryan|thomas|oliver|junior|ralph|albert|bruce|eddy|reed|rocko|sandy|shelley|grandpa|grandma|flo)([^a-z]|$)/i;
-let voiceObj=null,speechOK='speechSynthesis' in window,speechUnlocked=false,lastUtt=null;
+/* ---------- speech (reliably female English voice, iOS-safe) ---------- */
+const EN_LANG=/^en[-_](us|gb|au|ie|za|in)$/i;
+/* known female voices, best first (iOS/macOS, Google, Microsoft) */
+const VOICE_PREF=['samantha','ava','allison','susan','karen','moira','tessa','serena','kate','fiona','nicky','zoe','victoria','joelle','catherine','google uk english female','google us english','zira','aria','jenny','michelle','sonia'];
+/* known male voices - never used automatically */
+const MALE_RE=/(^|[^a-z])(daniel|alex|fred|oliver|rishi|aaron|arthur|gordon|tom|lee|ralph|evan|reed|david|mark|george|guy|ryan|eric|thomas|junior|bruce|nathan|eddy|rocko|grandpa)([^a-z]|$)/i;
+/* Eloquence / novelty voices - never used */
+const NOVELTY_RE=/eloquence|(^|[^a-z])(bells|bad\s+news|bahh|boing|bubbles|cellos|good\s+news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|albert|deranged|hysterical|pipe\s+organ|flo|sandy|shelley|grandma|grandpa|eddy|reed|rocko)([^a-z]|$)/i;
+const isMaleName=n=>MALE_RE.test(n)||(/male/i.test(n)&&!/female/i.test(n));
+const isNovelty=n=>NOVELTY_RE.test(n);
+const vQuality=v=>/premium/i.test(v.name)?3:/enhanced|natural|neural|online/i.test(v.name)?2:/compact/i.test(v.name)?0:1;
+const prefIndex=v=>{const n=v.name;for(let i=0;i<VOICE_PREF.length;i++){if(new RegExp('(^|[^a-z])'+VOICE_PREF[i].replace(/ /g,'\\s+'),'i').test(n))return i}return -1};
+let voiceObj=null,voiceFemale=true,speechOK='speechSynthesis' in window,speechUnlocked=false,lastUtt=null;
+function englishVoices(){
+  let all=[];try{all=speechSynthesis.getVoices()||[]}catch(e){}
+  return all.filter(v=>EN_LANG.test(v.lang||''));
+}
+/* auto choice: best known female voice; otherwise best-quality English voice that isn't male/novelty (then pitch is raised) */
+function autoVoice(en){
+  const ok=en.filter(v=>!isNovelty(v.name)&&!isMaleName(v.name));
+  const known=ok.filter(v=>prefIndex(v)>=0).sort((x,y)=>prefIndex(x)-prefIndex(y)||vQuality(y)-vQuality(x)||(/^en[-_]us$/i.test(y.lang)?1:0)-(/^en[-_]us$/i.test(x.lang)?1:0));
+  if(known.length)return {v:known[0],female:true};
+  const rest=ok.slice().sort((x,y)=>vQuality(y)-vQuality(x));
+  return rest.length?{v:rest[0],female:/female/i.test(rest[0].name)}:null;
+}
 function pickVoice(){
   if(!speechOK)return;
   try{
-    const all=speechSynthesis.getVoices()||[];
-    const en=all.filter(v=>/^en([-_]|$)/i.test(v.lang)||/english/i.test(v.name));
+    const en=englishVoices();
     if(!en.length)return;
-    let best=null;
-    for(const p of VOICE_PREF){
-      const re=new RegExp('(^|[^a-z])'+p.replace(/ /g,'\\s+'),'i');
-      const hits=en.filter(v=>re.test(v.name));
-      if(hits.length){best=hits.find(v=>/^en[-_](us|gb)/i.test(v.lang))||hits[0];break}
-    }
-    if(!best)best=en.find(v=>/female/i.test(v.name));
-    if(!best)best=en.find(v=>!MALE_RE.test(v.name)&&/^en[-_](us|gb)/i.test(v.lang));
-    voiceObj=best||en[0];
+    let v=null,female=true;
+    if(S.voiceName){const m=en.filter(x=>x.name===S.voiceName);if(m.length){v=m[0];female=prefIndex(v)>=0||/female/i.test(v.name)}}
+    if(!v){const a=autoVoice(en);if(a){v=a.v;female=a.female}}
+    if(v){voiceObj=v;voiceFemale=female}
   }catch(e){}
 }
 try{
   pickVoice();
-  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',pickVoice);else speechSynthesis.onvoiceschanged=pickVoice;
-  [300,1000,2500].forEach(ms=>setTimeout(()=>{if(!voiceObj)pickVoice()},ms)); /* iOS/Safari may load voices lazily without an event */
+  const onv=()=>{pickVoice();if(typeof refreshVoiceList==='function')refreshVoiceList()};
+  if(speechSynthesis.addEventListener)speechSynthesis.addEventListener('voiceschanged',onv);else speechSynthesis.onvoiceschanged=onv;
+  [300,1000,2500].forEach(ms=>setTimeout(()=>{if(!voiceObj)onv()},ms)); /* iOS/Safari may load voices lazily without an event */
 }catch(e){speechOK=false}
 /* iOS only allows speech after a real tap: speak one silent utterance on the first tap to unlock it */
 function unlockSpeech(){
   if(speechUnlocked||!speechOK)return;speechUnlocked=true;
   try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u)}catch(e){}
 }
-function say(t){
-  if(!S.voice||!t||!speechOK||!speechUnlocked)return;
+/* speak text; voice/female override is used by the parent corner's sample buttons */
+function speak(t,v,female){
+  if(!t||!speechOK||!speechUnlocked)return;
   try{
-    if(!voiceObj)pickVoice();
+    if(!v){if(!voiceObj)pickVoice();v=voiceObj;female=voiceFemale}
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(String(t).replace(/−/g,' minus ').replace(/\+/g,' plus ').replace(/=/g,' equals '));
-    u.rate=.85;u.pitch=1.1;u.volume=1;
-    if(voiceObj){u.voice=voiceObj;u.lang=voiceObj.lang||'en-US'}else u.lang='en-US';
+    u.rate=.85;u.pitch=(v&&female===false)?1.25:1.1;u.volume=1;
+    if(v){u.voice=v;u.lang=v.lang||'en-US'}else{u.lang='en-US';u.pitch=1.25}
     lastUtt=u; /* keep a reference: Safari can drop utterances that get garbage-collected */
     speechSynthesis.speak(u);
     if(speechSynthesis.paused)speechSynthesis.resume();
   }catch(e){}
 }
+function say(t){if(S.voice&&t)speak(t)}
 
 /* ---------- objects ---------- */
 const OBJ=[
@@ -1383,6 +1409,24 @@ function renderStickers(){
   const g=$('#stkGrid');g.innerHTML='';
   STICKERS.forEach(s=>g.appendChild(el('div','stk'+(S.stickers.includes(s)?'':' lock'),s)));
 }
+/* parent corner: voice picker (Auto + every English voice, each with a sample button) */
+const SAMPLE='Hello! Let us count together.';
+function refreshVoiceList(){
+  const box=document.getElementById('voiceList');if(!box)return;
+  const en=englishVoices().filter(v=>!isNovelty(v.name));
+  const auto=autoVoice(englishVoices());
+  const row=(label,sel,idx,sub)=>`<div class="vrow${sel?' on':''}"><button class="vsel" data-vi="${idx}" aria-label="Use ${label}">${sel?'✅':'⚪'} <b>${label}</b>${sub?` <small>${sub}</small>`:''}</button><button class="vplay" data-vp="${idx}" aria-label="Play sample">▶ Play sample</button></div>`;
+  let h=row('Auto',!S.voiceName,-1,auto?'(now: '+auto.v.name+')':'');
+  if(!en.length)h+='<div class="small-note">No English voices found on this device yet – the default voice is used. Try again in a moment.</div>';
+  en.forEach((v,i)=>{h+=row(v.name,S.voiceName===v.name,i,v.lang.replace('_','-')+(isMaleName(v.name)?' · male':''))});
+  box.innerHTML=h;
+  box.querySelectorAll('.vsel').forEach(b=>b.onclick=()=>{const i=+b.dataset.vi;S.voiceName=i<0?'':en[i].name;save();pickVoice();refreshVoiceList()});
+  box.querySelectorAll('.vplay').forEach(b=>b.onclick=()=>{
+    unlockSpeech();const i=+b.dataset.vp;
+    if(i<0){const a=autoVoice(englishVoices());a?speak(SAMPLE,a.v,a.female):speak(SAMPLE)}
+    else speak(SAMPLE,en[i],prefIndex(en[i])>=0||/female/i.test(en[i].name));
+  });
+}
 function renderParent(){
   const rows=[];
   const add=(id,m20)=>{const a=ACTS[id];const key=id+(m20?'20':'');const s=S.skills[key]||{lvl:1,att:0,ok:0,rounds:0};
@@ -1395,13 +1439,16 @@ function renderParent(){
    <div class="pset"><b>⭐ ${S.stars}</b> stars · <b>🎁 ${S.stickers.length}/${STICKERS.length}</b> stickers</div>
    <div class="pset"><span>Questions per round:</span>${[6,8,10].map(n=>`<button class="modebtn${S.perRound===n?' on':''}" data-pr="${n}">${n}</button>`).join('')}</div>
    <div class="pset"><button class="modebtn${S.sound?' on':''}" id="pSound">🔔 Sounds ${S.sound?'on':'off'}</button><button class="modebtn${S.voice?' on':''}" id="pVoice">🗣️ Voice ${S.voice?'on':'off'}</button></div>
+   <div class="pset vpick"><b>🗣️ Voice</b><div id="voiceList" class="vlist"></div>
+    <div class="small-note">On iPhone: Settings &gt; Accessibility &gt; Spoken Content &gt; Voices &gt; English &gt; download Samantha (Enhanced)</div></div>
    <div class="pset" id="resetArea"><button class="bigbtn orange" id="resetBtn" style="font-size:20px">Reset all progress</button></div>`;
   $('#parBody').querySelectorAll('[data-pr]').forEach(b=>b.onclick=()=>{S.perRound=+b.dataset.pr;save();renderParent()});
   $('#pSound').onclick=()=>{S.sound=!S.sound;save();renderParent()};
   $('#pVoice').onclick=()=>{S.voice=!S.voice;save();renderParent()};
+  refreshVoiceList();
   $('#resetBtn').onclick=()=>{
     $('#resetArea').innerHTML=`<span>Erase stars, stickers and progress?</span><button class="bigbtn orange" id="resetYes" style="font-size:20px">Yes, erase</button><button class="bigbtn gray" id="resetNo" style="font-size:20px">Cancel</button>`;
-    $('#resetYes').onclick=()=>{const keep={sound:S.sound,voice:S.voice,perRound:S.perRound};S=Object.assign(DEFAULTS(),keep);save();renderParent();renderHome()};
+    $('#resetYes').onclick=()=>{const keep={sound:S.sound,voice:S.voice,voiceName:S.voiceName,perRound:S.perRound};S=Object.assign(DEFAULTS(),keep);save();renderParent();renderHome()};
     $('#resetNo').onclick=renderParent;
   };
 }
