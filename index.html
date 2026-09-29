@@ -320,11 +320,10 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 #stage{gap:clamp(18px,3.4vh,30px)}
 .qcard,.atray{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2vmin,20px);max-width:100%;border-radius:30px}
 .qcard{background:#fffef9;border:4px solid #ffdca0;box-shadow:0 6px 16px #a9823c22;padding:clamp(18px,3.4vmin,28px) clamp(10px,2.4vmin,22px) clamp(10px,2.4vmin,20px);cursor:default}
-.atray{background:#e9e3ff;border:4px solid #c9bdff;box-shadow:inset 0 5px 0 #d6ccff,0 6px 0 #b5a6f5;padding:clamp(18px,3.4vmin,28px) clamp(10px,2.4vmin,22px) clamp(12px,2.6vmin,22px)}
+.atray{background:#e9e3ff;border:4px solid #c9bdff;box-shadow:inset 0 5px 0 #d6ccff,0 6px 0 #b5a6f5;padding:clamp(12px,2.6vmin,22px) clamp(10px,2.4vmin,22px)}
 .qcard.empty,.atray.empty{display:none}
-.qcard::before,.atray::before{position:absolute;left:14px;top:-19px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;box-shadow:0 3px 0 #0002}
+.qcard::before{position:absolute;left:14px;top:-19px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;box-shadow:0 3px 0 #0002}
 .qcard::before{content:"🤔";background:#ffe7ad;border:3px solid #ffdca0}
-.atray::before{content:"👆";background:#8a78ff;border:3px solid #c9bdff}
 .qcard .field,.qcard .lay{background:none;border:0;padding:0}
 .qcard *{cursor:default}
 .qcard .item[class*="wig"],.qcard .item{cursor:pointer}
@@ -373,8 +372,8 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 @media (max-height:560px){
   #stage{gap:16px}
   .qcard,.atray{border-radius:22px;border-width:3px}
-  .qcard{padding:14px 10px 8px}.atray{padding:14px 10px 10px}
-  .qcard::before,.atray::before{width:30px;height:30px;font-size:17px;top:-15px;left:10px}
+  .qcard{padding:14px 10px 8px}.atray{padding:10px}
+  .qcard::before{width:30px;height:30px;font-size:17px;top:-15px;left:10px}
   .atray .numbtn{box-shadow:0 6px 0 var(--d)}
 }
 @media (max-height:560px) and (min-width:640px){
@@ -387,7 +386,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .mh{width:min(80vw,640px)}
 .mv{width:min(80vw,520px)}
 @media (min-width:700px) and (max-height:860px) and (min-height:561px){
-  .qcard{padding:16px 14px 10px}.atray{padding:16px 14px 12px}
+  .qcard{padding:16px 14px 10px}.atray{padding:12px 14px}
   #stage{gap:20px}
   .bond{width:min(52vmin,300px);height:min(40vmin,230px)}
   .bc{font-size:clamp(30px,6.4vmin,50px)}
@@ -396,7 +395,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
   .mv{height:min(30vmin,240px)}
 }
 @media (max-height:560px){
-  .qcard{padding:12px 10px 8px}.atray{padding:12px 10px 10px}
+  .qcard{padding:12px 10px 8px}.atray{padding:10px}
   #stage{gap:20px;--obj:clamp(18px,5vmin,34px);--cell:clamp(20px,5.4vmin,34px)}
   .bond{width:min(48vmin,190px);height:min(38vmin,150px)}
   .bc{font-size:clamp(20px,6vmin,32px);border-width:3px}
@@ -430,7 +429,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
   .add-st .eq{font-size:clamp(20px,5.6vmin,28px)}
   #stage.add-st{--obj:clamp(16px,4.4vmin,26px);--cell:clamp(16px,4.6vmin,26px)}
   #stage.small,#stage.cnt-st.small{--obj:clamp(12px,3.3vmin,20px);--cell:clamp(14px,3.9vmin,22px)}
-  .qcard{padding:10px 8px 6px}.atray{padding:10px 8px 8px}
+  .qcard{padding:10px 8px 6px}.atray{padding:8px}
   .add-st .tfpair{gap:8px}
   .add-st .cbtn.mini{width:44px;height:44px}
 }
