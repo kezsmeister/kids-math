@@ -320,6 +320,12 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .qcard::before{content:"🤔";background:#ffe7ad;border:3px solid #ffdca0}
 .qcard .field,.qcard .lay{background:none;border:0;padding:0}
 .qcard *{cursor:default}
+.qcard .substory{font-size:clamp(20px,4.4vmin,34px);font-weight:900;color:#6b5a86;display:flex;align-items:center;gap:.4em;justify-content:center;text-align:center;flex-wrap:wrap}
+.qcard .substory .emo{font-size:1.5em}
+.sub-st .qcard{gap:clamp(12px,3vmin,28px);padding-top:clamp(22px,4vmin,34px);padding-bottom:clamp(18px,3.4vmin,30px)}
+.sub-st .qcard .eq{font-size:clamp(52px,12vmin,104px)}
+.eq.hintpop{animation:hop .6s ease 2}
+@media (max-height:560px){.sub-st .qcard .eq{font-size:clamp(34px,10vmin,48px)}.sub-st .qcard{gap:6px}.qcard .substory{font-size:clamp(16px,4.6vmin,22px)}.qcard .substory .emo{font-size:1.2em}}
 .qcard .cbtn,.qcard .cbtn *{cursor:pointer}
 
 /* question items: quiet, flat, outlined, muted - never button-like */
@@ -1256,40 +1262,32 @@ function addTeen(c,st){
 }
 
 /* 7. SUBTRACT */
-ACTS.sub={name:'Take Away',color:['#7c8cff','#4b58d6'],icon:'<div style="font-size:.8em;text-shadow:0 3px 0 #0003;white-space:nowrap">🐥➖🐥</div>',skill:'Subtraction as taking away (static picture stories with crossed-out objects, equations)',
- note:'Picture story (5 chicks, 2 fly away) shown statically: the starting group in a dice / ten-frame layout with the taken-away ones faded and crossed out; she picks how many are left. Later the equation 5 − 2 = ?. Optional "count together" button counts the remaining objects (also runs as the hint after a wrong answer). No tapping of objects.',
+ACTS.sub={name:'Take Away',color:['#7c8cff','#4b58d6'],icon:'<div style="font-size:.8em;text-shadow:0 3px 0 #0003;white-space:nowrap">🐥➖🐥</div>',skill:'Subtraction as taking away (story + equation, no pictures to count)',
+ note:'Story ("8 ducks, 6 swim away") with the big equation 8 − 6 = ?; she picks how many are left. After a wrong answer a short spoken + written hint: "Start with 8, take away 6".',
  make(c,st){
-  st.classList.add('add-st');
+  st.classList.add('sub-st');
   const hi=HI[c.lvl];const zero=c.lvl===3&&Math.random()<.1;
   const n=rnd(2,hi);const k=zero?n:rnd(1,n-1);const left=n-k;
   const eqType=c.lvl>1&&Math.random()<(c.lvl===2?.4:.6);
   st.dataset.type=eqType?'sub-eq':'sub-story';
   const o=pick(OBJ);
   ctl.note(`${n} − ${k} = ${left}`,`${W[n]} take away ${W[k]} leaves ${W[left]}`);
-  const kind=n<=6?pick(['dice','frame']):'frame';
-  let eq=null,lay;
   if(!eqType){
-    ctl.ask(`<b class="big">${k}</b> <span class="emo">${o.e}</span> 💨 How many left?`,`${W[n]} ${o.p}. ${W[k]} ${o.v}. How many are left? You can press the button and we will count together.`);
-    lay=layoutFor(n,kind,o.e);st.appendChild(lay.el);
-    st.appendChild(el('div','fbtext',`<span style="font-size:.6em;opacity:.7">${n} ${plu(n,o)}, ${k} ${o.v}</span>`));
+    ctl.ask(`<b class="big">${k}</b> <span class="emo">${o.e}</span> 💨 How many left?`,`${W[n]} ${o.p}. ${W[k]} ${o.v}. How many are left?`);
+    st.appendChild(el('div','substory',`<span class="emo">${o.e}</span> ${n} ${plu(n,o)}, ${k} ${o.v}`));
   }else{
-    ctl.ask(`<b>${n}</b> − <b>${k}</b> = <b class="big">?</b>`,`${W[n]} take away ${W[k]} equals how many? You can press the button and we will count together.`);
-    eq=el('div','eq',`<span class="a">${n}</span><span class="op">−</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`);st.appendChild(eq);
-    lay=layoutFor(n,kind,'<span class="cnt red"></span>');st.appendChild(lay.el);
+    ctl.ask(`<b>${n}</b> − <b>${k}</b> = <b class="big">?</b>`,`${W[n]} take away ${W[k]} equals how many?`);
   }
-  /* the taken-away ones (the last k) are already faded + crossed out */
-  const items=lay.items;
-  items.slice(n-k).forEach(i=>i.classList.add('gone'));
-  const rest=items.slice(0,left);
-  let counted=false;
-  const hint=()=>{
-    if(left===0){say('None left. That is zero.');return}
-    if(counted)return;counted=true;countAll(rest);
-  };
-  countTogether(st,hint,()=>Math.max(left,1)*countGap()+300);
-  const fillQ=()=>{if(eq){const q=$('.q',eq);q.textContent=left;q.classList.add('filled')}};
+  const eq=el('div','eq',`<span class="a">${n}</span><span class="op">−</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`);st.appendChild(eq);
+  const fillQ=()=>{const q=$('.q',eq);q.textContent=left;q.classList.add('filled')};
   makeChoices(st,numOpts(left,0,Math.max(hi,n),nChoices(c)),left,{onRight:fillQ,onReveal:fillQ});
-  ctl.hint(hint);ctl.reveal(hint);
+  /* gentle hint after a wrong answer: short spoken + written reminder */
+  ctl.hint(()=>{
+    const t=`Start with ${n}, take away ${k}`;
+    $('#fbtext').innerHTML+=`<span class="note">${t}</span>`;
+    say(`Start with ${W[n]}. Take away ${W[k]}.`);
+    eq.classList.add('hintpop');later(()=>eq.classList.remove('hintpop'),1500);
+  });
  }};
 
 /* 8. SHAPES & PATTERNS */
