@@ -117,8 +117,9 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .item .emo{display:block;transition:transform .2s,opacity .2s}
 .item.counted .emo{animation:hop .5s}
 .item.counted{filter:drop-shadow(0 0 6px #ffd23f)}
-.badge{position:absolute;right:-4px;bottom:-4px;min-width:1.4em;height:1.4em;padding:0 .2em;border-radius:999px;background:var(--purple);color:#fff;font-size:calc(var(--obj)*.4);display:flex;align-items:center;justify-content:center;font-weight:900;box-shadow:0 2px 0 #0003;animation:pop .3s ease;z-index:2;line-height:1}
-.badge.b2{background:var(--orange)}
+/* .badge = number-free highlight ring shown while counting together */
+.badge{position:absolute;inset:-2px;border:5px solid var(--purple);border-radius:50%;background:transparent;box-shadow:0 0 10px #a98bff99;animation:pop .3s ease;z-index:2;pointer-events:none}
+.badge.b2{border-color:var(--orange);box-shadow:0 0 10px #ff9f4399}
 @keyframes pop{from{transform:scale(0)}to{transform:scale(1)}}
 .item.gone .emo,.item.gone .cnt{opacity:.25;filter:grayscale(1);transform:scale(.8)}
 .item.gone::after{content:"✖";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:calc(var(--obj)*1.05);text-shadow:0 2px 0 #fff;animation:pop .25s}
@@ -150,7 +151,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .tf-cell .cnt{width:78%;height:78%;animation:pop .2s}
 .tf-cell.target{background:#fff3b0;animation:glow2 1s ease-in-out infinite}
 .tf-cell.target.on{background:#fff}
-.tf-cell .badge{right:-2px;bottom:-2px;font-size:calc(var(--cell)*.35)}
+.tf-cell .badge{inset:1px;border-width:4px}
 .lbl{font-size:clamp(14px,2.8vmin,22px);opacity:.7}
 
 .bond{position:relative;width:min(70vmin,320px);height:min(52vmin,240px)}
@@ -165,7 +166,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 @keyframes hopc{30%{transform:translate(-50%,-70%) scale(1.15)}}
 .cntrow{display:flex;flex-wrap:wrap;gap:4px;justify-content:center;align-items:center;max-width:92vw}
 .cntrow .sp{width:calc(var(--obj)*.4)}
-.cntrow .cnt .badge{font-size:calc(var(--obj)*.32)}
+.cntrow .cnt .badge{inset:-4px;border-width:4px}
 
 .cmp{display:flex;flex-direction:column;align-items:center;gap:0}
 .crow{display:grid;background:#fff;border-radius:24px;padding:clamp(4px,1.2vmin,10px);border:5px solid #fff;box-shadow:0 6px 0 #e7d9b8;font-size:min(var(--obj),calc(74vw / var(--cols)));width:min(88vw,calc(var(--cols)*var(--obj)*1.35 + 40px));transition:transform .1s}
@@ -265,7 +266,7 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .dice{display:grid;grid-template-columns:repeat(3,calc(var(--obj)*1.1));grid-template-rows:repeat(3,calc(var(--obj)*1.1));background:#fff;border:5px solid #e7d9b8;border-radius:22px;padding:6px;box-shadow:0 5px 0 #e7d9b8;align-items:center;justify-items:center}
 .dice .item{width:100%;height:100%;font-size:calc(var(--obj)*.9)}
 .tf-cell .item{width:100%;height:100%;font-size:calc(var(--cell)*.72)}
-.tf-cell .item .badge{font-size:calc(var(--cell)*.32);right:-3px;bottom:-3px}
+.tf-cell .item .badge{inset:-3px;border-width:4px}
 .frow{display:flex;background:#fff;border:5px solid #e7d9b8;border-radius:18px;padding:4px;box-shadow:0 4px 0 #e7d9b8}
 .frow .item,.frow .slot{width:calc(var(--obj)*1.1);height:calc(var(--obj)*1.1);font-size:var(--obj)}
 .cnt-st .fives{gap:3px}
@@ -283,8 +284,24 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 .gbtn:active{transform:translateY(6px);box-shadow:0 2px 0 #e7d9b8}
 .gbtn.soft{opacity:.3;pointer-events:none}.gbtn.right{border-color:var(--green);animation:hop .6s}.gbtn.glow{animation:glowb 1s infinite}
 .gbtn .lay{background:none;border:0;padding:0}
+
+/* ---- Number Path: roomier layout ---- */
+#stage[data-type^="path-"]{--pg:clamp(14px,3.4vmin,26px);--pbox:min(clamp(64px,14vmin,104px),calc((100vw - 48px - 4*var(--pg))/5));gap:clamp(34px,6.2vh,60px)}
+#stage[data-type^="path-"] .path{gap:clamp(32px,5.5vh,48px) var(--pg);padding:6px 0;flex-wrap:nowrap}
+#stage[data-type^="path-"] .slots{flex-wrap:nowrap}
+#stage[data-type^="path-"] .pbox{width:var(--pbox);height:var(--pbox);font-size:calc(var(--pbox)*.6);border-radius:22px}
+#stage[data-type^="path-"] .pcell{gap:10px}
+#stage[data-type^="path-"] .slots{gap:clamp(26px,5vmin,40px) var(--pg)}
+#stage[data-type^="path-"] .slot2{width:var(--pbox);height:var(--pbox);font-size:calc(var(--pbox)*.6);border-radius:22px}
+#stage[data-type^="path-"] .choices{gap:clamp(28px,5vh,44px) clamp(14px,3vmin,26px)}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:90;overflow:hidden}
 .confetti{position:absolute;font-size:clamp(22px,5vmin,40px)}
+
+@media (max-height:560px){
+  #stage[data-type^="path-"]{--pg:14px;--pbox:min(clamp(44px,12vmin,64px),calc((100vw - 48px - 4*var(--pg))/5));gap:28px}
+  #stage[data-type^="path-"] .path,#stage[data-type^="path-"] .slots,#stage[data-type^="path-"] .choices{gap:28px var(--pg)}
+  #stage[data-type^="path-"] .numbtn{height:clamp(48px,12vmin,64px);min-width:clamp(48px,12vmin,64px);font-size:clamp(28px,8vmin,44px)}
+}
 </style>
 </head>
 <body>
@@ -452,7 +469,8 @@ const OBJ=[
  {e:'🐰',s:'bunny',p:'bunnies',v:'hop away'},{e:'🐱',s:'kitten',p:'kittens',v:'run away'}
 ];
 const plu=(n,o)=>n===1?o.s:o.p;
-const badgeEl=(n,c)=>el('span','badge'+(c?' '+c:''),n);
+/* counting highlight: a soft ring around the object - deliberately NO numbers/sequence strip */
+const badgeEl=(n,c)=>el('span','badge'+(c?' '+c:''),'');
 
 function numOpts(ans,lo,hi,k){
   const pool=[];for(let x=lo;x<=hi;x++)if(x!==ans)pool.push({x,k:Math.abs(x-ans)+Math.random()*1.6});
@@ -718,7 +736,7 @@ ACTS.count={name:'Count',color:['#ff7a6b','#d4493a'],icon:'🍎',m20:true,skill:
     ctl.ask(`<span class="emo">${o.e}</span> How many?`,n===0?`How many ${o.p} are on the plate?`:`How many ${o.p} can you see? You can press the button and we will count together.`);
     ctl.note(n===0?'0 – none!':`${n} ${plu(n,o)}`,n===0?'zero, none at all':`${W[n]} ${plu(n,o)}`);
     const lay=layoutFor(n,kind,o.e);const items=lay.items;st.appendChild(lay.el);
-    const cb=el('button','cbtn','▶ 1 · 2 · 3');cb.type='button';cb.id='countBtn';cb.setAttribute('aria-label','Count together');
+    const cb=el('button','cbtn','▶ 👆');cb.type='button';cb.id='countBtn';cb.setAttribute('aria-label','Count together');
     st.appendChild(cb);
     const ch=makeChoices(st,numOpts(n,c.m20?11:0,c.m20?20:Math.max(hi,n+2),nChoices(c)),n);
     let running=false;
