@@ -315,6 +315,126 @@ button{font:inherit;color:inherit;border:0;cursor:pointer;touch-action:manipulat
 #stage.add-st{gap:clamp(6px,1.8vmin,20px)}
 @media (max-height:560px){.add-st .fbtext{display:none}#stage.add-st{--obj:clamp(18px,5vmin,32px);--cell:clamp(18px,5.2vmin,30px)}.add-st .eq{font-size:clamp(26px,7vmin,36px)}.add-st .agrp{padding:4px}#stage.add-st{gap:6px}.add-st .cbtn.mini,.add-st .numbtn{height:52px;min-width:52px;width:auto;font-size:30px}.add-st .cbtn.mini{width:52px;font-size:20px}}
 @media (min-height:561px) and (max-height:820px) and (min-width:700px){#stage.add-st{--obj:clamp(22px,5.4vmin,40px);--cell:clamp(22px,5.6vmin,40px)}.add-st .eq{font-size:clamp(34px,7.5vmin,60px)}}
+
+/* ============ Question card (look) vs Answer tray (press) ============ */
+#stage{gap:clamp(18px,3.4vh,30px)}
+.qcard,.atray{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(8px,2vmin,20px);max-width:100%;border-radius:30px}
+.qcard{background:#fffef9;border:4px solid #ffdca0;box-shadow:0 6px 16px #a9823c22;padding:clamp(18px,3.4vmin,28px) clamp(10px,2.4vmin,22px) clamp(10px,2.4vmin,20px);cursor:default}
+.atray{background:#e9e3ff;border:4px solid #c9bdff;box-shadow:inset 0 5px 0 #d6ccff,0 6px 0 #b5a6f5;padding:clamp(18px,3.4vmin,28px) clamp(10px,2.4vmin,22px) clamp(12px,2.6vmin,22px)}
+.qcard.empty,.atray.empty{display:none}
+.qcard::before,.atray::before{position:absolute;left:14px;top:-19px;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;line-height:1;box-shadow:0 3px 0 #0002}
+.qcard::before{content:"🤔";background:#ffe7ad;border:3px solid #ffdca0}
+.atray::before{content:"👆";background:#8a78ff;border:3px solid #c9bdff}
+.qcard .field,.qcard .lay{background:none;border:0;padding:0}
+.qcard *{cursor:default}
+.qcard .item[class*="wig"],.qcard .item{cursor:pointer}
+.qcard .cbtn,.qcard .cbtn *{cursor:pointer}
+
+/* question items: quiet, flat, outlined, muted - never button-like */
+.pbox,.pbox.pc0,.pbox.pc1,.pbox.pc2,.pbox.pc3{background:#f4f1fb;color:#5a4d86;border:3px solid #d9d0ef;box-shadow:none;text-shadow:none}
+.pbox.blank{background:#fff;border:4px dashed #a996ee;color:#a996ee}
+.pbox.filled{background:#dff7e8;border:3px solid #7fd6a2;color:#1d7a46;text-shadow:none}
+.pbox.over{background:#efe9ff;transform:scale(1.08)}
+.ptok{box-shadow:none;background:#f4f1fb;border:3px solid #d9d0ef}
+.ptok.blank{background:#fff;border:4px dashed #a996ee}
+.ptok.filled{background:#dff7e8;border:3px solid #7fd6a2}
+.bc{box-shadow:none;background:#f4f1fb;border-width:4px;color:#5a4d86}
+.bc.blank{background:#fff;border-style:dashed;color:#a996ee}
+.bc.filled{background:#dff7e8;color:#1d7a46;border-style:solid}
+.bc.whole{--bd:#c2b5f0}.bc.pa{--bd:#f2a5a8}.bc.pb{--bd:#f0d27a}
+.eq .q{box-shadow:none;background:#fff;border:4px dashed #a996ee;border-radius:18px;padding:0 .18em;color:#a996ee}
+.eq .q.filled{background:#dff7e8;border:4px solid #7fd6a2;color:#1d7a46}
+.slot2{background:#f4f1fb;border:3px dashed #b8a9ee;box-shadow:none}
+.slot2.full{border:3px solid #7fd6a2;background:#dff7e8 !important;color:#1d7a46;text-shadow:none}
+.tf{box-shadow:none;background:#9bd9b8}
+.tf-cell{border-color:#9bd9b8}
+.crow,.mrow{box-shadow:none}
+
+/* answers: one bright chunky colour family (purple), 3D + pressable */
+.atray .numbtn,.atray .numbtn.c0,.atray .numbtn.c1,.atray .numbtn.c2,.atray .numbtn.c3,.atray .numbtn.c4{--c:#7a5cff;--d:#4a2fc4;background:var(--c);color:#fff;border:0}
+.atray .numbtn{box-shadow:0 9px 0 var(--d),0 14px 16px #3b1fa033}
+.atray .numbtn:active{transform:translateY(7px);box-shadow:0 2px 0 var(--d)}
+.atray .numbtn.right{--c:#2fc27a;--d:#1b8f57}
+.atray .numbtn.tok,.atray .numbtn.shb{background:#fff;border:6px solid #7a5cff;color:var(--ink);box-shadow:0 9px 0 #4a2fc4,0 14px 16px #3b1fa033}
+.atray .numbtn.tok.right,.atray .numbtn.shb.right{border-color:#2fc27a;box-shadow:0 9px 0 #1b8f57}
+.atray .numbtn .lab{background:#7a5cff;color:#fff}
+.atray .crow,.atray .mrow,.atray .mcol,.atray .msz,.atray .gbtn{border:5px solid #7a5cff;background:#fff;box-shadow:0 8px 0 #4a2fc4,0 12px 14px #3b1fa033}
+.atray .mcol,.atray .msz{padding:0 12px 4px;border-radius:22px}
+.atray .mv{border-bottom:0}
+.atray .crow.right,.atray .mrow.right,.atray .mcol.right,.atray .msz.right,.atray .gbtn.right{border-color:#2fc27a;box-shadow:0 8px 0 #1b8f57}
+.atray .crow:active,.atray .mrow:active,.atray .gbtn:active{transform:translateY(6px);box-shadow:0 2px 0 #4a2fc4}
+.atray .bigbtn,.atray #checkBtn{background:#7a5cff;box-shadow:0 8px 0 #4a2fc4,0 12px 16px #3b1fa033}
+.atray .choices.locked{opacity:.45}
+.atray .cmp{gap:0}
+.qcard .cbtn{background:#fff;color:#3b7ddd;text-shadow:none;border:4px solid #8fd3ff;box-shadow:0 4px 0 #bfe6ff;min-width:0}
+.qcard .cbtn.mini{width:clamp(52px,10vmin,72px)}
+.qcard .fbtext{font-size:clamp(16px,3vmin,24px)}
+
+@media (max-height:560px){
+  #stage{gap:16px}
+  .qcard,.atray{border-radius:22px;border-width:3px}
+  .qcard{padding:14px 10px 8px}.atray{padding:14px 10px 10px}
+  .qcard::before,.atray::before{width:30px;height:30px;font-size:17px;top:-15px;left:10px}
+  .atray .numbtn{box-shadow:0 6px 0 var(--d)}
+}
+@media (max-height:560px) and (min-width:640px){
+  #stage{flex-direction:row;flex-wrap:wrap;align-items:center;justify-content:center;gap:22px}
+}
+
+/* fit tweaks for the card/tray layout */
+.crow{width:min(78vw,calc(var(--cols)*var(--obj)*1.35 + 40px));font-size:min(var(--obj),calc(64vw / var(--cols)))}
+.cmid{width:min(78vw,calc(var(--cols)*var(--obj)*1.35 + 40px))}
+.mh{width:min(80vw,640px)}
+.mv{width:min(80vw,520px)}
+@media (min-width:700px) and (max-height:860px) and (min-height:561px){
+  .qcard{padding:16px 14px 10px}.atray{padding:16px 14px 12px}
+  #stage{gap:20px}
+  .bond{width:min(52vmin,300px);height:min(40vmin,230px)}
+  .bc{font-size:clamp(30px,6.4vmin,50px)}
+  .numbtn{height:clamp(66px,11vmin,92px);min-width:clamp(66px,11vmin,92px);font-size:clamp(34px,7vmin,54px)}
+  #stage.cnt-st{--obj:clamp(26px,5.8vmin,46px);--cell:clamp(28px,6vmin,48px)}
+  .mv{height:min(30vmin,240px)}
+}
+@media (max-height:560px){
+  .qcard{padding:12px 10px 8px}.atray{padding:12px 10px 10px}
+  #stage{gap:20px;--obj:clamp(18px,5vmin,34px);--cell:clamp(20px,5.4vmin,34px)}
+  .bond{width:min(48vmin,190px);height:min(38vmin,150px)}
+  .bc{font-size:clamp(20px,6vmin,32px);border-width:3px}
+  .mv{height:min(30vmin,120px)}
+  #stage.cnt-st{--obj:clamp(16px,4.6vmin,32px);--cell:clamp(18px,5vmin,32px)}
+  #stage.cnt-st.small{--obj:clamp(14px,3.8vmin,26px);--cell:clamp(16px,4.4vmin,26px)}
+  .numbtn{height:clamp(46px,12vmin,60px);min-width:clamp(46px,12vmin,60px);font-size:clamp(26px,7vmin,38px)}
+  .numbtn.huge{height:clamp(56px,14vmin,80px);min-width:clamp(70px,18vmin,110px)}
+  .cbtn{height:46px}
+  .eq{font-size:clamp(24px,7vmin,40px)}
+}
+
+@media (max-height:560px){
+  #stage.small{--cell:clamp(16px,4.4vmin,24px);--obj:clamp(14px,3.8vmin,24px)}
+  #stage.cnt-st.small{--cell:clamp(16px,4.4vmin,24px)}
+  .tf{padding:3px;border-radius:10px}
+  .lbl{display:none}
+  .tf-cell{border-width:2px}
+  .add-st .tfpair{gap:14px}
+  .top{padding:4px 12px 0}.fb{min-height:52px;padding-top:2px;padding-bottom:4px}
+  .promptbar{min-height:38px}
+  .add-st .eq{font-size:clamp(22px,6vmin,32px)}
+  .add-st .agrp{padding:3px;border-width:3px}
+  .qcard{gap:6px}.atray{gap:6px}
+  .stageOuter{padding-top:12px}
+}
+.msz{max-width:38vw;overflow:hidden}
+
+@media (max-height:420px){
+  #stage{gap:16px}
+  .add-st .eq{font-size:clamp(20px,5.6vmin,28px)}
+  #stage.add-st{--obj:clamp(16px,4.4vmin,26px);--cell:clamp(16px,4.6vmin,26px)}
+  #stage.small,#stage.cnt-st.small{--obj:clamp(12px,3.3vmin,20px);--cell:clamp(14px,3.9vmin,22px)}
+  .qcard{padding:10px 8px 6px}.atray{padding:10px 8px 8px}
+  .add-st .tfpair{gap:8px}
+  .add-st .cbtn.mini{width:44px;height:44px}
+}
+@media (min-width:700px) and (min-height:561px) and (max-height:820px){#stage.add-st.small{--cell:clamp(22px,4.8vmin,36px)}.add-st .eq{font-size:clamp(30px,6.4vmin,52px)}}
 </style>
 </head>
 <body>
@@ -528,7 +648,18 @@ function nextQ(){
   drawProgress();
   const c={lvl:sk(R.key).lvl,m20:R.m20,idx:R.idx};
   if(R.m20)st.classList.add('small');
-  try{R.a.make(c,st)}catch(e){console.error('question error',e);R.marks[R.idx]=1;R.idx++;setTimeout(()=>{if(R)nextQ()},50)}
+  try{R.a.make(c,st);organize(st)}catch(e){console.error('question error',e);R.marks[R.idx]=1;R.idx++;setTimeout(()=>{if(R)nextQ()},50)}
+}
+/* Split every question into a calm QUESTION CARD (look, don't press) and a bright ANSWER TRAY (press these). */
+const ANS_SEL='.choices,.gpick,.cmp,.mh,.mv,.checkrow,.numbtn';
+function organize(st){
+  const kids=[...st.children];
+  const card=el('div','qcard'),tray=el('div','atray');
+  kids.forEach(k=>{const isAns=k.matches(ANS_SEL)||k.matches('.tf-int')||!!k.querySelector('.tf-int');(isAns?tray:card).appendChild(k)});
+  const t=st.dataset.type||'';
+  if(!card.children.length)card.classList.add('empty');
+  if(!tray.children.length)tray.classList.add('empty');
+  st.append(card,tray);
 }
 ctl.ask=(html,speech)=>{$('#prompt').innerHTML=html;R.q.speech=speech||'';const tk=R.token;setTimeout(()=>{if(R&&R.token===tk)say(speech)},250)};
 ctl.hint=fn=>{R.q.hint=fn};
@@ -666,6 +797,7 @@ function tenFrame(o={}){
     clearBadges(){cells.forEach(c=>{const b=c.querySelector('.badge');if(b)b.remove()})}
   };
   if(o.n!=null)api.fill(o.n,o.cls);
+  if(o.interactive)f.classList.add('tf-int');
   if(o.interactive)cells.forEach((c,i)=>c.addEventListener('click',()=>{
     if(!R||R.q.done)return;
     api.set(i,!c.classList.contains('on'),'red');sfx.tap(api.count());
@@ -749,7 +881,7 @@ ACTS.count={name:'Count',color:['#ff7a6b','#d4493a'],icon:'🍎',m20:true,skill:
     ctl.ask(`<span class="emo">${o.e}</span> How many?`,n===0?`How many ${o.p} are on the plate?`:`How many ${o.p} can you see? You can press the button and we will count together.`);
     ctl.note(n===0?'0 – none!':`${n} ${plu(n,o)}`,n===0?'zero, none at all':`${W[n]} ${plu(n,o)}`);
     const lay=layoutFor(n,kind,o.e);const items=lay.items;st.appendChild(lay.el);
-    const cb=el('button','cbtn','▶ 👆');cb.type='button';cb.id='countBtn';cb.setAttribute('aria-label','Count together');
+    const cb=el('button','cbtn mini','▶ 👆');cb.type='button';cb.id='countBtn';cb.setAttribute('aria-label','Count together');
     st.appendChild(cb);
     const ch=makeChoices(st,numOpts(n,c.m20?11:0,c.m20?20:Math.max(hi,n+2),nChoices(c)),n);
     let running=false;
@@ -1032,7 +1164,7 @@ ACTS.order={name:'Number Path',color:['#22b8cf','#0f8ca0'],icon:'<svg viewBox="0
         if(R.q.done||b.disabled)return;
         if(v===sorted[placed]){
           sfx.tap(placed+1);b.disabled=true;b.style.visibility='hidden';
-          const s=sl[placed];s.classList.add('full');s.style.background=getComputedStyle(b).getPropertyValue('--c');s.textContent=v;placed++;say(W[v]);
+          const s=sl[placed];s.classList.add('full');s.style.background='#4fd08a';s.textContent=v;placed++;say(W[v]);
           if(placed===cnt)ctl.correct();
         }else{sfx.pop();b.classList.remove('wob');void b.offsetWidth;b.classList.add('wob');ctl.wrong()}
       });
@@ -1090,10 +1222,9 @@ ACTS.add={name:'Add',color:['#ff6fa3','#d13e78'],icon:'<div style="font-size:.8e
     st.appendChild(row);
     let started=false;
     const hint=()=>{if(started)return;started=true;seqRun(cn.slice(a),(x,i)=>{x.className='cnt yellow';x.appendChild(badgeEl(i+1,'b2'));sfx.tap(i+1);say(W[i+1])},gap())};
-    const ans=el('div','ansrow');st.appendChild(ans);
-    countTogether(ans,hint,()=>b*gap()+300);
+    countTogether(st,hint,()=>b*gap()+300);
     const fillQ=()=>{const q=$('.q',eq);q.textContent=b;q.classList.add('filled')};
-    makeChoices(ans,numOpts(b,1,tot,nChoices(c)),b,{onRight:fillQ,onReveal:fillQ});
+    makeChoices(st,numOpts(b,1,tot,nChoices(c)),b,{onRight:fillQ,onReveal:fillQ});
     ctl.hint(hint);ctl.reveal(hint);
     return;
   }
@@ -1110,10 +1241,9 @@ ACTS.add={name:'Add',color:['#ff6fa3','#d13e78'],icon:'<div style="font-size:.8e
   }
   const items=grp.items;let counted=false;
   const hint=()=>{if(counted)return;counted=true;countAll(items,grp.split)};
-  const ans=el('div','ansrow');st.appendChild(ans);
-  countTogether(ans,hint,()=>items.length*gap()+300);
+  countTogether(st,hint,()=>items.length*gap()+300);
   const fillQ=()=>{if(eq){const q=$('.q',eq);q.textContent=tot;q.classList.add('filled')}};
-  makeChoices(ans,numOpts(tot,2,Math.max(hi,tot+1),nChoices(c)),tot,{onRight:fillQ,onReveal:fillQ});
+  makeChoices(st,numOpts(tot,2,Math.max(hi,tot+1),nChoices(c)),tot,{onRight:fillQ,onReveal:fillQ});
   ctl.hint(hint);ctl.reveal(hint);
  }};
 function addTeen(c,st){
@@ -1128,10 +1258,9 @@ function addTeen(c,st){
   const eq=el('div','eq',`<span class="a">10</span><span class="op">+</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`);st.appendChild(eq);
   let started=false;const gap=()=>countGap()*.8;
   const hint=()=>{if(started)return;started=true;seqRun([...Array(n).keys()],(i)=>{i<10?f1.badge(i,i+1):f2.badge(i-10,i+1,'b2');sfx.tap(i+1);say(W[i+1])},gap())};
-  const ans=el('div','ansrow');st.appendChild(ans);
-  countTogether(ans,hint,()=>n*gap()+300);
+  countTogether(st,hint,()=>n*gap()+300);
   const fillQ=()=>{const q=$('.q',eq);q.textContent=n;q.classList.add('filled')};
-  makeChoices(ans,numOpts(n,11,20,nChoices(c)),n,{onRight:fillQ,onReveal:fillQ});
+  makeChoices(st,numOpts(n,11,20,nChoices(c)),n,{onRight:fillQ,onReveal:fillQ});
   ctl.hint(hint);ctl.reveal(hint);
 }
 
