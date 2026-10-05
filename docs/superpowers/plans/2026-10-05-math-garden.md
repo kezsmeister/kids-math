@@ -40,4 +40,4 @@ Files: README.md, docs/verification.md, release single-file HTML.
 - [x] Browser checks: 320×568, 390×844, 844×390, 960×720; keyboard build/parent settings, repeated counting, subtraction demonstration, complete round, reload persistence, no runtime errors.
 - [x] Fresh independent code review and fixes with regression evidence.
 - [x] Document test commands, source layout, offline build and manual iOS speech check.
-- [ ] Commit changes on the feature branch and provide a reviewable PR or local deliverables if remote writing is unavailable.
+- [x] Commit changes on the feature branch and provide a reviewable PR or local deliverables if remote writing is unavailable. Draft PR: https://github.com/kezsmeister/kids-math/pull/1. Offline HTML also provided.
