@@ -4,7 +4,7 @@ Reviewed against merged main `fc55b9d8bf9b168c0cb879f8fd20705ddd67e082`.
 
 ## Automated checks
 
-54 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. A clean offline dependency install in an exact temporary copy succeeded; tests, the self-contained build and JavaScript syntax checks passed. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
+64 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. A clean offline dependency install in an exact temporary copy succeeded; tests, the self-contained build and JavaScript syntax checks passed. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
 
 Coverage includes:
 
@@ -17,6 +17,10 @@ Coverage includes:
 - Existing regression checks for speech/counting cancellation, ten-frame buttons, settings focus, comparison sizing, reduced motion and round rewards.
 
 New defects were reproduced as failing tests before fixes. An independent whole-branch review identified unreachable progression in seven skill variants, lost counter focus, and an empty-frame hint that did nothing; all were fixed with regression coverage.
+
+## Shapes & Patterns narration
+
+Ten additional speech regression tests verify visible-sequence narration, selected item names, current-step replay, Undo, repair guidance, property hints, mute preferences, and cancellation of stale or overlapping narration. Reading the visible question does not count as mathematical assistance. Tests observe text sent to the browser speech interface; physical-device audio quality remains unverified.
 
 ## Browser checks
 

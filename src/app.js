@@ -39,10 +39,10 @@ $("#parBack").onclick = goHome;
 $("#homeBtn").onclick = goHome;
 $("#replayBtn").onclick = () => {
   if (R && R.q) {
-    const v = S.voice;
-    S.voice = true;
-    say(R.q.speech);
-    S.voice = v;
+    cancelQuestionWork();
+    unlockSpeech();
+    // An explicit speaker tap plays once, without changing the saved preference.
+    speak(R.q.done ? R.q.nsay || R.q.speech : R.q.speech);
   }
 };
 $("#nextBtn").onclick = () => {

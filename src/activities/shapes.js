@@ -57,12 +57,16 @@ function shapeSVG(name, fill, rot = 0, extra = "", points = null) {
     inner = `<polygon points="${(points || POLY[name]).map((p) => p.join(",")).join(" ")}" ${st}/>`;
   return `<svg viewBox="-15 -15 130 130"><g transform="rotate(${rot} 50 50)">${inner}</g>${extra}</svg>`;
 }
-const TOKENS = [
-  ["🔴", "🔵", "🟡", "🟢", "🟣", "🟠"],
-  ["🐱", "🐶", "🐸", "🐰", "🐥", "🐟"],
-  ["🍎", "🍌", "🍇", "🍓", "🍊"],
-  ["🔺", "🟦", "⭕", "⭐", "💗", "🟩"],
-];
+const SHAPE_DESCRIPTION = {
+  circle: "A circle has a curved edge and no corners.",
+  triangle: "A triangle has three straight sides and three corners.",
+  square:
+    "A square has four equal straight sides and four right-angle corners.",
+  rectangle:
+    "A rectangle has four straight sides and four right-angle corners. A square is a special rectangle too.",
+  hexagon: "A hexagon has six straight sides.",
+  star: "This star has five points. Look for the pointed tips.",
+};
 ACTS.shapes = {
   name: "Shapes & Patterns",
   color: ["#f0b429", "#c48a00"],
@@ -100,7 +104,7 @@ ACTS.shapes = {
       const ans = pick(opts);
       const cols = shuffle(SHAPE_COL);
       ctl.ask(`Tap the <b class="big">${ans}</b>`, `Tap the ${ans}.`);
-      ctl.note(ans, `This is a ${ans}`);
+      ctl.note(ans, `This is a ${ans}. ${SHAPE_DESCRIPTION[ans]}`);
       const rots = {};
       opts.forEach((o) => {
         rots[o] = rnd(-180, 180);
@@ -148,7 +152,11 @@ ACTS.shapes = {
           if (!b.querySelector(".lab"))
             b.appendChild(el("span", "lab", b.dataset.v));
         });
-      ctl.hint(lab);
+      ctl.hint(() => {
+        lab();
+        R.q.speech = SHAPE_DESCRIPTION[ans];
+        showTeaching(R.q.speech);
+      });
       ctl.reveal(lab);
     } else if (type === "sides") {
       const nm = pick(["triangle", "square", "rectangle", "hexagon"]);
@@ -174,6 +182,8 @@ ACTS.shapes = {
       st.appendChild(big);
       makeChoices(st, numOpts(n, 3, 6, nChoices(c)), n);
       const hint = () => {
+        R.q.speech = `Count the straight sides: ${Array.from({ length: n }, (_, i) => W[i + 1]).join(", ")}. ${W[n]} sides.`;
+        showTeaching("Let’s count each straight side once.");
         [...big.querySelectorAll(".sb")].forEach((g) =>
           g.classList.remove("vis"),
         );
@@ -185,10 +195,15 @@ ACTS.shapes = {
             say(W[i + 1]);
           },
           countGap(),
+          2000,
         );
       };
       ctl.hint(hint);
-      ctl.reveal(hint);
+      ctl.reveal(() => {
+        big
+          .querySelectorAll(".sb")
+          .forEach((side) => side.classList.add("vis"));
+      });
     }
   },
 };
