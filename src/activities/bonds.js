@@ -14,8 +14,11 @@ ACTS.bonds = {
     const a = zeroOk ? rnd(0, w) : rnd(1, w - 1);
     const b = w - a;
     const r = Math.random();
-    const miss = c.variant ? (c.variant==="whole"?"w":pick(["a","b"])) :
-      c.lvl === 1
+    const miss = c.variant
+      ? c.variant === "whole"
+        ? "w"
+        : pick(["a", "b"])
+      : c.lvl === 1
         ? r < 0.5
           ? "w"
           : r < 0.75
@@ -28,6 +31,7 @@ ACTS.bonds = {
             : "b";
     st.dataset.type = "bond-" + miss;
     const ans = miss === "w" ? w : miss === "a" ? a : b;
+    R.q.mathKey = `bond:${w}:${a}:${b}:${miss}`;
     const vals = { w, a, b };
     const bond = el("div", "bond");
     bond.innerHTML = `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><g stroke="#b7a7e6" stroke-width="5" stroke-linecap="round"><line x1="50" y1="22" x2="22" y2="78" vector-effect="non-scaling-stroke"/><line x1="50" y1="22" x2="78" y2="78" vector-effect="non-scaling-stroke"/></g></svg>`;
@@ -93,10 +97,25 @@ ACTS.bonds = {
     );
     ctl.hint(() => {
       build(true);
-      const missing=miss==='a'?cnts.slice(0,a):cnts.slice(a);
-      const known=miss==='a'?b:a;
-      showTeaching(miss==='w'?`Put ${a} and ${b} together.`:`The whole is ${w}. We know one part is ${known}. Count the other part.`);
-      seqRun(miss==='w'?cnts:missing,(x,i)=>{x.appendChild(badgeEl(i+1));sfx.tap(i+1);say(W[i+1])},countGap(),1500);
+      const missing = miss === "a" ? cnts.slice(0, a) : cnts.slice(a);
+      const known = miss === "a" ? b : a;
+      showTeaching(
+        miss === "w"
+          ? `Put ${a} and ${b} together.`
+          : ans === 0
+            ? `The known part is all ${w}. Nothing is missing: the other part is zero.`
+            : `The whole is ${w}. We know one part is ${known}. Count the other part.`,
+      );
+      seqRun(
+        miss === "w" ? cnts : missing,
+        (x, i) => {
+          x.appendChild(badgeEl(i + 1));
+          sfx.tap(i + 1);
+          say(W[i + 1]);
+        },
+        countGap(),
+        1500,
+      );
     });
     ctl.reveal(() => {
       build(true);

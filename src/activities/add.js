@@ -13,12 +13,13 @@ ACTS.add = {
     if (c.m20) return addTeen(c, st);
     const hi = HI[c.lvl];
     const tot = rnd(2, hi);
-    const a = Math.random()<.12 ? 0 : rnd(1, tot - 1),
+    const a = Math.random() < 0.12 ? 0 : rnd(1, tot - 1),
       b = tot - a;
     R.q.mathKey = `add:${a}:${b}`;
     const r = Math.random();
-    const type = c.variant || (
-      c.lvl === 1
+    const type =
+      c.variant ||
+      (c.lvl === 1
         ? "story"
         : c.lvl === 2
           ? r < 0.5
@@ -107,11 +108,7 @@ ACTS.add = {
         `<b>${a}</b> + <b>${b}</b> = <b class="big">?</b>`,
         `${W[a]} plus ${W[b]} equals how many? You can press the button and we will count together.`,
       );
-      eq = el(
-        "div",
-        "eq",
-        equationHTML(a,"+",b,"?",Math.random()<.5),
-      );
+      eq = el("div", "eq", equationHTML(a, "+", b, "?", Math.random() < 0.5));
       st.appendChild(eq);
       grp = addGroups(
         a,
@@ -126,15 +123,26 @@ ACTS.add = {
     const hint = countTogether(
       st,
       () => {
-      if(c.lvl===1)countAll(items,grp.split);
-      else {
-        const first=items.slice(0,grp.split),second=items.slice(grp.split);
-        countOn(a>=b?first:second,a>=b?second:first,Math.max(a,b));
-      }
-    },
+        if (c.lvl === 1) countAll(items, grp.split);
+        else {
+          const first = items.slice(0, grp.split),
+            second = items.slice(grp.split);
+          countOn(
+            a >= b ? first : second,
+            a >= b ? second : first,
+            Math.max(a, b),
+          );
+        }
+      },
       () => items.length * gap() + 1600,
     );
-    if(c.lvl>1)countTogether(st,()=>countAll(items,grp.split),()=>items.length*gap(),"Count each one");
+    if (c.lvl > 1)
+      countTogether(
+        st,
+        () => countAll(items, grp.split),
+        () => items.length * gap(),
+        "Count each one",
+      );
     const fillQ = () => {
       if (eq) {
         const q = $(".q", eq);
@@ -156,7 +164,12 @@ function addTeen(c, st) {
     k = n - 10;
   st.dataset.type = "add-teen";
   R.q.mathKey = `add:10:${k}`;
-  ctl.note(n===20?"10 + 10 = 20 · 2 tens, 0 leftover ones":`10 + ${k} = ${n}`, n===20?"Two full tens make twenty. Zero leftover ones.":`ten plus ${W[k]} equals ${W[n]}`);
+  ctl.note(
+    n === 20 ? "10 + 10 = 20 · 2 tens, 0 leftover ones" : `10 + ${k} = ${n}`,
+    n === 20
+      ? "Two full tens make twenty. Zero leftover ones."
+      : `ten plus ${W[k]} equals ${W[n]}`,
+  );
   ctl.ask(
     `<b>10</b> + <b>${k}</b> = <b class="big">?</b>`,
     `Ten plus ${W[k]} equals how many? You can press the button and we will count together.`,
@@ -170,7 +183,7 @@ function addTeen(c, st) {
     w.appendChild(el("div", "lbl", l));
     return w;
   };
-  wrap.append(mkw(f1, "ten"), mkw(f2, n===20?"second ten":"ones"));
+  wrap.append(mkw(f1, "ten"), mkw(f2, n === 20 ? "second ten" : "ones"));
   st.appendChild(wrap);
   const eq = el(
     "div",
@@ -184,9 +197,18 @@ function addTeen(c, st) {
     () => {
       f1.clearBadges();
       f2.clearBadges();
-      showTeaching('One full frame is ten. Count on from ten.');
-      f1.el.classList.add('known-ten');
-      seqRun([...Array(k).keys()],i=>{f2.badge(i,11+i,'b2');sfx.tap(11+i);say(W[11+i])},gap(),1500);
+      showTeaching("One full frame is ten. Count on from ten.");
+      f1.el.classList.add("known-ten");
+      seqRun(
+        [...Array(k).keys()],
+        (i) => {
+          f2.badge(i, 11 + i, "b2");
+          sfx.tap(11 + i);
+          say(W[11 + i]);
+        },
+        gap(),
+        1500,
+      );
     },
     () => k * gap() + 1800,
   );

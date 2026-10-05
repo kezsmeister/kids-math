@@ -2581,3 +2581,272 @@ h1#prompt {
   transition: none !important;
   scroll-behavior: auto !important;
 }
+
+/* Hands-on mathematical activities share the same large native controls. */
+[hidden] {
+  display: none !important;
+}
+.teaching-status {
+  text-align: center;
+  font-size: clamp(16px, 2.5vmin, 22px);
+  color: #385443;
+  padding: 0 12px;
+}
+.teaching-status:empty {
+  display: none;
+}
+.number-play,
+.pattern-play {
+  width: min(100%, 640px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+}
+.instruction,
+.math-message {
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+  font-size: clamp(17px, 2.8vmin, 23px);
+}
+.math-message {
+  color: #36563f;
+  font-weight: 800;
+}
+.collection,
+.pattern-bank {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.collection button,
+.pattern-bank button,
+.part-counters button,
+.repair-item {
+  min-width: 48px;
+  min-height: 48px;
+  border: 3px solid #789c83;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1.1;
+  padding: 8px;
+}
+.collection button[aria-pressed="true"] {
+  background: #d5f0bf;
+  border-color: #346743;
+  box-shadow: 0 0 0 3px #7fab62;
+  transform: translateY(-3px);
+}
+.part-counters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+.part-group {
+  min-height: 140px;
+  padding: 12px;
+  border: 3px dashed #74947f;
+  border-radius: 18px;
+  display: flex;
+  justify-content: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.part-group .lbl {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.part-group:first-child {
+  background: #fff0df;
+}
+.part-group:last-child {
+  background: #e2f2ff;
+}
+.part-counters button {
+  color: #356288;
+}
+.conservation {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  width: 100%;
+  min-height: 90px;
+  align-content: center;
+}
+.conservation.spread {
+  gap: 14px 26px;
+}
+.conservation .item {
+  width: 36px;
+  height: 40px;
+  font-size: 32px;
+}
+.quick-dots {
+  position: relative;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
+.quick-dots.covered > * {
+  visibility: hidden;
+}
+.quick-dots.covered::after {
+  content: "?";
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  background: #e0eacb;
+  border-radius: 18px;
+  font-size: 65px;
+  font-weight: 900;
+}
+.pattern-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.pattern-repeat {
+  display: flex;
+  padding: 4px 2px 8px;
+  border-bottom: 4px solid transparent;
+  gap: 3px;
+}
+.pattern-slot {
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 7vmin, 58px);
+  height: clamp(46px, 7vmin, 62px);
+  font-size: clamp(26px, 4.5vmin, 38px);
+  border-radius: 12px;
+  background: #fff;
+}
+.pattern-slot.blank {
+  border: 2px dashed #748779;
+  color: #526557;
+}
+.showunits .pattern-repeat {
+  border-bottom-color: #517d5d;
+  background: #dfedcd;
+  border-radius: 10px;
+}
+.pattern-repeat .repair-item {
+  min-width: 44px;
+  min-height: 48px;
+  padding: 4px;
+}
+.repair-item.selected {
+  outline: 4px solid #3b7656;
+}
+.pattern-option {
+  font-size: clamp(24px, 5vmin, 38px);
+  padding: 12px;
+}
+.pattern-preview {
+  min-height: 65px;
+  width: 100%;
+}
+.pattern-play .text-button {
+  margin: 0;
+}
+.known-ten {
+  outline: 4px solid #598555;
+  outline-offset: 3px;
+}
+@media (max-width: 400px) {
+  .part-group {
+    padding: 8px;
+    gap: 6px;
+  }
+  .part-counters {
+    gap: 8px;
+  }
+  .pattern-row {
+    gap: 6px;
+  }
+  .pattern-repeat {
+    gap: 2px;
+  }
+  .pattern-slot {
+    width: 42px;
+  }
+  .collection {
+    gap: 8px;
+  }
+}
+.skill-label {
+  text-align: center;
+  color: #50694e;
+  margin: 4px 0 0;
+  font-size: 15px;
+}
+.learning-section {
+  background: #fffdf4;
+  border: 2px solid #d9dfc7;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 12px 0;
+}
+.learning-section > summary {
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 20px;
+  padding: 6px;
+}
+.learning-skill {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px 4px;
+  border-top: 1px solid #d9dfc7;
+}
+.learning-skill h3 {
+  font-size: 19px;
+  margin: 0 0 8px;
+}
+.learning-skill p {
+  margin: 6px 0;
+  line-height: 1.45;
+}
+.learning-summary {
+  color: #346044;
+  font-weight: 800;
+}
+.home-practice {
+  background: #ecf3df;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+.learning-skill .text-button {
+  flex: none;
+  margin: 0;
+}
+@media (max-width: 500px) {
+  .learning-skill {
+    flex-direction: column;
+  }
+  .learning-section {
+    padding: 10px;
+  }
+}
+.lesson-help {
+  display: flex;
+  justify-content: center;
+}
+.lesson-help .text-button {
+  margin: 4px 0;
+  padding: 8px 14px;
+  min-height: 44px;
+  font-size: 16px;
+}

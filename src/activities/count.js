@@ -9,10 +9,14 @@ ACTS.count = {
     "Counting objects and subitising (dice patterns, ten frames, groups of five)",
   note: 'Objects are shown in dice / ten-frame / groups-of-five layouts so she can see the number at a glance. A "count together" button highlights and says each object in turn; then she picks the numeral. Also "which group has N?" and zero.',
   make(c, st) {
+    if (["collect", "compose", "conserve", "quick"].includes(c.variant))
+      return makeNumberPlay(c, st);
     const lo = loOf(c),
       hi = hiOf(c);
     const o = pick(OBJ);
-    const type = c.variant || (!c.m20 && c.lvl >= 2 && Math.random() < 0.3 ? "give" : "count");
+    const type =
+      c.variant ||
+      (!c.m20 && c.lvl >= 2 && Math.random() < 0.3 ? "give" : "count");
     st.dataset.type = type;
     if (type === "count") {
       const n = !c.m20 && Math.random() < 0.12 ? 0 : rnd(lo, hi);
@@ -37,13 +41,20 @@ ACTS.count = {
         st,
         () => {
           if (n === 0) say("There are none. That is zero.");
-          else if(c.m20)countOn(items.slice(0,10),items.slice(10),10);
-          else if(c.lvl>1 && n>5)countOn(items.slice(0,5),items.slice(5),5);
+          else if (c.m20) countOn(items.slice(0, 10), items.slice(10), 10);
+          else if (c.lvl > 1 && n > 5)
+            countOn(items.slice(0, 5), items.slice(5), 5);
           else countAll(items);
         },
         () => 1600 + items.length * countGap(),
       );
-      if(c.m20 || (c.lvl>1 && n>5)) countTogether(st,()=>countAll(items),()=>items.length*countGap(),"Count each one");
+      if (c.m20 || (c.lvl > 1 && n > 5))
+        countTogether(
+          st,
+          () => countAll(items),
+          () => items.length * countGap(),
+          "Count each one",
+        );
       makeChoices(
         st,
         numOpts(

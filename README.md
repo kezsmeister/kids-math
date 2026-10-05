@@ -24,29 +24,34 @@ The build creates `dist/math-garden.html`, a self-contained file that can be ope
 
 ## How play works
 
-- Choose a number range and activity. Difficulty adapts after three correct first answers or two missed questions in a row.
-- Use **Count with me** or **Show me** whenever needed. Help can be replayed. A successful answer stops pending help so it cannot interrupt feedback.
-- A wrong answer offers a hint. A second wrong answer shows the solution. Press **Next** when ready; explanations have no time limit.
-- Ten-frame boxes are native buttons: tap, click, or use Tab and Space to add or remove a counter. **How to play** includes a separate example.
-- Each correct first answer earns a star, and finishing a round earns another star and a sticker.
-- Hold the Parents button for three seconds, or focus it and press Enter, to open Parent Corner. It includes progress, sound and voice settings, round length, and an animation preference. The default follows the device's reduced-motion setting.
+- Choose 0–10 or 11–20 and an activity. Individual skills develop separately: shape recognition, pattern repair, missing parts, collecting quantities, and the other question types have their own records.
+- Press **Help**, **Count with me**, **Count each one**, or **Show me** whenever needed. Help can be replayed. Counting strategies include a known five, a full ten, and counting on from the larger addend.
+- A wrong answer offers a hint. A second wrong answer shows a solution and schedules a fresh question on that skill, including across rounds and reloads. Press **Next** when ready; answers and explanations have no deadline.
+- Count includes collecting an exact amount, making a number in two different ways, rearranging objects without changing their number, and recognizing small groups. The brief-look task starts when the child chooses **Look at the dots**; **Show again** leaves the dots visible as support.
+- Pattern tasks continue a complete repeat, identify the smallest repeating group, repair a mistake, and create a repeating pattern. Examples show three complete repeats before the unfinished or incorrect group.
+- Shapes include varied and rotated triangles. Squares are accepted when a rectangle is requested. Zero, equations with the total on either side, and twenty as two tens with no leftover ones are included.
+- Every solved question earns a star, including corrections and supported answers. Finishing a round earns another star and a sticker.
+- Hold the Parents button for three seconds, or focus it and press Enter. Parent Corner shows each skill, a physical activity to try together, and a **Practice** button. It also includes voice, sound, round length, and reduced-motion settings.
 
-“Correct on first answer” means no wrong answer was submitted for that question. Counting help and demonstrations are allowed and do not count as a miss.
+Progress distinguishes **independent** (correct without a wrong answer or mathematical help), **supported** (correct with help or a retry), and **shown** (the game demonstrated the solution). Difficulty increases after four independent answers among the latest five at that level, with at least three distinct mathematical questions. A successful independent check on a later day is recorded separately from same-day progress. These are practice observations, not a formal assessment or evidence of educational effectiveness.
+
+Existing stars, stickers, and activity totals are retained. Earlier first-answer accuracy may include help and is not reclassified as independent learning.
 
 ## Source layout
 
-| File or directory                                  | Responsibility                                                        |
-| -------------------------------------------------- | --------------------------------------------------------------------- |
-| `index.html`                                       | Screen structure and explicit deferred script order                   |
-| `styles/game.css`                                  | Shared components, teaching aids, responsive layout, and calm mode    |
-| `src/state.js`                                     | Validated preferences and progress persistence                        |
-| `src/engine.js`                                    | Round lifecycle, owned timers, scoring, difficulty, and rewards       |
-| `src/audio.js`                                     | Sound effects, speech, and motion preferences                         |
-| `src/dom.js`, `src/questions.js`, `src/widgets.js` | Shared helpers, question data, and controls                           |
-| `src/activities/`                                  | One file per activity                                                 |
-| `src/screens.js`, `src/app.js`                     | Screens, settings, and startup wiring                                 |
-| `scripts/build.mjs`                                | Offline single-file packaging                                         |
-| `tests/`                                           | Deterministic DOM, timer, persistence, accessibility, and build tests |
+| File or directory                                  | Responsibility                                                               |
+| -------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `index.html`                                       | Screen structure and explicit deferred script order                          |
+| `styles/game.css`                                  | Shared components, teaching aids, responsive layout, and calm mode           |
+| `src/curriculum.js`, `src/learning.js`             | Skill catalog, evidence, progression, retention checks and practice guidance |
+| `src/state.js`                                     | Validated preferences and progress persistence                               |
+| `src/engine.js`                                    | Round lifecycle, owned timers, scoring, follow-ups, and rewards              |
+| `src/audio.js`                                     | Sound effects, speech, and motion preferences                                |
+| `src/dom.js`, `src/questions.js`, `src/widgets.js` | Shared helpers, question data, and controls                                  |
+| `src/activities/`                                  | Activity generators plus shared number-construction and pattern tasks        |
+| `src/screens.js`, `src/app.js`                     | Screens, settings, and startup wiring                                        |
+| `scripts/build.mjs`                                | Offline single-file packaging                                                |
+| `tests/`                                           | Deterministic DOM, timer, persistence, accessibility, and build tests        |
 
 Classic scripts intentionally retain a fixed order and direct-file support. If adding a source file, add its script tag to `index.html`; the builder follows that same order.
 

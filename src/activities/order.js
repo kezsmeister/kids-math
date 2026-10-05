@@ -12,7 +12,7 @@ ACTS.order = {
   make(c, st) {
     const hi = hiOf(c);
     const r = Math.random();
-    const lo2 = c.m20 ? 11 : c.lvl === 3 ? 0 : 1;
+    const lo2 = c.m20 ? 11 : 0;
     let type;
     if (c.lvl === 1) type = r < 0.4 ? "next" : r < 0.8 ? "missing" : "sort";
     else
@@ -26,27 +26,27 @@ ACTS.order = {
               : r < 0.85
                 ? "sort"
                 : "bigger";
-    if(c.variant)type=c.variant;
+    if (c.variant) type = c.variant;
     st.dataset.type = "path-" + type;
     if (type === "next" || type === "missing" || type === "before") {
       let nums, blank, ans;
       if (type === "next") {
-        const len = c.lvl === 1 ? 3 : 4;
+        const len = c.lvl === 1 ? 1 : 3;
         const s = rnd(lo2, hi - len);
         nums = [...Array(len + 1).keys()].map((i) => s + i);
         blank = len;
         ans = nums[blank];
         ctl.ask("What comes <b>next</b>?", "What number comes next?");
       } else if (type === "missing") {
-        const len = c.lvl === 1 ? 4 : 5;
+        const len = c.lvl === 1 ? 3 : 5;
         const s = rnd(lo2, Math.max(lo2, hi - len + 1));
         nums = [...Array(len).keys()].map((i) => s + i);
-        blank = c.lvl === 1 ? rnd(1, len - 2) : rnd(0, len - 1);
+        blank = rnd(0, len - 1);
         ans = nums[blank];
         ctl.ask("Find the <b>missing</b> number", "Which number is missing?");
       } else {
-        const s = rnd(lo2, hi - 2);
-        nums = [s, s + 1, s + 2];
+        const s = rnd(lo2, hi - 1);
+        nums = [s, s + 1];
         blank = 0;
         ans = s;
         ctl.ask(
@@ -54,6 +54,7 @@ ACTS.order = {
           "What number comes before " + W[s + 1] + "?",
         );
       }
+      R.q.mathKey = `${type}:${nums.join(",")}:${blank}`;
       const p = el("div", "path");
       const boxes = [];
       nums.forEach((v, i) => {
@@ -175,6 +176,7 @@ ACTS.order = {
         `${Math.min(a, b)} &lt; ${Math.max(a, b)}`,
         `${W[Math.min(a, b)]} is less than ${W[Math.max(a, b)]}`,
       );
+      R.q.mathKey = `numerals:${a}:${b}:${big}`;
       const ch = makeChoices(st, [a, b], ans, { btnCls: "huge" });
       ctl.hint(() => {
         ch.btns.forEach((bt) => {

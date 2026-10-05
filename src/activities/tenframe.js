@@ -14,7 +14,7 @@ ACTS.tenframe = {
     const hi = HI[c.lvl],
       r = Math.random();
     let type;
-    if(c.variant)type=c.variant;
+    if (c.variant) type = c.variant;
     else if (c.lvl === 1) type = r < 0.5 ? "read" : "build";
     else if (c.lvl === 2) type = r < 0.3 ? "read" : r < 0.65 ? "build" : "more";
     else type = r < 0.2 ? "read" : r < 0.5 ? "build" : "more";
@@ -31,6 +31,10 @@ ACTS.tenframe = {
       makeChoices(st, numOpts(n, 0, Math.max(hi, n + 2), nChoices(c)), n);
       const hint = () => {
         f.clearBadges();
+        if (n === 0) {
+          showTeaching("The frame is empty. No counters means zero.");
+          return;
+        }
         seqRun(
           f.cells.slice(0, n),
           (cell, i) => {
@@ -57,7 +61,7 @@ ACTS.tenframe = {
       checkBtn(st, () => {
         f.count() === n ? ctl.correct() : ctl.wrong();
       });
-      const hint = () => buildingHint(f.count(),n);
+      const hint = () => buildingHint(f.count(), n);
       ctl.hint(hint);
       ctl.reveal(() => {
         f.fill(n);
@@ -96,8 +100,9 @@ function teenFrames(c, st) {
     n = rnd(11, hi),
     k = n - 10;
   const r = Math.random();
-  const type = c.variant || (
-    c.lvl === 1
+  const type =
+    c.variant ||
+    (c.lvl === 1
       ? r < 0.5
         ? "read"
         : "ones"
@@ -114,13 +119,28 @@ function teenFrames(c, st) {
     w.appendChild(el("div", "lbl", l));
     return w;
   };
-  const tens=n===20?2:1,ones=n===20?0:k;
-  ctl.note(n===20?'20 = 2 tens and 0 ones':`${n} = 10 + ${k}`,n===20?'Twenty is two tens and zero leftover ones.':`${W[n]} is one ten and ${W[k]} ones`);
-  st.appendChild(el('p','math-message',`${tens} ${tens===1?'ten':'tens'} and ${ones} leftover ones`));
+  const tens = n === 20 ? 2 : 1,
+    ones = n === 20 ? 0 : k;
+  ctl.note(
+    n === 20 ? "20 = 2 tens and 0 ones" : `${n} = 10 + ${k}`,
+    n === 20
+      ? "Twenty is two tens and zero leftover ones."
+      : `${W[n]} is one ten and ${W[k]} ones`,
+  );
+  st.appendChild(
+    el(
+      "p",
+      "math-message",
+      n === 20 ? "2 tens in full frames." : "Each full frame is one ten.",
+    ),
+  );
   if (type === "build") {
     const f1 = tenFrame({ interactive: true, label: "First ten frame" }),
       f2 = tenFrame({ interactive: true, label: "Ones frame" });
-    wrap.append(mkw(f1, "first ten"), mkw(f2, n===20?"second ten":"extra ones"));
+    wrap.append(
+      mkw(f1, "first ten"),
+      mkw(f2, n === 20 ? "second ten" : "extra ones"),
+    );
     st.appendChild(wrap);
     ctl.ask(
       `Make <b class="big">${n}</b>`,
@@ -132,8 +152,13 @@ function teenFrames(c, st) {
       f1.count() === 10 && f2.count() === k ? ctl.correct() : ctl.wrong();
     });
     const hint = () => {
-      if(f1.count()+f2.count()!==n)buildingHint(f1.count()+f2.count(),n);
-      else showTeaching('You have the right total. Move counters to fill the first ten frame.',true);
+      if (f1.count() + f2.count() !== n)
+        buildingHint(f1.count() + f2.count(), n);
+      else
+        showTeaching(
+          "You have the right total. Move counters to fill the first ten frame.",
+          true,
+        );
     };
     ctl.hint(hint);
     ctl.reveal(() => {
@@ -144,7 +169,10 @@ function teenFrames(c, st) {
   }
   const f1 = tenFrame({ n: 10 }),
     f2 = tenFrame({ n: k });
-  wrap.append(mkw(f1, "first ten"), mkw(f2, n===20?"second ten":"extra ones"));
+  wrap.append(
+    mkw(f1, "first ten"),
+    mkw(f2, n === 20 ? "second ten" : "extra ones"),
+  );
   st.appendChild(wrap);
   if (type === "read") {
     ctl.ask(
@@ -155,21 +183,43 @@ function teenFrames(c, st) {
     const hint = () => {
       f1.clearBadges();
       f2.clearBadges();
-      showTeaching(n===20?'Two full frames make two tens: twenty.':'One full frame is ten. Count on from ten.');
-      if(n!==20)seqRun([...Array(k).keys()],i=>{f2.badge(i,11+i);say(W[11+i]);sfx.tap(11+i)},countGap(),1500);
-
+      showTeaching(
+        n === 20
+          ? "Two full frames make two tens: twenty."
+          : "One full frame is ten. Count on from ten.",
+      );
+      if (n !== 20)
+        seqRun(
+          [...Array(k).keys()],
+          (i) => {
+            f2.badge(i, 11 + i);
+            say(W[11 + i]);
+            sfx.tap(11 + i);
+          },
+          countGap(),
+          1500,
+        );
     };
     ctl.hint(hint);
     ctl.reveal(hint);
   } else {
     ctl.ask(
-      n===20?`20 has 2 tens and <b class="big">?</b> leftover ones`:`<b>${n}</b> = 10 + <b class="big">?</b>`,
-      n===20?"Twenty has two full tens. How many leftover ones?":`${W[n]} is ten and how many ones?`,
+      n === 20
+        ? `20 has 2 tens and <b class="big">?</b> leftover ones`
+        : `<b>${n}</b> = 10 + <b class="big">?</b>`,
+      n === 20
+        ? "Twenty has two full tens. How many leftover ones?"
+        : `${W[n]} is ten and how many ones?`,
     );
     makeChoices(st, numOpts(ones, 0, 9, nChoices(c)), ones);
     const hint = () => {
       f2.clearBadges();
-      if(n===20){showTeaching("Both frames are full tens. There are zero leftover ones.");return;}
+      if (n === 20) {
+        showTeaching(
+          "Both frames are full tens. There are zero leftover ones.",
+        );
+        return;
+      }
       seqRun(
         [...Array(k).keys()],
         (i) => {

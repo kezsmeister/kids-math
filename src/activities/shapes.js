@@ -71,9 +71,14 @@ ACTS.shapes = {
     "Shapes (circle, square, triangle, rectangle…) and repeating patterns (AB, AAB, ABB, ABC)",
   note: "Finds named shapes, counts sides, and completes AB / AAB / ABB / ABC patterns.",
   make(c, st) {
+    if (["extend", "unit", "repair", "create"].includes(c.variant))
+      return makePattern(c, st);
     const r = Math.random();
-    const type = c.variant ? (c.variant==="extend"?"pat":c.variant) :
-      c.lvl < 3
+    const type = c.variant
+      ? c.variant === "extend"
+        ? "pat"
+        : c.variant
+      : c.lvl < 3
         ? r < 0.35
           ? "find"
           : "pat"
@@ -98,15 +103,45 @@ ACTS.shapes = {
       ctl.note(ans, `This is a ${ans}`);
       const rots = {};
       opts.forEach((o) => {
-        rots[o] = rnd(-180,180);
+        rots[o] = rnd(-180, 180);
       });
       const ch = makeChoices(st, opts, ans, {
         btnCls: "shb",
-        accept:v=>v===ans || (ans==='rectangle' && v==='square'),
-        onRight:b=>{if(ans==='rectangle'&&b.dataset.v==='square')ctl.note('A square is a rectangle too.','A square is a special rectangle. It has four right-angle corners.');},
-        render: (v, i) => shapeSVG(v, cols[i], rots[v], '', v==='triangle'?pick([
-          POLY.triangle, [[15,15],[15,85],[85,85]], [[50,5],[66,88],[34,88]], [[10,65],[88,82],[69,12]]
-        ]):null),
+        accept: (v) => v === ans || (ans === "rectangle" && v === "square"),
+        onRight: (b) => {
+          if (ans === "rectangle" && b.dataset.v === "square")
+            ctl.note(
+              "A square is a rectangle too.",
+              "A square is a special rectangle. It has four right-angle corners.",
+            );
+        },
+        render: (v, i) =>
+          shapeSVG(
+            v,
+            cols[i],
+            rots[v],
+            "",
+            v === "triangle"
+              ? pick([
+                  POLY.triangle,
+                  [
+                    [15, 15],
+                    [15, 85],
+                    [85, 85],
+                  ],
+                  [
+                    [50, 5],
+                    [66, 88],
+                    [34, 88],
+                  ],
+                  [
+                    [10, 65],
+                    [88, 82],
+                    [69, 12],
+                  ],
+                ])
+              : null,
+          ),
       });
       const lab = () =>
         ch.btns.forEach((b) => {
@@ -154,63 +189,6 @@ ACTS.shapes = {
       };
       ctl.hint(hint);
       ctl.reveal(hint);
-    } else {
-      const units =
-        c.lvl === 1
-          ? ["AB"]
-          : c.lvl === 2
-            ? ["AB", "AAB", "ABB"]
-            : ["AAB", "ABB", "ABC", "AB"];
-      const u = pick(units);
-      const toks = shuffle(pick(TOKENS));
-      const map = { A: toks[0], B: toks[1], C: toks[2] };
-      const total = Math.max(6, u.length * 2);
-      const seq = [];
-      for (let i = 0; i < total; i++) seq.push(map[u[i % u.length]]);
-      const bi = c.lvl === 1 ? total - 1 : rnd(u.length, total - 1);
-      const ans = seq[bi];
-      ctl.ask(
-        bi === total - 1
-          ? "What comes <b>next</b>?"
-          : "What is <b>missing</b>?",
-        bi === total - 1
-          ? "What comes next in the pattern?"
-          : "What is missing in the pattern?",
-      );
-      ctl.note("It repeats!", "The pattern repeats.");
-      const pat = el("div", "pat");
-      let unit = null,
-        blank = null;
-      seq.forEach((t, i) => {
-        if (i % u.length === 0) {
-          unit = el("div", "punit");
-          pat.appendChild(unit);
-        }
-        const x = el("div", "ptok", i === bi ? "?" : t);
-        if (i === bi) {
-          x.classList.add("blank");
-          blank = x;
-        }
-        unit.appendChild(x);
-      });
-      st.appendChild(pat);
-      const uniq = [...new Set(u.split("").map((k) => map[k]))];
-      const dis = toks.find((t) => !uniq.includes(t));
-      const opts = [...uniq, dis];
-      const fill = () => {
-        blank.textContent = ans;
-        blank.classList.remove("blank");
-        blank.classList.add("filled");
-      };
-      makeChoices(st, shuffle(opts), ans, {
-        btnCls: "tok",
-        drop: blank,
-        onRight: fill,
-        onReveal: fill,
-      });
-      const units2 = () => pat.classList.add("showunits");
-      ctl.hint(units2);
-      ctl.reveal(units2);
     }
   },
 };

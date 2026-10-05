@@ -8,7 +8,12 @@ ACTS.compare = {
   skill: "Comparing: more / fewer / same, longer / shorter, bigger / smaller",
   note: "Compares two groups by matching one-to-one, and compares length, height and size.",
   make(c, st) {
-    if (c.variant ? c.variant!=="quantity" : Math.random() < (c.lvl === 1 ? 0.3 : 0.4)) return measureQ(c, st);
+    if (
+      c.variant
+        ? c.variant !== "quantity"
+        : Math.random() < (c.lvl === 1 ? 0.3 : 0.4)
+    )
+      return measureQ(c, st);
     const hi = HI[c.lvl];
     const same = c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.15 : 0.22);
     let a = rnd(1, hi),
@@ -41,6 +46,7 @@ ACTS.compare = {
         ? `Both groups have ${W[a]}. They are the same.`
         : `${W[a]} and ${W[b]}. ${more ? W[Math.max(a, b)] + " is more" : W[Math.min(a, b)] + " is fewer"}`,
     );
+    R.q.mathKey = `quantity:${a}:${b}:${more}`;
     const cols = Math.max(a, b, 5);
     const wrap = el("div", "cmp");
     wrap.style.setProperty("--cols", cols);
@@ -143,10 +149,12 @@ function measureQ(c, st) {
     ["bigger", "s"],
     ["smaller", "s"],
   ];
-  const category={length:"h",height:"v",size:"s"}[c.variant];
-  const [word, kind] = pick(category?kinds.filter(k=>k[1]===category):kinds);
+  const category = { length: "h", height: "v", size: "s" }[c.variant];
+  const [word, kind] = pick(
+    category ? kinds.filter((k) => k[1] === category) : kinds,
+  );
   st.dataset.type = "meas-" + word;
-  const gap = c.lvl === 1 ? 28 : 14;
+  const gap = [0, 28, 20, 14][c.lvl];
   const p1 = rnd(35, 92);
   let p2;
   do {
@@ -156,6 +164,7 @@ function measureQ(c, st) {
   const want = isMore ? Math.max(p1, p2) : Math.min(p1, p2);
   const ans = p1 === want ? "a" : "b";
   const short = Math.min(p1, p2);
+  R.q.mathKey = `measure:${kind}:${p1}:${p2}:${word}`;
   ctl.ask(
     `Which is <b class="${isMore ? "more" : "less"}">${word}</b>?`,
     `Which one is ${word}?`,

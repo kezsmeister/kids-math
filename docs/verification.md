@@ -1,40 +1,32 @@
-# Verification record
+# Learning update verification
 
-Implementation reviewed against baseline commit `878dd7090186940014a331217ca9e7f23ce00cab`.
+Reviewed against merged main `fc55b9d8bf9b168c0cb879f8fd20705ddd67e082`.
 
-## Automated coverage
+## Automated checks
 
-All 20 tests passed. The test suite uses Node's test runner, jsdom, seeded question generation, and a controllable timer queue. It exercises the real application source in its declared script order. GitHub Actions runs tests and builds on pull requests and pushes to main.
+54 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. A clean offline dependency install in an exact temporary copy succeeded; tests, the self-contained build and JavaScript syntax checks passed. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
 
-- One attempted question for a wrong answer followed by a correction; no premature difficulty decrease.
-- Old-round callbacks and delayed hints cannot overwrite current feedback.
-- Feedback remains until Next; answering cancels counting; help can be replayed.
-- Revealing a group restarts and completes an interrupted count.
-- Native, labeled ten-frame buttons; named shape choices; keyboard Parent Corner access.
-- Voice selected state and keyboard focus after changing settings.
-- Subtraction demonstration removes exactly the stated number of objects.
-- Comparison proportions remain distinct at 320, 375, and 390 pixels wide.
-- 432 generated questions across all activities, supported number ranges, and three difficulty levels have valid choices and complete content.
-- Round rewards, persistence, malformed data, unavailable storage, and reduced motion.
-- Offline build embeds assets in the right order and starts a playable game.
+Coverage includes:
 
-The initial baseline run failed 13 of 16 checks. Three further review findings were reproduced as failing tests before their fixes. The cancellation test was tightened to observe counting before the old automatic-advance deadline.
+- Independent, supported and shown evidence; once-only recording; old saves; malformed values; rewards for correction; later-day retention; follow-ups across a round boundary.
+- 984 generated questions: all 41 skill variants at all three levels, eight samples each, with complete prompts and valid, distinct choices.
+- Enough mathematical variety to advance comparison and number-sequence skills; signatures describe quantities, relations and missing positions.
+- Squares accepted as rectangles; missing-part hints count the missing amount; counting on from a larger addend or a full ten; zero and twenty; reversed equations.
+- Exact collections including zero, distinct decompositions, conservation, a child-initiated brief look with untimed answers, pattern continuation/unit/repair/creation, and help before an error.
+- Keyboard focus after moving counters and starting a pattern; timer cancellation; explicit zero hints; supported feedback; state persistence and offline packaging.
+- Existing regression checks for speech/counting cancellation, ten-frame buttons, settings focus, comparison sizing, reduced motion and round rewards.
 
-On this machine, dependency/source reads under Documents intermittently stalled. Verification was also run against an exact copy in a temporary directory with the same jsdom 26.1.0 dependency. This was a local filesystem workaround; the normal commands remain `npm ci`, `npm test`, and `npm run build`.
+New defects were reproduced as failing tests before fixes. An independent whole-branch review identified unreachable progression in seven skill variants, lost counter focus, and an empty-frame hint that did nothing; all were fixed with regression coverage.
 
 ## Browser checks
 
-Checked in the desktop app's browser using responsive viewport sizes:
+Tested the learning update through the desktop app browser:
 
-- **320 × 568:** two-column activity cards; footer controls stay outside the scrolling cards.
-- **390 × 844:** subtraction Show me, keyboard ten-frame completion, first-use instructions, settings selected state, and keyboard focus retention.
-- **844 × 390:** larger teen-count objects and complete groups of five arranged in two columns; counting replay clears and restores highlights; answering cancels counting; full-round rewards remain reachable.
-- **960 × 720:** home and offline build smoke check.
+- **390 × 844:** Parent Corner, focused practice, collecting a target quantity, precise “one more” feedback and a corrected answer earning a star.
+- **320 × 568:** keyboard construction of two decompositions, a child-created pattern repeated three times, and accessible scrolling. No horizontal overflow in the checked activities. Rechecked focus after the counter-movement fix.
+- **844 × 390:** constructive activity layout and scrolling.
+- Independent focused re-review: 54/54 tests pass; all seven previously blocked skills advance; fresh follow-ups, focus, zero hints and assistance tracking pass.
 
-The offline build loaded with no browser warnings or errors during the smoke check.
+## Limits
 
-Completed a six-question round through the UI. Seven stars and one sticker were awarded; reloading preserved the resulting totals of 21 stars and 2 stickers in the local test profile.
-
-## Physical-device follow-up
-
-Responsive desktop checks do not substitute for an iPhone/iPad speech check. On a physical device, verify first-tap speech unlock, an installed English voice, interruption by a correct answer or Home, and replay after returning from the background. This was not physically tested here. No claim of a complete screen-reader or WCAG audit is made.
+Responsive browser checks do not substitute for physical iPhone/iPad speech testing. First-tap speech unlock, installed voices, interruption and background/resume behavior still need a physical-device check. No claim of a complete screen-reader/WCAG audit or measured learning effectiveness is made. Progress remains local to the browser and origin; hosted and offline copies may use separate storage.

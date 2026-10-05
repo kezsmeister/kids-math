@@ -14,7 +14,9 @@ ACTS.sub = {
     const n = rnd(2, hi);
     const k = zero ? n : rnd(1, n - 1);
     const left = n - k;
-    const eqType = c.variant ? c.variant==="eq" : c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
+    const eqType = c.variant
+      ? c.variant === "eq"
+      : c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
     st.dataset.type = eqType ? "sub-eq" : "sub-story";
     const o = pick(OBJ);
     ctl.note(
@@ -39,12 +41,8 @@ ACTS.sub = {
         `${W[n]} take away ${W[k]} equals how many?`,
       );
     }
-    const reverse=eqType && Math.random()<.5;
-    const eq = el(
-      "div",
-      "eq",
-      equationHTML(n,"−",k,"?",reverse),
-    );
+    const reverse = eqType && Math.random() < 0.5;
+    const eq = el("div", "eq", equationHTML(n, "−", k, "?", reverse));
     st.appendChild(eq);
     const fillQ = () => {
       const q = $(".q", eq);

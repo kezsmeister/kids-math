@@ -67,7 +67,9 @@ test("answering correctly cancels counting before it interrupts the feedback", (
 
 test("revealing a group after an interrupted hint counts every object", (t) => {
   const g = useGame(t);
-  g.run("Math.random=()=>.2; learningRecord('count.give').level=3; startRound('count','count.give')");
+  g.run(
+    "Math.random=()=>.2; learningRecord('count.give').level=3; startRound('count','count.give')",
+  );
   const wrong = [...g.document.querySelectorAll(".gbtn:not([data-correct])")];
   assert.equal(wrong.length, 2);
   wrong[0].click();
@@ -218,7 +220,7 @@ test("different measurement values stay visibly different on narrow portrait scr
   g.run(`startRound('compare'); document.querySelector('#stage').replaceChildren();
     { const samples=[.7, (78-35+.5)/58, (94-30+.5)/66, .1];
       Math.random=()=>samples.length?samples.shift():.1;
-      measureQ({lvl:2}, document.querySelector('#stage')); }`);
+      measureQ({lvl:3}, document.querySelector('#stage')); }`);
   const animals = [...g.document.querySelectorAll(".msz")];
   assert.equal(animals.length, 2);
   function pixels(style, width, height) {
@@ -247,48 +249,44 @@ test("different measurement values stay visibly different on narrow portrait scr
 
 test("every activity generates complete questions with valid distinct answer choices", (t) => {
   const g = useGame(t);
-  for (const id of [
-    "count",
-    "tenframe",
-    "bonds",
-    "compare",
-    "order",
-    "add",
-    "sub",
-    "shapes",
-  ]) {
-    for (const mode of [10, 20]) {
-      if (mode === 20 && !g.run(`ACTS.${id}.m20`)) continue;
-      for (const level of [1, 2, 3])
-        for (let sample = 0; sample < 12; sample++) {
-          g.run(
-            `S.mode=${mode}; sk('${id}${mode === 20 ? "20" : ""}').lvl=${level}; startRound('${id}')`,
+  for (const topic of g.run("Object.keys(TOPICS)")) {
+    const activity = topic.split(".")[0],
+      id = activity.replace(/20$/, "");
+    for (const level of [1, 2, 3])
+      for (let sample = 0; sample < 8; sample++) {
+        g.run(
+          `S.mode=${activity.endsWith("20") ? 20 : 10};learningRecord('${topic}').level=${level};startRound('${id}','${topic}')`,
+        );
+        assert.equal(
+          g.run("R.idx"),
+          0,
+          `${topic}/${level} must generate a question`,
+        );
+        assert.equal(g.run("R.q.level"), level);
+        assert.ok(g.document.querySelector("#prompt").textContent.trim());
+        const choices = [...g.document.querySelectorAll(".choices button")].map(
+          (b) => b.dataset.v,
+        );
+        assert.equal(new Set(choices).size, choices.length, topic);
+        choices
+          .filter((v) => !Number.isNaN(Number(v)))
+          .forEach((v) =>
+            assert.ok(
+              Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 21,
+              topic,
+            ),
           );
-          assert.equal(
-            g.run("R.idx"),
-            0,
-            `${id}/${mode}/${level} must not skip a broken question`,
-          );
-          assert.ok(g.document.querySelector("#prompt").textContent.trim());
-          const choices = [
-            ...g.document.querySelectorAll(".choices button"),
-          ].map((b) => b.dataset.v);
-          assert.equal(new Set(choices).size, choices.length);
-          choices
-            .filter((v) => !Number.isNaN(Number(v)))
-            .forEach((v) =>
-              assert.ok(
-                Number.isInteger(Number(v)) &&
-                  Number(v) >= 0 &&
-                  Number(v) <= 21,
-              ),
-            );
-          assert.equal(
-            g.document.querySelector("#stage").textContent.includes("NaN"),
-            false,
-          );
-        }
-    }
+        assert.equal(
+          g.document.querySelector("#stage").textContent.includes("NaN"),
+          false,
+          topic,
+        );
+        assert.equal(
+          g.document.querySelector("#stage").textContent.includes("undefined"),
+          false,
+          topic,
+        );
+      }
   }
 });
 
