@@ -162,7 +162,7 @@ test("ten-frame cells can be activated as labeled native buttons", (t) => {
 
 test("subtraction help removes the stated quantity and shows what remains", (t) => {
   const g = useGame(t);
-  g.run("startRound('sub')");
+  g.run("startRound('sub','sub.story')");
   const equation = g.document
     .querySelector(".eq")
     .textContent.match(/(\d+)−(\d+)=/);

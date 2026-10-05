@@ -13,8 +13,9 @@ ACTS.add = {
     if (c.m20) return addTeen(c, st);
     const hi = HI[c.lvl];
     const tot = rnd(2, hi);
-    const a = rnd(1, tot - 1),
+    const a = Math.random()<.12 ? 0 : rnd(1, tot - 1),
       b = tot - a;
+    R.q.mathKey = `add:${a}:${b}`;
     const r = Math.random();
     const type = c.variant || (
       c.lvl === 1
@@ -109,7 +110,7 @@ ACTS.add = {
       eq = el(
         "div",
         "eq",
-        `<span class="a">${a}</span><span class="op">+</span><span class="b">${b}</span><span class="op">=</span><span class="q">?</span>`,
+        equationHTML(a,"+",b,"?",Math.random()<.5),
       );
       st.appendChild(eq);
       grp = addGroups(
@@ -124,9 +125,16 @@ ACTS.add = {
     const items = grp.items;
     const hint = countTogether(
       st,
-      () => countAll(items, grp.split),
-      () => items.length * gap() + 300,
+      () => {
+      if(c.lvl===1)countAll(items,grp.split);
+      else {
+        const first=items.slice(0,grp.split),second=items.slice(grp.split);
+        countOn(a>=b?first:second,a>=b?second:first,Math.max(a,b));
+      }
+    },
+      () => items.length * gap() + 1600,
     );
+    if(c.lvl>1)countTogether(st,()=>countAll(items,grp.split),()=>items.length*gap(),"Count each one");
     const fillQ = () => {
       if (eq) {
         const q = $(".q", eq);
@@ -147,7 +155,8 @@ function addTeen(c, st) {
   const n = rnd(11, hi),
     k = n - 10;
   st.dataset.type = "add-teen";
-  ctl.note(`10 + ${k} = ${n}`, `ten plus ${W[k]} equals ${W[n]}`);
+  R.q.mathKey = `add:10:${k}`;
+  ctl.note(n===20?"10 + 10 = 20 · 2 tens, 0 leftover ones":`10 + ${k} = ${n}`, n===20?"Two full tens make twenty. Zero leftover ones.":`ten plus ${W[k]} equals ${W[n]}`);
   ctl.ask(
     `<b>10</b> + <b>${k}</b> = <b class="big">?</b>`,
     `Ten plus ${W[k]} equals how many? You can press the button and we will count together.`,
@@ -161,7 +170,7 @@ function addTeen(c, st) {
     w.appendChild(el("div", "lbl", l));
     return w;
   };
-  wrap.append(mkw(f1, "ten"), mkw(f2, "ones"));
+  wrap.append(mkw(f1, "ten"), mkw(f2, n===20?"second ten":"ones"));
   st.appendChild(wrap);
   const eq = el(
     "div",
@@ -175,17 +184,11 @@ function addTeen(c, st) {
     () => {
       f1.clearBadges();
       f2.clearBadges();
-      seqRun(
-        [...Array(n).keys()],
-        (i) => {
-          i < 10 ? f1.badge(i, i + 1) : f2.badge(i - 10, i + 1, "b2");
-          sfx.tap(i + 1);
-          say(W[i + 1]);
-        },
-        gap(),
-      );
+      showTeaching('One full frame is ten. Count on from ten.');
+      f1.el.classList.add('known-ten');
+      seqRun([...Array(k).keys()],i=>{f2.badge(i,11+i,'b2');sfx.tap(11+i);say(W[11+i])},gap(),1500);
     },
-    () => n * gap() + 300,
+    () => k * gap() + 1800,
   );
   const fillQ = () => {
     const q = $(".q", eq);

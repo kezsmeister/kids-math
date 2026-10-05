@@ -10,7 +10,7 @@ ACTS.bonds = {
   make(c, st) {
     const hi = HI[c.lvl];
     const w = rnd(c.lvl === 1 ? 2 : 3, hi);
-    const zeroOk = c.lvl === 3 && Math.random() < 0.12;
+    const zeroOk = Math.random() < 0.12;
     const a = zeroOk ? rnd(0, w) : rnd(1, w - 1);
     const b = w - a;
     const r = Math.random();
@@ -93,15 +93,10 @@ ACTS.bonds = {
     );
     ctl.hint(() => {
       build(true);
-      seqRun(
-        cnts,
-        (x, i) => {
-          x.appendChild(badgeEl(i + 1));
-          sfx.tap(i + 1);
-          say(W[i + 1]);
-        },
-        countGap(),
-      );
+      const missing=miss==='a'?cnts.slice(0,a):cnts.slice(a);
+      const known=miss==='a'?b:a;
+      showTeaching(miss==='w'?`Put ${a} and ${b} together.`:`The whole is ${w}. We know one part is ${known}. Count the other part.`);
+      seqRun(miss==='w'?cnts:missing,(x,i)=>{x.appendChild(badgeEl(i+1));sfx.tap(i+1);say(W[i+1])},countGap(),1500);
     });
     ctl.reveal(() => {
       build(true);

@@ -10,7 +10,7 @@ ACTS.sub = {
   make(c, st) {
     st.classList.add("sub-st");
     const hi = HI[c.lvl];
-    const zero = c.lvl === 3 && Math.random() < 0.1;
+    const zero = Math.random() < 0.18;
     const n = rnd(2, hi);
     const k = zero ? n : rnd(1, n - 1);
     const left = n - k;
@@ -39,10 +39,11 @@ ACTS.sub = {
         `${W[n]} take away ${W[k]} equals how many?`,
       );
     }
+    const reverse=eqType && Math.random()<.5;
     const eq = el(
       "div",
       "eq",
-      `<span class="a">${n}</span><span class="op">−</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`,
+      equationHTML(n,"−",k,"?",reverse),
     );
     st.appendChild(eq);
     const fillQ = () => {

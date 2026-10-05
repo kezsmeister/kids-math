@@ -5,6 +5,7 @@ function makeChoices(parent, opts, ans, o = {}) {
   const box = el("div", "choices" + (o.cls ? " " + o.cls : ""));
   const btns = [];
   let correctBtn = null;
+  const correctBtns=[];
   opts.forEach((v, i) => {
     const b = el(
       "button",
@@ -14,14 +15,16 @@ function makeChoices(parent, opts, ans, o = {}) {
     b.setAttribute("aria-label", o.label ? o.label(v) : String(v));
     b.type = "button";
     b.dataset.v = v;
-    if (v === ans) {
+    const accepted=o.accept?o.accept(v):v===ans;
+    if (accepted) {
       b.dataset.correct = "1";
-      correctBtn = b;
+      correctBtn ||= b;
+      correctBtns.push(b);
     }
     const act = () => {
       if (b.disabled || !R || R.q.done) return;
       sfx.pop();
-      if (v === ans) {
+      if (accepted) {
         b.classList.add("right");
         if (o.onRight) o.onRight(b);
         ctl.correct();
@@ -41,7 +44,7 @@ function makeChoices(parent, opts, ans, o = {}) {
   });
   parent.appendChild(box);
   R.q.glow = () => {
-    if (correctBtn) correctBtn.classList.add("glow");
+    correctBtns.forEach(b=>b.classList.add("glow"));
     if (o.onReveal) o.onReveal();
   };
   return { box, btns, correctBtn };
@@ -326,7 +329,7 @@ function countTogether(st, fn, duration, label = "Count with me") {
     `<span aria-hidden="true">☝️</span> ${label}`,
   );
   cb.type = "button";
-  cb.id = "countBtn";
+  cb.id = st.querySelector("#countBtn") ? "countAllBtn" : "countBtn";
   cb.setAttribute("aria-label", label);
   const round = R,
     question = R.q;
@@ -409,4 +412,29 @@ function addGroups(a, b, e1, e2, kind) {
   const row = el("div", "row arow");
   row.append(A.g, el("div", "plus", "＋"), B.g);
   return { row, items: [...A.items, ...B.items], split: A.items.length };
+}
+
+// Count a known group as one amount, then count the additional objects.
+function countOn(known, extra, start) {
+  [...known,...extra].forEach(item=>{item.classList.remove('counted');item.querySelector('.badge')?.remove();});
+  known.forEach(item=>item.classList.add('counted'));
+  showTeaching(`Start with ${start}. Count on ${extra.length} more.`,false);
+  say(`Start with ${W[start]}. Count on.`);
+  seqRun(extra,(item,i)=>{item.classList.add('counted');item.appendChild(badgeEl(start+i+1,'b2'));say(W[start+i+1]);sfx.tap(start+i+1)},countGap(),1300);
+}
+function showTeaching(text, feedback=false) {
+  const target=feedback?$('#fbtext'):$('#helpStatus');
+  target.textContent=text;
+  say(text);
+}
+function buildingHint(current, target) {
+  const difference=target-current;
+  const text=difference>0?`You made ${current}. Add ${difference} more to make ${target}.`:
+    difference<0?`You made ${current}. Take away ${-difference} to make ${target}.`:`You made ${target}. Count once more, then press Check.`;
+  showTeaching(text,true);
+}
+function equationHTML(a,op,b,answer='?',reverse=false) {
+  const lhs=`<span class="a">${a}</span><span class="op">${op}</span><span class="b">${b}</span>`;
+  const rhs=answer==='?'?'<span class="q">?</span>':`<span>${answer}</span>`;
+  return reverse?`${rhs}<span class="op">=</span>${lhs}`:`${lhs}<span class="op">=</span>${rhs}`;
 }

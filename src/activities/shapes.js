@@ -45,7 +45,7 @@ function starPts() {
   }
   return p;
 }
-function shapeSVG(name, fill, rot = 0, extra = "") {
+function shapeSVG(name, fill, rot = 0, extra = "", points = null) {
   let inner;
   const st = `fill="${fill}" stroke="#0002" stroke-width="3" stroke-linejoin="round"`;
   if (name === "circle") inner = `<circle cx="50" cy="50" r="42" ${st}/>`;
@@ -54,8 +54,8 @@ function shapeSVG(name, fill, rot = 0, extra = "") {
       .map((p) => p.join(","))
       .join(" ")}" ${st}/>`;
   else
-    inner = `<polygon points="${POLY[name].map((p) => p.join(",")).join(" ")}" ${st}/>`;
-  return `<svg viewBox="0 0 100 100"><g transform="rotate(${rot} 50 50)">${inner}</g>${extra}</svg>`;
+    inner = `<polygon points="${(points || POLY[name]).map((p) => p.join(",")).join(" ")}" ${st}/>`;
+  return `<svg viewBox="-15 -15 130 130"><g transform="rotate(${rot} 50 50)">${inner}</g>${extra}</svg>`;
 }
 const TOKENS = [
   ["🔴", "🔵", "🟡", "🟢", "🟣", "🟠"],
@@ -98,16 +98,15 @@ ACTS.shapes = {
       ctl.note(ans, `This is a ${ans}`);
       const rots = {};
       opts.forEach((o) => {
-        rots[o] =
-          c.lvl === 3
-            ? rnd(-25, 25)
-            : o === "rectangle" && Math.random() < 0.5
-              ? 90
-              : 0;
+        rots[o] = rnd(-180,180);
       });
       const ch = makeChoices(st, opts, ans, {
         btnCls: "shb",
-        render: (v, i) => shapeSVG(v, cols[i], rots[v]),
+        accept:v=>v===ans || (ans==='rectangle' && v==='square'),
+        onRight:b=>{if(ans==='rectangle'&&b.dataset.v==='square')ctl.note('A square is a rectangle too.','A square is a special rectangle. It has four right-angle corners.');},
+        render: (v, i) => shapeSVG(v, cols[i], rots[v], '', v==='triangle'?pick([
+          POLY.triangle, [[15,15],[15,85],[85,85]], [[50,5],[66,88],[34,88]], [[10,65],[88,82],[69,12]]
+        ]):null),
       });
       const lab = () =>
         ch.btns.forEach((b) => {

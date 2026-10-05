@@ -97,6 +97,7 @@ function nextQ() {
   st.removeAttribute("data-type");
   $("#prompt").innerHTML = "";
   $("#fbtext").innerHTML = "";
+  $("#helpStatus").textContent = "";
   $("#nextBtn").classList.remove("show");
   const selected=chooseLearning(R);
   R.q = {
@@ -234,7 +235,7 @@ function advance() {
   R.idx++;
   nextQ();
 }
-/* adaptive: 3 first-try answers in a row -> level up; 2 misses in a row -> easier */
+/* Historical activity totals; progression uses the separate learning records. */
 function recSkill(first) {
   if (R.q.recorded) return;
   R.q.recorded = true;

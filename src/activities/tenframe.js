@@ -20,7 +20,7 @@ ACTS.tenframe = {
     else type = r < 0.2 ? "read" : r < 0.5 ? "build" : "more";
     st.dataset.type = type;
     if (type === "read") {
-      const n = rnd(c.lvl === 3 ? 0 : 1, hi);
+      const n = rnd(0, hi);
       const f = tenFrame({ n });
       ctl.ask(
         'How many <span class="emo">🔴</span>?',
@@ -44,7 +44,7 @@ ACTS.tenframe = {
       ctl.hint(hint);
       ctl.reveal(hint);
     } else if (type === "build") {
-      const n = rnd(1, hi);
+      const n = rnd(0, hi);
       const f = tenFrame({ interactive: true });
       ctl.ask(
         `Make <b class="big">${n}</b>`,
@@ -57,12 +57,9 @@ ACTS.tenframe = {
       checkBtn(st, () => {
         f.count() === n ? ctl.correct() : ctl.wrong();
       });
-      const hint = () => {
-        f.cells.forEach((cell, i) => cell.classList.toggle("target", i < n));
-      };
+      const hint = () => buildingHint(f.count(),n);
       ctl.hint(hint);
       ctl.reveal(() => {
-        hint();
         f.fill(n);
       });
     } else {
@@ -117,11 +114,13 @@ function teenFrames(c, st) {
     w.appendChild(el("div", "lbl", l));
     return w;
   };
-  ctl.note(`${n} = 10 + ${k}`, `${W[n]} is ten and ${W[k]}`);
+  const tens=n===20?2:1,ones=n===20?0:k;
+  ctl.note(n===20?'20 = 2 tens and 0 ones':`${n} = 10 + ${k}`,n===20?'Twenty is two tens and zero leftover ones.':`${W[n]} is one ten and ${W[k]} ones`);
+  st.appendChild(el('p','math-message',`${tens} ${tens===1?'ten':'tens'} and ${ones} leftover ones`));
   if (type === "build") {
     const f1 = tenFrame({ interactive: true, label: "First ten frame" }),
       f2 = tenFrame({ interactive: true, label: "Ones frame" });
-    wrap.append(mkw(f1, "ten"), mkw(f2, "ones"));
+    wrap.append(mkw(f1, "first ten"), mkw(f2, n===20?"second ten":"extra ones"));
     st.appendChild(wrap);
     ctl.ask(
       `Make <b class="big">${n}</b>`,
@@ -133,12 +132,11 @@ function teenFrames(c, st) {
       f1.count() === 10 && f2.count() === k ? ctl.correct() : ctl.wrong();
     });
     const hint = () => {
-      f1.cells.forEach((x) => x.classList.add("target"));
-      f2.cells.forEach((x, i) => x.classList.toggle("target", i < k));
+      if(f1.count()+f2.count()!==n)buildingHint(f1.count()+f2.count(),n);
+      else showTeaching('You have the right total. Move counters to fill the first ten frame.',true);
     };
     ctl.hint(hint);
     ctl.reveal(() => {
-      hint();
       f1.fill(10);
       f2.fill(k);
     });
@@ -146,7 +144,7 @@ function teenFrames(c, st) {
   }
   const f1 = tenFrame({ n: 10 }),
     f2 = tenFrame({ n: k });
-  wrap.append(mkw(f1, "ten"), mkw(f2, "ones"));
+  wrap.append(mkw(f1, "first ten"), mkw(f2, n===20?"second ten":"extra ones"));
   st.appendChild(wrap);
   if (type === "read") {
     ctl.ask(
@@ -157,26 +155,21 @@ function teenFrames(c, st) {
     const hint = () => {
       f1.clearBadges();
       f2.clearBadges();
-      seqRun(
-        [...Array(n).keys()],
-        (i) => {
-          i < 10 ? f1.badge(i, i + 1) : f2.badge(i - 10, i + 1);
-          sfx.tap(i + 1);
-          say(W[i + 1]);
-        },
-        countGap() * 0.8,
-      );
+      showTeaching(n===20?'Two full frames make two tens: twenty.':'One full frame is ten. Count on from ten.');
+      if(n!==20)seqRun([...Array(k).keys()],i=>{f2.badge(i,11+i);say(W[11+i]);sfx.tap(11+i)},countGap(),1500);
+
     };
     ctl.hint(hint);
     ctl.reveal(hint);
   } else {
     ctl.ask(
-      `<b>${n}</b> = 10 + <b class="big">?</b>`,
-      `${W[n]} is ten and how many ones?`,
+      n===20?`20 has 2 tens and <b class="big">?</b> leftover ones`:`<b>${n}</b> = 10 + <b class="big">?</b>`,
+      n===20?"Twenty has two full tens. How many leftover ones?":`${W[n]} is ten and how many ones?`,
     );
-    makeChoices(st, numOpts(k, 1, 10, nChoices(c)), k);
+    makeChoices(st, numOpts(ones, 0, 9, nChoices(c)), ones);
     const hint = () => {
       f2.clearBadges();
+      if(n===20){showTeaching("Both frames are full tens. There are zero leftover ones.");return;}
       seqRun(
         [...Array(k).keys()],
         (i) => {

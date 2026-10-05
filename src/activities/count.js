@@ -15,7 +15,8 @@ ACTS.count = {
     const type = c.variant || (!c.m20 && c.lvl >= 2 && Math.random() < 0.3 ? "give" : "count");
     st.dataset.type = type;
     if (type === "count") {
-      const n = !c.m20 && c.lvl === 3 && Math.random() < 0.1 ? 0 : rnd(lo, hi);
+      const n = !c.m20 && Math.random() < 0.12 ? 0 : rnd(lo, hi);
+      R.q.mathKey = `count:${n}`;
       const kind = pick(kindsFor(c, n));
       st.dataset.kind = kind;
       st.classList.add("cnt-st");
@@ -36,10 +37,13 @@ ACTS.count = {
         st,
         () => {
           if (n === 0) say("There are none. That is zero.");
+          else if(c.m20)countOn(items.slice(0,10),items.slice(10),10);
+          else if(c.lvl>1 && n>5)countOn(items.slice(0,5),items.slice(5),5);
           else countAll(items);
         },
-        () => 300 + items.length * countGap(),
+        () => 1600 + items.length * countGap(),
       );
+      if(c.m20 || (c.lvl>1 && n>5)) countTogether(st,()=>countAll(items),()=>items.length*countGap(),"Count each one");
       makeChoices(
         st,
         numOpts(
@@ -55,7 +59,8 @@ ACTS.count = {
     } else {
       /* "which group has N?" - choose between 2-3 groups, no per-object tapping */
       const t = rnd(2, Math.min(hi, c.lvl === 2 ? 6 : 9));
-      const k = c.lvl === 2 ? 2 : 3;
+      R.q.mathKey = `give:${t}`;
+      const k = c.lvl === 1 ? 2 : 3;
       const cand = [];
       for (let x = 1; x <= Math.min(hi, 10); x++)
         if (x !== t) cand.push({ x, d: Math.abs(x - t) + Math.random() * 1.5 });
