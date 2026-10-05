@@ -100,6 +100,7 @@ function nextQ() {
   $("#prompt").innerHTML = "";
   $("#fbtext").innerHTML = "";
   $("#helpStatus").textContent = "";
+  $("#readQuestionBtn").hidden = R.id !== "shapes";
   $("#nextBtn").classList.remove("show");
   const selected = chooseLearning(R);
   R.q = {
@@ -184,6 +185,7 @@ function organize(st) {
 ctl.ask = (html, speech) => {
   $("#prompt").innerHTML = html;
   R.q.speech = speech || "";
+  R.q.questionSpeech = R.q.speech;
   later(() => say(speech), 250);
 };
 ctl.assist = () => {

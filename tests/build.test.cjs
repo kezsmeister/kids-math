@@ -17,6 +17,10 @@ test("offline build embeds every asset and starts a playable game", (t) => {
   const g = game({ built: true });
   t.after(g.close);
   assert.equal(g.document.querySelectorAll("#cards .card").length, 8);
+  assert.ok(g.run("SHAPE_VOICE_DATA.audio.length > 10000"));
+  g.run("startRound('shapes','shapes.extend')");
+  assert.ok(g.run("recordedPlan(R.q.questionSpeech).length > 3"));
+  assert.equal(g.document.querySelector("#readQuestionBtn").hidden, false);
   g.run("startRound('sub');ctl.correct()");
   assert.equal(g.run("S.stars"), 1);
   assert.equal(

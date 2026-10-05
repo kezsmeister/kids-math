@@ -37,6 +37,12 @@ $("#stkBtn").onclick = () => {
 $("#stkBack").onclick = goHome;
 $("#parBack").onclick = goHome;
 $("#homeBtn").onclick = goHome;
+$("#readQuestionBtn").onclick = () => {
+  if (!R?.q) return;
+  cancelQuestionWork();
+  unlockSpeech();
+  speak(R.q.questionSpeech);
+};
 $("#replayBtn").onclick = () => {
   if (R && R.q) {
     cancelQuestionWork();

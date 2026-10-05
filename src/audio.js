@@ -22,7 +22,7 @@ function ac() {
   }
   if (AC && AC.state !== "running") {
     try {
-      AC.resume();
+      AC.resume().catch(() => {});
     } catch (e) {}
   }
   return AC;
@@ -239,7 +239,14 @@ function unlockSpeech() {
 }
 /* speak text; voice/female override is used by the parent corner's sample buttons */
 function speak(t, v, female) {
-  if (!t || !speechOK || !speechUnlocked) return;
+  if (!t) return;
+  if (!v && R?.id === "shapes" && playRecording(t)) return;
+  stopRecording();
+  if (!speechOK || !speechUnlocked) {
+    if (R?.id === "shapes")
+      speechStatus("Audio couldn’t start. Tap Read question to try again.");
+    return;
+  }
   try {
     if (!v) {
       if (!voiceObj) pickVoice();
@@ -274,6 +281,7 @@ function say(t) {
 }
 
 function stopSpeaking() {
+  stopRecording();
   try {
     speechSynthesis.cancel();
   } catch {}

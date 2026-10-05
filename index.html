@@ -64,6 +64,9 @@
         <p id="skillLabel" class="skill-label"></p>
         <div class="promptbar"><h1 id="prompt" tabindex="-1"></h1></div>
         <div class="lesson-help">
+          <button id="readQuestionBtn" class="text-button" hidden>
+            🔊 Read question
+          </button>
           <button
             id="hintBtn"
             class="text-button"
@@ -72,6 +75,12 @@
             💡 Help
           </button>
         </div>
+        <div
+          id="speechStatus"
+          class="teaching-status"
+          role="status"
+          aria-live="polite"
+        ></div>
         <div
           id="helpStatus"
           class="teaching-status"
@@ -121,6 +130,8 @@
     <script defer src="src/dom.js"></script>
     <script defer src="src/curriculum.js"></script>
     <script defer src="src/state.js"></script>
+    <script defer src="src/shape-voice-data.js"></script>
+    <script defer src="src/recorded-voice.js"></script>
     <script defer src="src/audio.js"></script>
     <script defer src="src/questions.js"></script>
     <script defer src="src/learning.js"></script>
