@@ -92,7 +92,7 @@ function refreshVoiceList() {
   );
   if (!en.length)
     h +=
-      '<div class="small-note">No English voices found on this device yet – the default voice is used. Try again in a moment.</div>';
+      '<div class="small-note">No extra device voices found. Built-in question recordings can still play.</div>';
   en.forEach((v, i) => {
     h += row(
       v.name,
@@ -172,8 +172,8 @@ function renderParent(focusSelector) {
    <details class="learning-section"><summary>Activity totals, including earlier play</summary><p class="small-note">These totals preserve earlier progress. First-answer accuracy can include counting help, so it does not measure independence.</p><div class="table-scroll"><table class="ptable"><tr><th>Activity</th><th>Rounds</th><th>Questions</th><th>Correct on first answer</th></tr>${totals || '<tr><td colspan="4">No completed questions yet.</td></tr>'}</table></div></details>
    <div class="pset"><b>⭐ ${S.stars}</b> stars · <b>🎁 ${S.stickers.length}/${STICKERS.length}</b> stickers</div>
    <div class="pset"><span>Questions per round:</span>${[6, 8, 10].map((n) => `<button class="modebtn${S.perRound === n ? " on" : ""}" aria-pressed="${S.perRound === n}" data-pr="${n}">${n}</button>`).join("")}</div>
-   <div class="pset"><button class="modebtn${S.sound ? " on" : ""}" id="pSound" aria-pressed="${S.sound}">🔔 Sounds ${S.sound ? "on" : "off"}</button><button class="modebtn${S.voice ? " on" : ""}" id="pVoice" aria-pressed="${S.voice}">🗣️ Voice ${S.voice ? "on" : "off"}</button></div>
-   <div class="pset vpick"><b>🗣️ Voice</b><div id="voiceList" class="vlist"></div>
+   <div class="pset"><button class="modebtn${S.sound ? " on" : ""}" id="pSound" aria-pressed="${S.sound}">🔔 Sounds ${S.sound ? "on" : "off"}</button><button class="modebtn${S.voice ? " on" : ""}" id="pVoice" aria-pressed="${S.voice}">🗣️ Read essential questions ${S.voice ? "on" : "off"}</button></div>
+   <div class="pset vpick"><b>🗣️ Backup voice</b><p class="small-note">Questions use the built-in voice when available. Choose a backup voice below.</p><div id="voiceList" class="vlist"></div>
     <div class="small-note">On iPhone: Settings &gt; Accessibility &gt; Spoken Content &gt; Voices &gt; English &gt; download Samantha (Enhanced)</div></div>
    <p class="small-note">Every solved question earns a star, including corrections and answers with help. Completing a round earns another star and a sticker until the collection is full. During play, stars mark independent answers; hearts mark supported or shown answers. The three dots show the current skill’s challenge level.</p>
    <div class="pset"><label for="motionChoice">Animation:</label><select id="motionChoice"><option value="system">Follow device preference</option><option value="calm">Calm · less motion</option><option value="full">Playful · full motion</option></select></div>

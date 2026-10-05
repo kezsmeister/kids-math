@@ -111,7 +111,6 @@ ACTS.bonds = {
         (x, i) => {
           x.appendChild(badgeEl(i + 1));
           sfx.tap(i + 1);
-          say(W[i + 1]);
         },
         countGap(),
         1500,

@@ -134,7 +134,6 @@ ACTS.order = {
             s.style.background = "#4fd08a";
             s.textContent = v;
             placed++;
-            say(W[v]);
             if (placed === cnt) ctl.correct();
           } else {
             sfx.pop();

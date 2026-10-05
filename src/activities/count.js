@@ -7,7 +7,7 @@ ACTS.count = {
   m20: true,
   skill:
     "Counting objects and subitising (dice patterns, ten frames, groups of five)",
-  note: 'Objects are shown in dice / ten-frame / groups-of-five layouts so she can see the number at a glance. A "count together" button highlights and says each object in turn; then she picks the numeral. Also "which group has N?" and zero.',
+  note: 'Objects are shown in dice / ten-frame / groups-of-five layouts so she can see the number at a glance. A "count together" button highlights each object in turn; then she picks the numeral. Also "which group has N?" and zero.',
   make(c, st) {
     if (["collect", "compose", "conserve", "quick"].includes(c.variant))
       return makeNumberPlay(c, st);
@@ -40,7 +40,7 @@ ACTS.count = {
       const run = countTogether(
         st,
         () => {
-          if (n === 0) say("There are none. That is zero.");
+          if (n === 0) showTeaching("There are none. That is zero.");
           else if (c.m20) countOn(items.slice(0, 10), items.slice(10), 10);
           else if (c.lvl > 1 && n > 5)
             countOn(items.slice(0, 5), items.slice(5), 5);

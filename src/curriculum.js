@@ -206,11 +206,40 @@ const CURRICULUM = {
   ],
 };
 CURRICULUM.order20 = CURRICULUM.order;
+// Read only when words supply the rule, direction, or construction instructions.
+// Quantities, equations and visible gaps already express their question visually.
+const NARRATED_TOPICS = new Set([
+  "count.collect",
+  "count.compose",
+  "count.conserve",
+  "count.quick",
+  "tenframe.build",
+  "tenframe20.build",
+  "compare.quantity",
+  "compare.length",
+  "compare.height",
+  "compare.size",
+  "order.sort",
+  "order.bigger",
+  "order20.sort",
+  "order20.bigger",
+  "shapes.find",
+  "shapes.sides",
+  "shapes.unit",
+  "shapes.repair",
+  "shapes.create",
+]);
 const TOPICS = Object.fromEntries(
   Object.entries(CURRICULUM).flatMap(([activity, rows]) =>
     rows.map(([variant, label, home]) => [
       `${activity}.${variant}`,
-      { activity, variant, label, home },
+      {
+        activity,
+        variant,
+        label,
+        home,
+        narrate: NARRATED_TOPICS.has(`${activity}.${variant}`),
+      },
     ]),
   ),
 );

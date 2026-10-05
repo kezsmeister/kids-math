@@ -66,7 +66,6 @@ ACTS.add = {
               x.className = "cnt yellow";
               x.appendChild(badgeEl(i + 1, "b2"));
               sfx.tap(i + 1);
-              say(W[i + 1]);
             },
             gap(),
           );
@@ -204,7 +203,6 @@ function addTeen(c, st) {
         (i) => {
           f2.badge(i, 11 + i, "b2");
           sfx.tap(11 + i);
-          say(W[11 + i]);
         },
         gap(),
         1500,

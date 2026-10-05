@@ -97,7 +97,7 @@ const sfx = {
   },
 };
 
-/* ---------- speech (reliably female English voice, iOS-safe) ---------- */
+/* ---------- device speech fallback and voice previews ---------- */
 const EN_LANG = /^en[-_](us|gb|au|ie|za|in)$/i;
 /* known female voices, best first (iOS/macOS, Google, Microsoft) */
 const VOICE_PREF = [
@@ -240,10 +240,10 @@ function unlockSpeech() {
 /* speak text; voice/female override is used by the parent corner's sample buttons */
 function speak(t, v, female) {
   if (!t) return;
-  if (!v && R?.id === "shapes" && playRecording(t)) return;
+  if (!v && R?.q && playRecording(t)) return;
   stopRecording();
   if (!speechOK || !speechUnlocked) {
-    if (R?.id === "shapes")
+    if (R?.q?.questionSpeech)
       speechStatus("Audio couldn’t start. Tap Read question to try again.");
     return;
   }
@@ -276,10 +276,6 @@ function speak(t, v, female) {
     if (speechSynthesis.paused) speechSynthesis.resume();
   } catch (e) {}
 }
-function say(t) {
-  if (S.voice && t) speak(t);
-}
-
 function stopSpeaking() {
   stopRecording();
   try {

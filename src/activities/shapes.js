@@ -161,10 +161,7 @@ ACTS.shapes = {
     } else if (type === "sides") {
       const nm = pick(["triangle", "square", "rectangle", "hexagon"]);
       const n = POLY[nm].length;
-      ctl.ask(
-        "How many <b>sides</b>?",
-        "How many sides does this shape have? Count along the edges.",
-      );
+      ctl.ask("How many <b>sides</b>?", "How many sides does this shape have?");
       ctl.note(`${n} sides`, `${W[n]} sides`);
       const pts = POLY[nm];
       let extra = "";
@@ -192,7 +189,6 @@ ACTS.shapes = {
           (i) => {
             big.querySelector(`.sb[data-i="${i}"]`).classList.add("vis");
             sfx.tap(i + 1);
-            say(W[i + 1]);
           },
           countGap(),
           2000,

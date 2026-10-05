@@ -38,9 +38,13 @@ test("teen addition help recognizes the ten and counts on from eleven", (t) => {
   g.spoken.length = 0;
   g.document.querySelector("#countBtn").click();
   g.tick(20000);
-  assert.equal(g.spoken.includes("one"), false);
-  assert.equal(g.spoken.includes("eleven"), true);
-  assert.match(g.spoken.join(" "), /ten/);
+  assert.equal(g.spoken.length, 0);
+  assert.match(
+    g.document.querySelector("#helpStatus").textContent,
+    /full frame.*ten/i,
+  );
+  assert.equal(g.document.querySelectorAll(".known-ten .badge").length, 0);
+  assert.equal(g.document.querySelectorAll(".tfpair .badge").length, 3);
 });
 test("building feedback tells the child how many more are needed", (t) => {
   const g = setup(t);
@@ -147,7 +151,7 @@ test("an empty ten-frame hint explains zero explicitly", (t) => {
     g.document.querySelector("#helpStatus").textContent,
     /empty.*zero/i,
   );
-  assert.match(g.spoken.join(" "), /zero/i);
+  assert.equal(g.spoken.filter((text) => text.trim()).length, 0);
 });
 test("a child can request help before submitting a wrong answer", (t) => {
   const g = setup(t);

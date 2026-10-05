@@ -25,7 +25,14 @@
             <button class="rbtn" id="tSound" aria-label="Sound effects">
               🔔
             </button>
-            <button class="rbtn" id="tVoice" aria-label="Read aloud">🗣️</button>
+            <button
+              class="rbtn"
+              id="tVoice"
+              aria-label="Read essential questions aloud"
+              title="Read essential questions aloud"
+            >
+              🗣️
+            </button>
           </div>
         </div>
         <div class="modebar">
@@ -57,7 +64,7 @@
             <span id="roundLabel" aria-hidden="true"></span>
           </div>
           <div class="lvpill" id="lvpill" role="img"></div>
-          <button class="rbtn" id="replayBtn" aria-label="Say it again">
+          <button class="rbtn" id="replayBtn" aria-label="Read question" hidden>
             🔊
           </button>
         </div>
@@ -130,7 +137,7 @@
     <script defer src="src/dom.js"></script>
     <script defer src="src/curriculum.js"></script>
     <script defer src="src/state.js"></script>
-    <script defer src="src/shape-voice-data.js"></script>
+    <script defer src="src/question-voice-data.js"></script>
     <script defer src="src/recorded-voice.js"></script>
     <script defer src="src/audio.js"></script>
     <script defer src="src/questions.js"></script>

@@ -4,7 +4,7 @@ Reviewed against merged main `fc55b9d8bf9b168c0cb879f8fd20705ddd67e082`.
 
 ## Automated checks
 
-72 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
+70 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
 
 Coverage includes:
 
@@ -18,17 +18,17 @@ Coverage includes:
 
 New defects were reproduced as failing tests before fixes. An independent whole-branch review identified unreachable progression in seven skill variants, lost counter focus, and an empty-frame hint that did nothing; all were fixed with regression coverage.
 
-## Shapes & Patterns narration
+## Selective question narration
 
-Ten additional speech regression tests verify visible-sequence narration, selected item names, current-step replay, Undo, repair guidance, property hints, mute preferences, and cancellation of stale or overlapping narration. Reading the visible question does not count as mathematical assistance. Tests observe text sent to the browser speech interface; physical-device audio quality remains unverified.
+Narration is now limited across the game to tasks whose rule or instruction depends on words. Tests cover the selection for all 41 skills and the conditional question about leftover ones in two full tens. Visual counting, equations, number gaps and pattern continuation stay quiet. Tests also cover short pattern instructions, silent taps/Undo/praise/answers, essential new-stage instructions, explicit replay with automatic voice off, and cancellation when a subquestion becomes visual-only. Reading never marks mathematical assistance.
 
-### Recorded question playback fix
+All narrated tasks use bundled English recordings: 56 cues, 80.5 seconds, 674,466 bytes including the encoded asset and cue metadata. The generator encoded, decoded and verified every cue contains sound. Hosted and single-file builds include the same data without network requests. Recording coverage is checked for every narrated skill at all three levels.
 
-The user reported that even explicit replay produced no speech. The old reader only called browser text-to-speech and silently returned when unavailable; its tests did not exercise audio playback. Shapes & Patterns now uses 79 bundled English recordings (144.7 seconds, about 1.2 MB encoded) through Web Audio. The generator encoded, decoded and checked every cue for non-silent audio. Both hosted and single-file builds include the same recordings without network requests.
+Playback regressions exercise missing browser speech support, muted automatic reading with explicit replay, cancellation during decoding and replay, and visible messages for failed decoding, suspended audio and rejected activation. The Web Audio boundary is simulated in jsdom; these checks verify application behavior, not physical speaker output. The full 70-test suite and offline build pass.
 
-Eight additional regressions check playback scheduling with `speechSynthesis` entirely absent, complete recording coverage for all six question types at all three levels, explicit question reading with automatic voice disabled, preservation of the original question after hints, cancellation during decoding and replay, and visible failure messages for decode failure, suspended audio and rejected audio activation. The Web Audio boundary is simulated in jsdom; these checks verify application behavior, not physical speaker output. The offline-build test also checks the bundled recording data and question reader.
+The former tests requiring spoken animals, hints and praise were replaced with assertions for the new question-only contract. Visual teaching tests still check grouping, counting support, zero explanations, feedback and progression.
 
-The new **Read question** control always repeats the question. The existing speaker control still repeats the current instruction or explanation. Reading does not change learning evidence. The complete 72-test suite and offline build pass. Browser-tool access to the user's open local file was blocked by URL policy, so this update's audible playback in that embedded browser remains unverified.
+Browser-tool access to the user's open local file was blocked by URL policy during the previous audio fix. No attempt was made to bypass that block; audible playback and the latest UI in that embedded browser remain unverified.
 
 ## Browser checks
 

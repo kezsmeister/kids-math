@@ -23,7 +23,7 @@ function makeNumberPlay(c, st) {
   if (c.variant === "collect") {
     ctl.ask(
       `Collect <b class="big">${n}</b> ${o.e}`,
-      `Choose exactly ${W[n]} ${o.p}. Tap an object to choose it or put it back. Then press Check.`,
+      `Collect ${W[n]}. Tap to choose or put back. Then press Check.`,
     );
     panel.appendChild(
       el("p", "instruction", "Tap to choose. Tap again to put back."),
@@ -108,6 +108,7 @@ function makeNumberPlay(c, st) {
         description.textContent =
           "Keep the same total. Make a different pair of parts.";
         showTeaching("Now make a different pair of parts.");
+        ctl.instruction("Now make a different pair of parts.");
         return;
       }
       if (key === first) {
@@ -139,7 +140,7 @@ function makeNumberPlay(c, st) {
   } else if (c.variant === "conserve") {
     ctl.ask(
       `Here are <b>${n}</b> ${o.e}`,
-      `Here are ${W[n]} ${o.p}. Move them around. Does the number change?`,
+      "Move the objects around. Does the number change?",
     );
     const objects = el("div", "conservation");
     for (let i = 0; i < n; i++) objects.appendChild(mkItem(o.e));
@@ -147,7 +148,7 @@ function makeNumberPlay(c, st) {
     const move = activityButton("Move them around", () => {
       objects.classList.toggle("spread");
       choices.box.hidden = false;
-      ctl.ask("How many now?", "How many are there now?");
+      ctl.ask("How many now?", "How many are there now?", false);
       move.textContent = "Move them again";
     });
     move.id = "moveObjects";
@@ -166,7 +167,7 @@ function makeNumberPlay(c, st) {
   } else {
     ctl.ask(
       "How many did you see?",
-      "Press Look at the dots when you are ready. How many do you see? You can look again whenever you want.",
+      "Press Look at the dots when you are ready. How many did you see?",
     );
     const dots = el("div", "quick-dots");
     const items = [];

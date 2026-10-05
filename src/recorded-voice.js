@@ -7,7 +7,7 @@ const voiceWords = (text) =>
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
-const recordedCues = SHAPE_VOICE_DATA.clips
+const recordedCues = QUESTION_VOICE_DATA.clips
   .map(([text, offset, duration]) => ({
     text,
     words: voiceWords(text),
@@ -50,7 +50,7 @@ function stopRecording() {
 }
 function loadRecording(context) {
   if (!recordedBuffer) {
-    const bytes = Uint8Array.from(atob(SHAPE_VOICE_DATA.audio), (c) =>
+    const bytes = Uint8Array.from(atob(QUESTION_VOICE_DATA.audio), (c) =>
       c.charCodeAt(0),
     );
     recordedBuffer = context.decodeAudioData(bytes.buffer).catch((error) => {

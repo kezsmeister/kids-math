@@ -40,7 +40,6 @@ ACTS.tenframe = {
           (cell, i) => {
             f.badge(i, i + 1);
             sfx.tap(i + 1);
-            say(W[i + 1]);
           },
           countGap(),
         );
@@ -85,7 +84,6 @@ ACTS.tenframe = {
             f.set(i, true, "ghost");
             f.badge(i, k + 1, "b2");
             sfx.tap(k + 1);
-            say(W[k + 1]);
           },
           countGap(),
         );
@@ -193,7 +191,6 @@ function teenFrames(c, st) {
           [...Array(k).keys()],
           (i) => {
             f2.badge(i, 11 + i);
-            say(W[11 + i]);
             sfx.tap(11 + i);
           },
           countGap(),
@@ -210,6 +207,7 @@ function teenFrames(c, st) {
       n === 20
         ? "Twenty has two full tens. How many leftover ones?"
         : `${W[n]} is ten and how many ones?`,
+      n === 20,
     );
     makeChoices(st, numOpts(ones, 0, 9, nChoices(c)), ones);
     const hint = () => {
@@ -225,7 +223,6 @@ function teenFrames(c, st) {
         (i) => {
           f2.badge(i, i + 1);
           sfx.tap(i + 1);
-          say(W[i + 1]);
         },
         countGap(),
       );

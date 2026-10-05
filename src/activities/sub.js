@@ -80,7 +80,6 @@ ACTS.sub = {
         });
         pictures.setAttribute("aria-label", `${n} ${o.p}. Take away ${k}.`);
         caption.textContent = `Start with ${n}. Take away ${k}.`;
-        say(`Start with ${W[n]} ${o.p}. Take away ${W[k]}.`);
         later(() => {
           items.slice(left).forEach((item) => item.classList.add("gone"));
           pictures.setAttribute(
@@ -89,7 +88,7 @@ ACTS.sub = {
           );
           caption.textContent = `${n} − ${k} = ${left}. ${left} left!`;
           if (left) countAll(items.slice(0, left));
-          else say("None left. That is zero.");
+          else showTeaching("None left. That is zero.");
         }, 1200);
       },
       () => 1500 + left * countGap(),

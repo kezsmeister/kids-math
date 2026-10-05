@@ -82,21 +82,14 @@ test("shape questions start recorded audio even when browser speech is unavailab
   assert.equal(g.run("R.q.assisted"), false);
 });
 
-test("every Shapes & Patterns question has complete recorded coverage at every level", (t) => {
+test("every narrated Shapes & Patterns question has complete recorded coverage at every level", (t) => {
   const { g } = audioGame(t);
   assert.equal(
     g.run("typeof recordedPlan"),
     "function",
     "Offline question reader exists",
   );
-  for (const variant of [
-    "find",
-    "sides",
-    "extend",
-    "unit",
-    "repair",
-    "create",
-  ]) {
+  for (const variant of ["find", "sides", "unit", "repair", "create"]) {
     for (const lvl of [1, 2, 3]) {
       for (let i = 0; i < 12; i++) {
         g.run(
@@ -130,21 +123,21 @@ test("Read question works while automatic reading is off and keeps the original 
 
 test("leaving during audio decoding prevents stale question playback", async (t) => {
   const { g, sources } = audioGame(t);
-  g.run("unlockSpeech();startRound('shapes','shapes.extend')");
+  g.run("unlockSpeech();startRound('shapes','shapes.unit')");
   g.tick(300);
   g.run("goHome()");
   await settle();
   assert.equal(sources.filter((s) => s.scheduled).length, 0);
 });
 
-test("replay replaces all scheduled pattern clips and Home stops them", async (t) => {
+test("replay replaces scheduled question audio and Home stops it", async (t) => {
   const { g, sources } = audioGame(t);
-  g.run("unlockSpeech();startRound('shapes','shapes.extend')");
+  g.run("unlockSpeech();startRound('count','count.compose')");
   g.tick(300);
   await settle();
   assert.ok(
-    sources.length > 3,
-    "The complete pattern has multiple recorded segments",
+    sources.length > 1,
+    "The construction question includes its recorded target quantity",
   );
   const previous = [...sources];
   g.document.querySelector("#replayBtn").click();

@@ -15,10 +15,6 @@ $("#tVoice").onclick = () => {
   if (!S.voice) stopSpeaking();
   save();
   renderHome();
-  if (S.voice) {
-    unlockSpeech();
-    say("Hello, friend! Let us play with numbers together.");
-  }
 };
 $("#m10").onclick = () => {
   S.mode = 10;
@@ -37,20 +33,14 @@ $("#stkBtn").onclick = () => {
 $("#stkBack").onclick = goHome;
 $("#parBack").onclick = goHome;
 $("#homeBtn").onclick = goHome;
-$("#readQuestionBtn").onclick = () => {
-  if (!R?.q) return;
+function readQuestion() {
+  if (!R?.q?.questionSpeech || R.q.done) return;
   cancelQuestionWork();
   unlockSpeech();
   speak(R.q.questionSpeech);
-};
-$("#replayBtn").onclick = () => {
-  if (R && R.q) {
-    cancelQuestionWork();
-    unlockSpeech();
-    // An explicit speaker tap plays once, without changing the saved preference.
-    speak(R.q.done ? R.q.nsay || R.q.speech : R.q.speech);
-  }
-};
+}
+$("#readQuestionBtn").onclick = readQuestion;
+$("#replayBtn").onclick = readQuestion;
 $("#nextBtn").onclick = () => {
   if (R && R.q && R.q.done) advance();
 };

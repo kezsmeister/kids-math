@@ -221,7 +221,6 @@ function countAll(items, split) {
       it.classList.add("counted");
       it.appendChild(badgeEl(i + 1, split != null && i >= split ? "b2" : ""));
       sfx.tap(i + 1);
-      say(W[i + 1]);
     },
     countGap(),
   );
@@ -383,7 +382,6 @@ function frameGuide(st) {
     cancelQuestionWork();
     demo.children[0].classList.add("on");
     $("#helpStatus").textContent = "Tap once to add a counter.";
-    say("Tap once to add a counter. Tap again to remove it.");
     later(() => {
       demo.children[0].classList.remove("on");
       $("#helpStatus").textContent = "Tap again to remove it.";
@@ -422,13 +420,11 @@ function countOn(known, extra, start) {
   });
   known.forEach((item) => item.classList.add("counted"));
   showTeaching(`Start with ${start}. Count on ${extra.length} more.`, false);
-  say(`Start with ${W[start]}. Count on.`);
   seqRun(
     extra,
     (item, i) => {
       item.classList.add("counted");
       item.appendChild(badgeEl(start + i + 1, "b2"));
-      say(W[start + i + 1]);
       sfx.tap(start + i + 1);
     },
     countGap(),
@@ -438,7 +434,6 @@ function countOn(known, extra, start) {
 function showTeaching(text, feedback = false) {
   const target = feedback ? $("#fbtext") : $("#helpStatus");
   target.textContent = text;
-  say(text);
 }
 function buildingHint(current, target) {
   const difference = target - current;

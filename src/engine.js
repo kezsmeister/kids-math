@@ -29,7 +29,7 @@ function cancelQuestionWork() {
 function seqRun(list, fn, gap, start = 300) {
   list.forEach((x, i) => later(() => fn(x, i), start + i * gap));
 }
-const countGap = () => (S.voice ? 700 : 420);
+const countGap = () => 700;
 function show(id) {
   document
     .querySelectorAll(".screen")
@@ -100,7 +100,6 @@ function nextQ() {
   $("#prompt").innerHTML = "";
   $("#fbtext").innerHTML = "";
   $("#helpStatus").textContent = "";
-  $("#readQuestionBtn").hidden = R.id !== "shapes";
   $("#nextBtn").classList.remove("show");
   const selected = chooseLearning(R);
   R.q = {
@@ -182,11 +181,27 @@ function organize(st) {
   st.append(card, tray);
   $("#prompt").focus({ preventScroll: true });
 }
-ctl.ask = (html, speech) => {
+function refreshQuestionReader() {
+  const available = !!R?.q?.questionSpeech && !R.q.done;
+  $("#readQuestionBtn").hidden = !available;
+  $("#replayBtn").hidden = !available;
+}
+ctl.instruction = (speech, essential = TOPICS[R.q.topic].narrate) => {
+  const q = R.q;
+  clearTimeout(q.narrationTimer);
+  R.pending.delete(q.narrationTimer);
+  stopSpeaking();
+  q.questionSpeech = essential ? speech || "" : "";
+  refreshQuestionReader();
+  if (q.questionSpeech)
+    q.narrationTimer = later(() => {
+      if (S.voice && !q.done) speak(q.questionSpeech);
+    }, 250);
+};
+ctl.ask = (html, speech, essential) => {
   $("#prompt").innerHTML = html;
   R.q.speech = speech || "";
-  R.q.questionSpeech = R.q.speech;
-  later(() => say(speech), 250);
+  ctl.instruction(speech, essential);
 };
 ctl.assist = () => {
   if (R?.q && !R.q.done) R.q.assisted = true;
@@ -235,7 +250,6 @@ ctl.correct = () => {
       ]);
   $("#fbtext").innerHTML =
     `<span class="praise">${pr}</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
-  say(pr + " " + q.nsay);
   finishQ();
 };
 ctl.wrong = () => {
@@ -246,7 +260,6 @@ ctl.wrong = () => {
     recSkill(false);
     sfx.oops();
     $("#fbtext").innerHTML = `<span class="oops">Let’s look together 💛</span>`;
-    say("Oops, not quite. Let us look together, then try again.");
     if (q.hint) later(q.hint, 150);
   } else {
     cancelQuestionWork();
@@ -258,11 +271,11 @@ ctl.wrong = () => {
     if (q.glow) q.glow();
     $("#fbtext").innerHTML =
       `<span class="oops">Here it is!</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
-    say("That is okay. Here it is. " + q.nsay);
     finishQ();
   }
 };
 function finishQ() {
+  refreshQuestionReader();
   $("#hintBtn").hidden = true;
   $("#nextBtn").classList.add("show");
   // Explanations and counting have no time limit. The child chooses Next.
@@ -356,10 +369,6 @@ function finishRound() {
   show("res");
   sfx.win();
   burst();
-  say(
-    `Well done, you! You earned ${W[Math.min(stars, 20)]} stars.` +
-      (newSt ? " And look, a new sticker!" : ""),
-  );
   $("#againBtn").onclick = () => startRound(id);
   $("#resHome").onclick = goHome;
 }
