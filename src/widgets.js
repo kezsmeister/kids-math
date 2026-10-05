@@ -340,6 +340,7 @@ function countTogether(st, fn, duration, label = "Count with me") {
   question.cancel.push(reset);
   const run = () => {
     if (R !== round || R.q !== question || busy) return;
+    ctl.assist();
     cancelQuestionWork();
     busy = true;
     cb.disabled = true;

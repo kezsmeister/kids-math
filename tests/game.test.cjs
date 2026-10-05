@@ -19,7 +19,7 @@ test("a corrected retry records one question and does not immediately lower diff
 test("a callback from an abandoned round cannot overwrite the next round", (t) => {
   const g = useGame(t);
   g.run(
-    "startRound('sub'); later(()=>document.querySelector('#fbtext').textContent='stale hint', 100); goHome(); startRound('add')",
+    "startRound('sub'); later(()=>document.querySelector('#fbtext').textContent='stale hint', 100); goHome(); startRound('add','add.story')",
   );
   g.tick(110);
   assert.notEqual(
@@ -41,7 +41,7 @@ test("answer feedback remains until the child chooses Next", (t) => {
 
 test("addition counting can be replayed after finishing", (t) => {
   const g = useGame(t);
-  g.run("startRound('add')");
+  g.run("startRound('add','add.story')");
   const button = g.document.querySelector("#countBtn");
   button.click();
   g.tick(20000);
@@ -58,7 +58,7 @@ test("addition counting can be replayed after finishing", (t) => {
 
 test("answering correctly cancels counting before it interrupts the feedback", (t) => {
   const g = useGame(t);
-  g.run("startRound('add')");
+  g.run("startRound('add','add.story')");
   g.document.querySelector("#countBtn").click();
   g.run("ctl.correct()");
   g.tick(2000);
@@ -67,7 +67,7 @@ test("answering correctly cancels counting before it interrupts the feedback", (
 
 test("revealing a group after an interrupted hint counts every object", (t) => {
   const g = useGame(t);
-  g.run("Math.random=()=>.2; sk('count').lvl=3; startRound('count')");
+  g.run("Math.random=()=>.2; learningRecord('count.give').level=3; startRound('count','count.give')");
   const wrong = [...g.document.querySelectorAll(".gbtn:not([data-correct])")];
   assert.equal(wrong.length, 2);
   wrong[0].click();

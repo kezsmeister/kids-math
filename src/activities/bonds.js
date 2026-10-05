@@ -14,7 +14,7 @@ ACTS.bonds = {
     const a = zeroOk ? rnd(0, w) : rnd(1, w - 1);
     const b = w - a;
     const r = Math.random();
-    const miss =
+    const miss = c.variant ? (c.variant==="whole"?"w":pick(["a","b"])) :
       c.lvl === 1
         ? r < 0.5
           ? "w"

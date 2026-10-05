@@ -8,7 +8,7 @@ ACTS.compare = {
   skill: "Comparing: more / fewer / same, longer / shorter, bigger / smaller",
   note: "Compares two groups by matching one-to-one, and compares length, height and size.",
   make(c, st) {
-    if (Math.random() < (c.lvl === 1 ? 0.3 : 0.4)) return measureQ(c, st);
+    if (c.variant ? c.variant!=="quantity" : Math.random() < (c.lvl === 1 ? 0.3 : 0.4)) return measureQ(c, st);
     const hi = HI[c.lvl];
     const same = c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.15 : 0.22);
     let a = rnd(1, hi),
@@ -143,7 +143,8 @@ function measureQ(c, st) {
     ["bigger", "s"],
     ["smaller", "s"],
   ];
-  const [word, kind] = pick(kinds);
+  const category={length:"h",height:"v",size:"s"}[c.variant];
+  const [word, kind] = pick(category?kinds.filter(k=>k[1]===category):kinds);
   st.dataset.type = "meas-" + word;
   const gap = c.lvl === 1 ? 28 : 14;
   const p1 = rnd(35, 92);

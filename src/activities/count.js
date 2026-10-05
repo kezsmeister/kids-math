@@ -12,7 +12,7 @@ ACTS.count = {
     const lo = loOf(c),
       hi = hiOf(c);
     const o = pick(OBJ);
-    const type = !c.m20 && c.lvl >= 2 && Math.random() < 0.3 ? "give" : "count";
+    const type = c.variant || (!c.m20 && c.lvl >= 2 && Math.random() < 0.3 ? "give" : "count");
     st.dataset.type = type;
     if (type === "count") {
       const n = !c.m20 && c.lvl === 3 && Math.random() < 0.1 ? 0 : rnd(lo, hi);

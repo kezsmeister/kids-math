@@ -14,7 +14,8 @@ ACTS.tenframe = {
     const hi = HI[c.lvl],
       r = Math.random();
     let type;
-    if (c.lvl === 1) type = r < 0.5 ? "read" : "build";
+    if(c.variant)type=c.variant;
+    else if (c.lvl === 1) type = r < 0.5 ? "read" : "build";
     else if (c.lvl === 2) type = r < 0.3 ? "read" : r < 0.65 ? "build" : "more";
     else type = r < 0.2 ? "read" : r < 0.5 ? "build" : "more";
     st.dataset.type = type;
@@ -98,7 +99,7 @@ function teenFrames(c, st) {
     n = rnd(11, hi),
     k = n - 10;
   const r = Math.random();
-  const type =
+  const type = c.variant || (
     c.lvl === 1
       ? r < 0.5
         ? "read"
@@ -107,7 +108,7 @@ function teenFrames(c, st) {
         ? "read"
         : r < 0.6
           ? "ones"
-          : "build";
+          : "build");
   st.dataset.type = "teen-" + type;
   const wrap = el("div", "tfpair");
   const mkw = (f, l) => {

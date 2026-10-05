@@ -14,7 +14,7 @@ ACTS.sub = {
     const n = rnd(2, hi);
     const k = zero ? n : rnd(1, n - 1);
     const left = n - k;
-    const eqType = c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
+    const eqType = c.variant ? c.variant==="eq" : c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
     st.dataset.type = eqType ? "sub-eq" : "sub-story";
     const o = pick(OBJ);
     ctl.note(

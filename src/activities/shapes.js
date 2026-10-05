@@ -72,7 +72,7 @@ ACTS.shapes = {
   note: "Finds named shapes, counts sides, and completes AB / AAB / ABB / ABC patterns.",
   make(c, st) {
     const r = Math.random();
-    const type =
+    const type = c.variant ? (c.variant==="extend"?"pat":c.variant) :
       c.lvl < 3
         ? r < 0.35
           ? "find"

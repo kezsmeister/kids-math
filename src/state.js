@@ -46,6 +46,7 @@ const DEFAULTS = () => ({
   stars: 0,
   stickers: [],
   skills: {},
+  learning: {},
   sound: true,
   voice: true,
   voiceName: "",
@@ -93,6 +94,20 @@ function normalizeState(raw) {
       att,
       ok: boundedInt(value.ok, 0, 0, att),
       rounds: boundedInt(value.rounds, 0),
+    };
+  }
+  for(const key of Object.keys(TOPICS)) {
+    const value=raw.learning?.[key];
+    if(!value || typeof value!=='object' || Array.isArray(value))continue;
+    const history=Array.isArray(value.history)?value.history.filter(item=>item &&
+      ['independent','supported','shown'].includes(item.outcome) &&
+      typeof item.day==='string' && /^\d{4}-\d{2}-\d{2}$/.test(item.day) &&
+      [1,2,3].includes(item.level) && typeof item.signature==='string'
+    ).slice(-20).map(item=>({...item,signature:item.signature.slice(0,180)})):[];
+    state.learning[key]={
+      level:boundedInt(value.level,1,1,3),independent:boundedInt(value.independent,0),
+      supported:boundedInt(value.supported,0),shown:boundedInt(value.shown,0),history,
+      lastSeen:history.at(-1)?.day || '', verifiedLevel:boundedInt(value.verifiedLevel,0,0,3)
     };
   }
   return state;

@@ -26,6 +26,7 @@ ACTS.order = {
               : r < 0.85
                 ? "sort"
                 : "bigger";
+    if(c.variant)type=c.variant;
     st.dataset.type = "path-" + type;
     if (type === "next" || type === "missing" || type === "before") {
       let nums, blank, ans;

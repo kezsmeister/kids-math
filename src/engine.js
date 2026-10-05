@@ -44,13 +44,17 @@ function lvDots(n) {
     .join("");
 }
 
-function startRound(id) {
+function startRound(id, focus = null) {
   cancelQuestionWork();
   const a = ACTS[id];
   const m20 = S.mode === 20 && !!a.m20;
   R = {
     id,
     a,
+    focus,
+    usedTopics: new Set(),
+    followUp: null,
+    avoidSignature: null,
     m20,
     key: id + (m20 ? "20" : ""),
     idx: 0,
@@ -76,7 +80,7 @@ function drawProgress() {
     } else if (i === R.idx) d.classList.add("cur");
     p.appendChild(d);
   }
-  const level = sk(R.key).lvl;
+  const level = R.q?.level || 1;
   $("#lvpill").innerHTML = lvDots(level);
   $("#lvpill").setAttribute("aria-label", `Level ${level} of 3`);
   $("#lvpill").title = `Level ${level} of 3`;
@@ -94,7 +98,12 @@ function nextQ() {
   $("#prompt").innerHTML = "";
   $("#fbtext").innerHTML = "";
   $("#nextBtn").classList.remove("show");
+  const selected=chooseLearning(R);
   R.q = {
+    ...selected,
+    level:selected.lvl,
+    assisted:false,
+    learningRecorded:false,
     tries: 0,
     done: false,
     recorded: false,
@@ -108,10 +117,16 @@ function nextQ() {
     nsay: "",
   };
   drawProgress();
-  const c = { lvl: sk(R.key).lvl, m20: R.m20, idx: R.idx };
+  const c = { ...selected, m20: R.m20, idx: R.idx };
   if (R.m20) st.classList.add("small");
   try {
-    R.a.make(c, st);
+    for(let attempt=0;attempt<20;attempt++) {
+      if(attempt){cancelQuestionWork();st.replaceChildren();R.q.cancel=[];}
+      R.a.make(c, st);
+      R.q.signature=(R.q.mathKey || R.q.note || $('#prompt').textContent).slice(0,180);
+      if(R.q.signature!==R.avoidSignature)break;
+    }
+    R.avoidSignature=null;
     organize(st);
   } catch (e) {
     console.error("question error", e);
@@ -146,8 +161,10 @@ ctl.ask = (html, speech) => {
   R.q.speech = speech || "";
   later(() => say(speech), 250);
 };
+ctl.assist = () => { if(R?.q && !R.q.done)R.q.assisted=true; };
 ctl.hint = (fn) => {
-  R.q.hint = fn;
+  const round=R,question=R.q;
+  question.hint=()=>{if(R!==round||R.q!==question)return;ctl.assist();fn();};
 };
 ctl.reveal = (fn) => {
   R.q.reveal = fn;
@@ -162,15 +179,15 @@ ctl.correct = () => {
   cancelQuestionWork();
   q.done = true;
   const first = q.tries === 0;
-  if (first) {
-    R.ok++;
-    S.stars++;
-  }
+  R.ok++;
+  S.stars++;
   recSkill(first);
-  R.marks[R.idx] = first ? 2 : 1;
+  const independent=first && !q.assisted;
+  recordLearning(independent?"independent":"supported");
+  R.marks[R.idx] = independent ? 2 : 1;
   sfx.ok();
   burst();
-  const pr = pick([
+  const pr = q.tries ? "You checked and tried again!" : pick([
     "Great job!",
     "Wonderful!",
     "You did it!",
@@ -199,6 +216,7 @@ ctl.wrong = () => {
     q.done = true;
     R.marks[R.idx] = 1;
     sfx.oops();
+    recordLearning("shown");
     if (q.reveal) q.reveal();
     if (q.glow) q.glow();
     $("#fbtext").innerHTML =
@@ -226,20 +244,12 @@ function recSkill(first) {
     s.ok++;
     s.streak++;
     s.miss = 0;
-    if (s.streak >= 3 && s.lvl < 3) {
-      s.lvl++;
-      s.streak = 0;
-      toast("Level up! 🚀");
-      sfx.up();
-    }
+
   } else {
     if (R.q.tries <= 1) s.att++;
     s.miss++;
     s.streak = 0;
-    if (s.miss >= 2 && s.lvl > 1) {
-      s.lvl--;
-      s.miss = 0;
-    }
+
   }
   save();
 }

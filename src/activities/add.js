@@ -16,7 +16,7 @@ ACTS.add = {
     const a = rnd(1, tot - 1),
       b = tot - a;
     const r = Math.random();
-    const type =
+    const type = c.variant || (
       c.lvl === 1
         ? "story"
         : c.lvl === 2
@@ -27,7 +27,7 @@ ACTS.add = {
             ? "story"
             : r < 0.6
               ? "eq"
-              : "miss";
+              : "miss");
     st.dataset.type = "add-" + type;
     const o = pick(OBJ);
     ctl.note(`${a} + ${b} = ${tot}`, `${W[a]} plus ${W[b]} equals ${W[tot]}`);
