@@ -1,0 +1,325 @@
+"use strict";
+
+/* =====================================================================  Engine */
+let R = null;
+const ctl = {};
+// A timer belongs to one round, one question, and one assistance generation.
+function later(fn, ms) {
+  const round = R,
+    question = round && round.q;
+  if (!round || !question) return;
+  const epoch = question.epoch;
+  const id = setTimeout(() => {
+    round.pending.delete(id);
+    if (R === round && round.q === question && question.epoch === epoch) fn();
+  }, ms);
+  round.pending.add(id);
+  return id;
+}
+function cancelQuestionWork() {
+  if (!R) return;
+  R.pending.forEach(clearTimeout);
+  R.pending.clear();
+  if (R.q) {
+    R.q.epoch++;
+    R.q.cancel.forEach((fn) => fn());
+  }
+  stopSpeaking();
+}
+function seqRun(list, fn, gap, start = 300) {
+  list.forEach((x, i) => later(() => fn(x, i), start + i * gap));
+}
+const countGap = () => (S.voice ? 700 : 420);
+function show(id) {
+  document
+    .querySelectorAll(".screen")
+    .forEach((screen) => screen.classList.toggle("on", screen.id === id));
+  const screen = document.getElementById(id);
+  screen.setAttribute("tabindex", "-1");
+  screen.focus({ preventScroll: true });
+}
+function lvDots(n) {
+  return [1, 2, 3]
+    .map((i) => `<i aria-hidden="true" class="lvd${i <= n ? " on" : ""}"></i>`)
+    .join("");
+}
+
+function startRound(id) {
+  cancelQuestionWork();
+  const a = ACTS[id];
+  const m20 = S.mode === 20 && !!a.m20;
+  R = {
+    id,
+    a,
+    m20,
+    key: id + (m20 ? "20" : ""),
+    idx: 0,
+    total: S.perRound,
+    ok: 0,
+    marks: [],
+    token: 0,
+    q: null,
+    pending: new Set(),
+  };
+  show("act");
+  nextQ();
+}
+function drawProgress() {
+  const p = $("#progress");
+  p.innerHTML = "";
+  for (let i = 0; i < R.total; i++) {
+    const d = el("div", "pd");
+    d.setAttribute("aria-hidden", "true");
+    if (R.marks[i]) {
+      d.classList.add("done");
+      d.textContent = R.marks[i] === 2 ? "⭐" : "💛";
+    } else if (i === R.idx) d.classList.add("cur");
+    p.appendChild(d);
+  }
+  const level = sk(R.key).lvl;
+  $("#lvpill").innerHTML = lvDots(level);
+  $("#lvpill").setAttribute("aria-label", `Level ${level} of 3`);
+  $("#lvpill").title = `Level ${level} of 3`;
+  p.setAttribute("aria-label", `Question ${R.idx + 1} of ${R.total}`);
+  $("#roundLabel").textContent = `${R.idx + 1} / ${R.total}`;
+}
+function nextQ() {
+  cancelQuestionWork();
+  R.token++;
+  if (R.idx >= R.total) return finishRound();
+  const st = $("#stage");
+  st.innerHTML = "";
+  st.className = "";
+  st.removeAttribute("data-type");
+  $("#prompt").innerHTML = "";
+  $("#fbtext").innerHTML = "";
+  $("#nextBtn").classList.remove("show");
+  R.q = {
+    tries: 0,
+    done: false,
+    recorded: false,
+    epoch: 0,
+    cancel: [],
+    hint: null,
+    reveal: null,
+    glow: null,
+    note: "",
+    speech: "",
+    nsay: "",
+  };
+  drawProgress();
+  const c = { lvl: sk(R.key).lvl, m20: R.m20, idx: R.idx };
+  if (R.m20) st.classList.add("small");
+  try {
+    R.a.make(c, st);
+    organize(st);
+  } catch (e) {
+    console.error("question error", e);
+    R.marks[R.idx] = 1;
+    R.idx++;
+    later(nextQ, 50);
+  }
+}
+/* Split every question into a calm QUESTION CARD (look, don't press) and a bright ANSWER TRAY (press these). */
+const ANS_SEL = ".choices,.gpick,.cmp,.mh,.mv,.checkrow,.numbtn";
+function organize(st) {
+  const kids = [...st.children];
+  const card = el("div", "qcard"),
+    tray = el("div", "atray");
+  kids.forEach((k) => {
+    const isAns =
+      k.matches(ANS_SEL) ||
+      k.matches(".frame-guide") ||
+      k.matches(".tf-int") ||
+      !!k.querySelector(".tf-int");
+    (isAns ? tray : card).appendChild(k);
+  });
+  const t = st.dataset.type || "";
+  if (![...card.children].some((child) => !child.hidden))
+    card.classList.add("empty");
+  if (!tray.children.length) tray.classList.add("empty");
+  st.append(card, tray);
+  $("#prompt").focus({ preventScroll: true });
+}
+ctl.ask = (html, speech) => {
+  $("#prompt").innerHTML = html;
+  R.q.speech = speech || "";
+  later(() => say(speech), 250);
+};
+ctl.hint = (fn) => {
+  R.q.hint = fn;
+};
+ctl.reveal = (fn) => {
+  R.q.reveal = fn;
+};
+ctl.note = (n, s) => {
+  R.q.note = n || "";
+  R.q.nsay = s || "";
+};
+ctl.correct = () => {
+  const q = R.q;
+  if (q.done) return;
+  cancelQuestionWork();
+  q.done = true;
+  const first = q.tries === 0;
+  if (first) {
+    R.ok++;
+    S.stars++;
+  }
+  recSkill(first);
+  R.marks[R.idx] = first ? 2 : 1;
+  sfx.ok();
+  burst();
+  const pr = pick([
+    "Great job!",
+    "Wonderful!",
+    "You did it!",
+    "Lovely!",
+    "That is right!",
+    "Yay, well done!",
+    "Super!",
+  ]);
+  $("#fbtext").innerHTML =
+    `<span class="praise">${pr}</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
+  say(pr + " " + q.nsay);
+  finishQ();
+};
+ctl.wrong = () => {
+  const q = R.q;
+  if (q.done) return;
+  q.tries++;
+  if (q.tries === 1) {
+    recSkill(false);
+    sfx.oops();
+    $("#fbtext").innerHTML = `<span class="oops">Let’s look together 💛</span>`;
+    say("Oops, not quite. Let us look together, then try again.");
+    if (q.hint) later(q.hint, 150);
+  } else {
+    cancelQuestionWork();
+    q.done = true;
+    R.marks[R.idx] = 1;
+    sfx.oops();
+    if (q.reveal) q.reveal();
+    if (q.glow) q.glow();
+    $("#fbtext").innerHTML =
+      `<span class="oops">Here it is!</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
+    say("That is okay. Here it is. " + q.nsay);
+    finishQ();
+  }
+};
+function finishQ() {
+  $("#nextBtn").classList.add("show");
+  // Explanations and counting have no time limit. The child chooses Next.
+}
+function advance() {
+  if (!R) return;
+  R.idx++;
+  nextQ();
+}
+/* adaptive: 3 first-try answers in a row -> level up; 2 misses in a row -> easier */
+function recSkill(first) {
+  if (R.q.recorded) return;
+  R.q.recorded = true;
+  const s = sk(R.key);
+  if (first) {
+    s.att++;
+    s.ok++;
+    s.streak++;
+    s.miss = 0;
+    if (s.streak >= 3 && s.lvl < 3) {
+      s.lvl++;
+      s.streak = 0;
+      toast("Level up! 🚀");
+      sfx.up();
+    }
+  } else {
+    if (R.q.tries <= 1) s.att++;
+    s.miss++;
+    s.streak = 0;
+    if (s.miss >= 2 && s.lvl > 1) {
+      s.lvl--;
+      s.miss = 0;
+    }
+  }
+  save();
+}
+function toast(t) {
+  const d = el("div", "toast", t);
+  document.body.appendChild(d);
+  setTimeout(() => d.remove(), 2100);
+}
+function burst() {
+  if (reducedMotion()) return;
+  const fx = $("#fx");
+  const em = ["⭐", "✨", "🌟", "💖", "🎉", "🌈"];
+  for (let i = 0; i < 14; i++) {
+    const p = el("div", "confetti", pick(em));
+    p.style.left = 35 + Math.random() * 30 + "%";
+    p.style.top = 40 + Math.random() * 10 + "%";
+    fx.appendChild(p);
+    const dx = (Math.random() - 0.5) * innerWidth * 0.8,
+      dy = -(Math.random() * innerHeight * 0.4) - 40;
+    if (p.animate) {
+      const an = p.animate(
+        [
+          { transform: "translate(0,0) scale(.4)", opacity: 1 },
+          {
+            transform: `translate(${dx}px,${dy}px) scale(1.3) rotate(${rnd(-90, 90)}deg)`,
+            opacity: 1,
+            offset: 0.6,
+          },
+          {
+            transform: `translate(${dx * 1.1}px,${dy + innerHeight * 0.5}px) scale(1)`,
+            opacity: 0,
+          },
+        ],
+        { duration: 1400 + Math.random() * 500, easing: "ease-out" },
+      );
+      an.onfinish = () => p.remove();
+    }
+    setTimeout(() => p.remove(), 2200);
+  }
+}
+function finishRound() {
+  cancelQuestionWork();
+  const s = sk(R.key);
+  s.rounds++;
+  S.stars += 1;
+  const left = STICKERS.filter((x) => !S.stickers.includes(x));
+  let newSt = null;
+  if (left.length) {
+    newSt = pick(left);
+    S.stickers.push(newSt);
+  }
+  save();
+  const id = R.id,
+    ok = R.ok;
+  const stars = ok + 1;
+  let h = `<div class="bigtitle">🎉 Well done! 🎉</div><div class="starsrow">`;
+  for (let i = 0; i < stars; i++)
+    h += `<span style="animation-delay:${i * 0.12}s">⭐</span>`;
+  h += `</div>`;
+  if (newSt)
+    h += `<div class="stkbig">${newSt}</div><div class="bigtitle" style="font-size:clamp(22px,5vmin,40px)">New sticker!</div>`;
+  else
+    h += `<div class="stkbig">🏆</div><div class="bigtitle" style="font-size:clamp(22px,5vmin,40px)">You have all the stickers!</div>`;
+  h += `<div class="row"><button class="bigbtn" id="againBtn" aria-label="Play again">🔁</button><button class="bigbtn blue" id="resHome" aria-label="Home">🏠</button></div>`;
+  $("#resBody").innerHTML = h;
+  R.token++;
+  R = null;
+  show("res");
+  sfx.win();
+  burst();
+  say(
+    `Well done, you! You earned ${W[Math.min(stars, 20)]} stars.` +
+      (newSt ? " And look, a new sticker!" : ""),
+  );
+  $("#againBtn").onclick = () => startRound(id);
+  $("#resHome").onclick = goHome;
+}
+function goHome() {
+  cancelQuestionWork();
+  R = null;
+  renderHome();
+  show("home");
+}
