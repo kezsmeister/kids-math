@@ -5,28 +5,14 @@ ACTS.order = {
   name: "Number Path",
   color: ["#22b8cf", "#0f8ca0"],
   icon: '<svg viewBox="0 0 120 40"><rect x="2" y="4" width="32" height="32" rx="8" fill="#ff86b9"/><rect x="44" y="4" width="32" height="32" rx="8" fill="#ffd23f"/><rect x="86" y="4" width="32" height="32" rx="8" fill="#fff"/><text x="18" y="29" font-size="26" fill="#fff" text-anchor="middle" font-weight="900">1</text><text x="60" y="29" font-size="26" fill="#fff" text-anchor="middle" font-weight="900">2</text><text x="102" y="29" font-size="26" fill="#22b8cf" text-anchor="middle" font-weight="900">?</text></svg>',
-  m20: true,
-  skill:
-    "Number sequence, missing numbers, before/after, ordering, bigger/smaller number",
-  note: "Number path: what comes next, missing number, what comes before, order small to big, which number is bigger.",
+  skill: "Number sequence and numeral comparison with quantity pictures",
+  note: "Fill one gap in a short number path or compare two numbers, with visible dot quantities.",
   make(c, st) {
-    const hi = hiOf(c);
-    const r = Math.random();
-    const lo2 = c.m20 ? 11 : 0;
-    let type;
-    if (c.lvl === 1) type = r < 0.4 ? "next" : r < 0.8 ? "missing" : "sort";
-    else
-      type =
-        r < 0.2
-          ? "next"
-          : r < 0.5
-            ? "missing"
-            : r < 0.65
-              ? "before"
-              : r < 0.85
-                ? "sort"
-                : "bigger";
-    if (c.variant) type = c.variant;
+    const hi = HI[c.lvl];
+    const lo2 = 0;
+    const type = ["next", "missing", "before", "bigger"].includes(c.variant)
+      ? c.variant
+      : "next";
     st.dataset.type = "path-" + type;
     if (type === "next" || type === "missing" || type === "before") {
       let nums, blank, ans;
@@ -62,6 +48,7 @@ ACTS.order = {
         const b = el("div", "pbox pc" + (i % 4), i === blank ? "?" : v);
         if (i === blank) b.classList.add("blank");
         cell.appendChild(b);
+        if (i !== blank) cell.appendChild(miniDots(v));
         p.appendChild(cell);
         boxes.push({ cell, v });
       });
@@ -73,17 +60,11 @@ ACTS.order = {
         blankEl.classList.remove("blank");
         blankEl.classList.add("filled");
       };
-      makeChoices(
-        st,
-        numOpts(
-          ans,
-          c.m20 ? 11 : 0,
-          Math.min(20, Math.max(hi, ans + 2)),
-          nChoices(c),
-        ),
-        ans,
-        { drop: blankEl, onRight: fill, onReveal: fill },
-      );
+      makeChoices(st, numOpts(ans, 0, hi, nChoices(c)), ans, {
+        drop: blankEl,
+        onRight: fill,
+        onReveal: fill,
+      });
       ctl.hint(() => {
         showTeaching("Use the dots to count along the number path.");
         boxes.forEach((bx, i) =>
@@ -97,69 +78,6 @@ ACTS.order = {
             i * 350 + 100,
           ),
         );
-      });
-    } else if (type === "sort") {
-      const cnt = c.lvl === 1 ? 3 : c.lvl === 2 ? 4 : 5;
-      const vals = shuffle(
-        [...Array(hi - lo2 + 1).keys()].map((i) => i + lo2),
-      ).slice(0, cnt);
-      const sorted = vals.slice().sort((a, b) => a - b);
-      ctl.ask(
-        'Small <span class="emo">🐭</span> ➜ Big <span class="emo">🐘</span>',
-        "Tap the numbers in order, from the smallest to the biggest.",
-      );
-      ctl.note(sorted.join(" &lt; "), sorted.map((v) => W[v]).join(", "));
-      const slots = el("div", "slots");
-      const sl = sorted.map(() => {
-        const s = el("div", "slot2");
-        slots.appendChild(s);
-        return s;
-      });
-      st.appendChild(slots);
-      const bank = el("div", "choices");
-      let placed = 0;
-      const tiles = [];
-      vals.forEach((v, i) => {
-        const b = el("button", "numbtn c" + (i % 5), String(v));
-        b.type = "button";
-        b.dataset.v = v;
-        tiles.push(b);
-        b.addEventListener("click", () => {
-          if (R.q.done || b.disabled) return;
-          if (v === sorted[placed]) {
-            sfx.tap(placed + 1);
-            b.disabled = true;
-            b.style.visibility = "hidden";
-            const s = sl[placed];
-            s.classList.add("full");
-            s.style.background = "#4fd08a";
-            s.textContent = v;
-            placed++;
-            if (placed === cnt) ctl.correct();
-          } else {
-            sfx.pop();
-            b.classList.remove("wob");
-            void b.offsetWidth;
-            b.classList.add("wob");
-            ctl.wrong();
-          }
-        });
-        bank.appendChild(b);
-      });
-      st.appendChild(bank);
-      ctl.hint(() => {
-        showTeaching("Find the smallest number that is still waiting.");
-        const t = tiles.find((b) => +b.dataset.v === sorted[placed]);
-        if (t) t.classList.add("glow");
-      });
-      ctl.reveal(() => {
-        for (let i = placed; i < cnt; i++) {
-          const s = sl[i];
-          s.classList.add("full");
-          s.style.background = "#4fd08a";
-          s.textContent = sorted[i];
-        }
-        tiles.forEach((t) => (t.style.visibility = "hidden"));
       });
     } else {
       let a = rnd(lo2, hi),
@@ -179,6 +97,7 @@ ACTS.order = {
       );
       R.q.mathKey = `numerals:${a}:${b}:${big}`;
       const ch = makeChoices(st, [a, b], ans, { btnCls: "huge" });
+      ch.btns.forEach((bt) => bt.appendChild(miniDots(+bt.dataset.v)));
       ctl.hint(() => {
         showTeaching("Compare the dots under each number.");
         ch.btns.forEach((bt) => {

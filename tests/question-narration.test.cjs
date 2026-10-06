@@ -17,51 +17,35 @@ function start(g, topic) {
   g.tick(300);
 }
 
-test("word-dependent tasks are read; quantities, equations and visible gaps stay quiet", (t) => {
+test("word-dependent tasks are read; quantities and visible gaps stay quiet", (t) => {
   const g = setup(t);
   const spoken = [
     "count.collect",
-    "count.compose",
     "count.conserve",
     "count.quick",
     "tenframe.build",
-    "tenframe20.build",
+    "tenframe.more",
+    "bonds.whole",
+    "bonds.part",
     "compare.quantity",
     "compare.length",
     "compare.height",
     "compare.size",
-    "order.sort",
     "order.bigger",
-    "order20.sort",
-    "order20.bigger",
     "shapes.find",
     "shapes.sides",
-    "shapes.unit",
-    "shapes.repair",
-    "shapes.create",
   ];
   const quiet = [
     "count.count",
     "count.give",
     "count20.count",
     "tenframe.read",
-    "tenframe.more",
     "tenframe20.read",
-    "tenframe20.ones",
-    "bonds.whole",
-    "bonds.part",
     "order.next",
     "order.missing",
     "order.before",
-    "order20.next",
-    "order20.missing",
-    "order20.before",
     "add.story",
-    "add.eq",
-    "add.miss",
-    "add20.teen",
     "sub.story",
-    "sub.eq",
     "shapes.extend",
   ];
   for (const [topics, expected] of [
@@ -82,28 +66,9 @@ test("word-dependent tasks are read; quantities, equations and visible gaps stay
   }
 });
 
-test("the wording of leftover ones at twenty is read despite the two full frames", (t) => {
-  const g = setup(t);
-  g.run("Math.random=()=>.999;learningRecord('tenframe20.ones').level=3");
-  start(g, "tenframe20.ones");
-  assert.match(g.spoken.join(" "), /leftover ones/i);
-});
-
-test("pattern questions read the instruction without listing visible animals", (t) => {
-  const g = setup(t);
-  for (const topic of ["shapes.unit", "shapes.repair"]) {
-    start(g, topic);
-    assert.doesNotMatch(
-      g.spoken.join(" "),
-      /cat|rabbit|frog|dog|listen to the pattern/i,
-    );
-    assert.match(g.spoken.join(" "), /smallest group|breaks the pattern/);
-  }
-});
-
 test("praise, answers and automatic hints do not speak after an answer", (t) => {
   const g = setup(t);
-  for (const topic of ["shapes.find", "compare.quantity", "add.eq"]) {
+  for (const topic of ["shapes.find", "compare.quantity", "add.story"]) {
     start(g, topic);
     g.spoken.length = 0;
     g.run("ctl.wrong();ctl.correct()");
@@ -124,29 +89,6 @@ test("Read question repeats the task after spoken help, even with automatic read
   assert.match(g.spoken.at(-1), /^Tap the/);
   assert.doesNotMatch(g.spoken.at(-1), /corners|straight sides/);
   assert.equal(g.run("S.voice"), false);
-});
-
-test("pattern taps and Undo are quiet, but a new required task is read once", (t) => {
-  const g = setup(t);
-  start(g, "shapes.create");
-  g.spoken.length = 0;
-  const bank = [...g.document.querySelectorAll(".pattern-bank button")];
-  bank[0].click();
-  bank[1].click();
-  g.tick(300);
-  assert.equal(g.spoken.length, 0);
-  g.document.querySelector("#useUnit").click();
-  g.tick(300);
-  assert.deepEqual(g.spoken, [
-    "Repeat your group twice more, then press Check.",
-  ]);
-  g.spoken.length = 0;
-  bank[0].click();
-  g.document.querySelector("#undoPattern").click();
-  g.tick(300);
-  assert.equal(g.spoken.length, 0);
-  g.document.querySelector("#replayBtn").click();
-  assert.match(g.spoken.at(-1), /^Repeat your group/);
 });
 
 test("switching to a visual-only subquestion cancels its earlier spoken instruction", (t) => {

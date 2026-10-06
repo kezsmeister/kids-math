@@ -165,11 +165,7 @@ test("ten-frame cells can be activated as labeled native buttons", (t) => {
 test("subtraction help removes the stated quantity and shows what remains", (t) => {
   const g = useGame(t);
   g.run("startRound('sub','sub.story')");
-  const equation = g.document
-    .querySelector(".eq")
-    .textContent.match(/(\d+)−(\d+)=/);
-  const total = Number(equation[1]),
-    removed = Number(equation[2]);
+  const [total, removed] = g.run("R.q.note").match(/\d+/g).map(Number);
   const show = g.document.querySelector("#countBtn");
   assert.ok(show, "A visible demonstration is available");
   show.click();

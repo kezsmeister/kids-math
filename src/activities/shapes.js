@@ -72,25 +72,11 @@ ACTS.shapes = {
   color: ["#f0b429", "#c48a00"],
   icon: '<svg viewBox="0 0 120 50"><circle cx="20" cy="26" r="18" fill="#ff86b9"/><rect x="45" y="8" width="34" height="34" rx="4" fill="#5cc6ff"/><polygon points="102,6 120,44 84,44" fill="#4fd08a"/></svg>',
   skill:
-    "Shapes (circle, square, triangle, rectangle…) and repeating patterns (AB, AAB, ABB, ABC)",
-  note: "Finds named shapes, counts sides, and completes AB / AAB / ABB / ABC patterns.",
+    "Shapes (circle, square, triangle, rectangle…) and repeating patterns (AB, AAB, ABB)",
+  note: "Finds named shapes, counts sides, and chooses the next item in AB / AAB / ABB patterns.",
   make(c, st) {
-    if (["extend", "unit", "repair", "create"].includes(c.variant))
-      return makePattern(c, st);
-    const r = Math.random();
-    const type = c.variant
-      ? c.variant === "extend"
-        ? "pat"
-        : c.variant
-      : c.lvl < 3
-        ? r < 0.35
-          ? "find"
-          : "pat"
-        : r < 0.3
-          ? "find"
-          : r < 0.45
-            ? "sides"
-            : "pat";
+    if (c.variant === "extend") return makePattern(c, st);
+    const type = c.variant === "sides" ? "sides" : "find";
     st.dataset.type = "shape-" + type;
     if (type === "find") {
       const pool =
@@ -159,7 +145,11 @@ ACTS.shapes = {
       });
       ctl.reveal(lab);
     } else if (type === "sides") {
-      const nm = pick(["triangle", "square", "rectangle", "hexagon"]);
+      const nm = pick(
+        c.lvl < 3
+          ? ["triangle", "square", "rectangle"]
+          : ["triangle", "square", "rectangle", "hexagon"],
+      );
       const n = POLY[nm].length;
       ctl.ask("How many <b>sides</b>?", "How many sides does this shape have?");
       ctl.note(`${n} sides`, `${W[n]} sides`);

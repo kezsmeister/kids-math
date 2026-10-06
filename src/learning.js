@@ -98,22 +98,20 @@ function learningRange(key, level) {
         : level === 2
           ? "Including rectangles and squares"
           : "Including hexagons and stars";
-    if (variant === "sides") return "Shapes with 3, 4 or 6 straight sides";
-    if (variant === "create")
-      return level === 1
-        ? "Create a group of 2 items"
-        : "Create a group of 2 or 3 items";
-    return [
-      "",
-      "AB patterns",
-      "AB, AAB and ABB patterns",
-      "AAB, ABB and ABC patterns",
-    ][level];
+    if (variant === "sides")
+      return level < 3
+        ? "Shapes with 3 or 4 straight sides"
+        : "Shapes with 3, 4 or 6 straight sides";
+    return level < 3
+      ? "One next item in an AB pattern"
+      : "One next item in an AB, AAB or ABB pattern";
   }
   if (variant === "quick")
     return level === 1
       ? "Visible groups of 1–5 in familiar layouts"
-      : "Brief looks at groups of 1–5, with another look available";
+      : "Visible groups of 1–5 in varied layouts";
+  if (activity === "bonds" && variant === "part")
+    return "Parts of numbers within 5";
   if (activity === "compare" && variant !== "quantity")
     return [
       "",
@@ -122,7 +120,7 @@ function learningRange(key, level) {
       "Subtler differences",
     ][level];
   if (activity === "tenframe" && variant === "more")
-    return "Parts that make 10";
+    return "Count empty spaces in a ten frame";
   return activity.endsWith("20")
     ? `Numbers 11–${[0, 14, 17, 20][level]}`
     : `Numbers within ${HI[level]}`;

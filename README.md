@@ -24,22 +24,22 @@ The build creates `dist/math-garden.html`, a self-contained file that can be ope
 
 ## How play works
 
-- Choose 0–10 or 11–20 and an activity. Individual skills develop separately: shape recognition, pattern repair, missing parts, collecting quantities, and the other question types have their own records.
-- Activities open directly on the task. A short question sits above the objects and answer controls; there are no tutorial pages to read or dismiss.
-- Press **Help**, **Count with me**, **Count each one**, or **Take away with me** for mathematical support. Requested help speaks even when automatic question reading is off. Counting strategies include a known five, a full ten, and counting on from the larger addend.
-- A wrong answer offers a hint. A second wrong answer shows a solution and schedules a fresh question on that skill, including across rounds and reloads. Press **Next** when ready; answers and explanations have no deadline.
-- Count includes moving an exact amount into a basket (tap again to return), making a number in two bowls with a retained picture of the first arrangement, rearranging objects without changing their number, and recognizing small groups. Small groups start visible with large number choices and the spoken question “How many?”. At later levels, dots hide after four seconds; answers remain untimed, and **Show dots** provides an unlimited supported look.
-- Pattern tasks continue a complete repeat, identify the smallest repeating group, repair a mistake, and create a repeating pattern. Creation first builds a two- or three-item unit, then repeats it with the chosen unit kept above as a reference. Repair first finds the mistake, then offers replacements. Finding the repeating unit does not show grouping boundaries before help.
-- Automatic narration is limited to questions where words convey the task: comparisons, named shapes, counting sides, identifying/repairing/creating a repeating group, sorting, and construction instructions. Picture counting, equations, and visible number/pattern gaps stay quiet. The question about leftover ones in two full tens is read because that distinction is expressed in words.
-- **Listen** / 🔊 is available on every unfinished question, even when automatic reading is off. It repeats the current task rather than an answer or hint. In multi-step construction or repair it updates when the task changes. Routine taps, visible animal sequences, automatic hints, praise and completed answers stay quiet.
-- Questions and requested-help recordings work offline. Listening to a question does not count as mathematical help. Playback stops when leaving or answering a question; a blocked audio start shows a retry instruction.
-- Shapes include varied and rotated triangles. Squares are accepted when a rectangle is requested. Zero, equations with the total on either side, and twenty as two tens with no leftover ones are included.
-- Every solved question earns a star, including corrections and supported answers. Finishing a round earns another star and a sticker.
-- Hold the Parents button for three seconds, or focus it and press Enter. Parent Corner shows each skill, a physical activity to try together, and a **Practice** button. It also includes voice, sound, round length, and reduced-motion settings.
+- Eight activity cards lead to 25 reviewed skills. Begin within five and extend within ten through varied independent practice. The optional 11–20 mode contains only counting visible objects and counters in two frames.
+- Activities open directly on the task, with one short prompt and usable answer controls. There are no tutorial pages to read or dismiss; home cards show only the icon and challenge name.
+- Count includes reading quantities, collecting an exact amount in a basket, matching a group, and rearranging objects without changing their number. Small-group questions show one to five dots at every level, with no hiding timer.
+- Ten frames support counting, building a quantity, and counting empty spaces. Number bonds use counters, with missing parts limited to wholes within five. Number paths and numeral comparisons show quantity pictures before help.
+- Addition joins two picture groups. Subtraction shows the starting objects with the removed objects crossed out immediately; it never removes more than five. Equations appear only as feedback where useful, not as separate questions.
+- Shapes include varied sizes and orientations; squares are accepted when a rectangle is requested. Side counting starts with three or four sides. Patterns ask for **one next item**: AB at the first two levels, with AAB/ABB also available at the third.
+- The two-decomposition challenge, symbolic equations/missing addends, formal teen-number tasks, sorting sequences of numerals, and multi-stage pattern puzzles have been retired. See [the complete question review](docs/age-five-review.md) for all 41 original variants and the reasons for each decision.
+- Press **Help**, **Count with me**, **Count each one**, or **Take away with me** for mathematical support. Requested help speaks even when automatic question reading is off. A first wrong answer offers help; a second shows a solution and schedules a fresh question on that skill. Press **Next** when ready.
+- Automatic narration reads instructions needed to choose an action, including comparisons, named shapes, sides, number bonds, empty spaces and construction. Visible counting and number/pattern gaps stay quiet. **Listen** / 🔊 repeats every unfinished question on request, without counting as mathematical help.
+- Questions and requested-help recordings work offline. Routine taps, automatic hints and praise remain quiet. Playback stops when leaving or answering; a blocked audio start shows a retry instruction.
+- Every solved question earns a star, including corrections and supported answers. Completing a round earns another star and a sticker.
+- Hold the Parents button for three seconds, or focus it and press Enter. Parent Corner offers focused practice, activities to try together, and voice, sound, round-length and reduced-motion settings. Removed questions do not appear here or in saved follow-ups.
 
 Progress distinguishes **independent** (correct without a wrong answer or mathematical help), **supported** (correct with help or a retry), and **shown** (the game demonstrated the solution). Difficulty increases after four independent answers among the latest five at that level, with at least three distinct mathematical questions. A successful independent check on a later day is recorded separately from same-day progress. These are practice observations, not a formal assessment or evidence of educational effectiveness.
 
-Existing stars, stickers, and activity totals are retained. Earlier first-answer accuracy may include help and is not reclassified as independent learning.
+Existing stars, stickers, activity totals, and valid historical records for retired skills are retained. Earlier first-answer accuracy may include help and is not reclassified as independent learning.
 
 ## Source layout
 

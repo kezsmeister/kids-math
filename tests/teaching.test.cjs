@@ -30,22 +30,6 @@ test("missing-part help counts the missing part rather than the whole", (t) => {
   assert.equal(g.document.querySelectorAll(".cntrow .badge").length, 2);
   assert.equal(g.document.querySelectorAll(".cntrow .cnt").length, 4);
 });
-test("teen addition help recognizes the ten and counts on from eleven", (t) => {
-  const g = setup(t);
-  g.run(
-    "S.mode=20;Math.random=()=>.5;startRound('add','add20.teen');unlockSpeech()",
-  );
-  g.spoken.length = 0;
-  g.document.querySelector("#countBtn").click();
-  g.tick(20000);
-  assert.ok(g.spoken.some((text) => text === "eleven"));
-  assert.match(
-    g.document.querySelector("#helpStatus").textContent,
-    /full frame.*ten/i,
-  );
-  assert.equal(g.document.querySelectorAll(".known-ten .badge").length, 0);
-  assert.equal(g.document.querySelectorAll(".tfpair .badge").length, 3);
-});
 test("building feedback tells the child how many more are needed", (t) => {
   const g = setup(t);
   g.run("Math.random=()=>.5;startRound('tenframe','tenframe.build')");
@@ -61,16 +45,6 @@ test("building feedback tells the child how many more are needed", (t) => {
     1,
     "hint must leave the child in control",
   );
-});
-test("twenty is represented as two tens with zero leftover ones", (t) => {
-  const g = setup(t);
-  g.run(
-    "S.mode=20;learningRecord('tenframe20.ones').level=3;Math.random=()=>.999;startRound('tenframe','tenframe20.ones')",
-  );
-  assert.match(g.document.querySelector("#prompt").textContent, /20/);
-  assert.match(g.document.querySelector("#stage").textContent, /2 tens/);
-  assert.ok(g.document.querySelector('.choices [data-v="0"][data-correct]'));
-  assert.equal(g.document.querySelectorAll(".tf-cell.on").length, 20);
 });
 test("zero quantities and taking away all are available at the first level", (t) => {
   const g = setup(t);
@@ -105,21 +79,6 @@ test("counting on starts with the larger addend and counting each object stays a
   g.document.querySelector("#countAllBtn").click();
   g.tick(20000);
   assert.equal(g.document.querySelectorAll("#stage .badge").length, a + b);
-});
-test("equations can show the total on the left", (t) => {
-  const g = setup(t);
-  let reverse = false;
-  for (let i = 0; i < 50; i++) {
-    g.run("startRound('add','add.eq')");
-    const eq = g.document.querySelector(".eq");
-    if (eq.textContent.startsWith("?=")) {
-      g.document.querySelector("[data-correct]").click();
-      assert.match(eq.textContent, /^\d+=\d+\+\d+$/);
-      reverse = true;
-      break;
-    }
-  }
-  assert.equal(reverse, true);
 });
 test("a zero collection can be submitted without choosing an object", (t) => {
   const g = setup(t);

@@ -9,7 +9,7 @@ ACTS.count = {
     "Counting objects and subitising (dice patterns, ten frames, groups of five)",
   note: 'Objects are shown in dice / ten-frame / groups-of-five layouts so she can see the number at a glance. A "count together" button highlights each object in turn; then she picks the numeral. Also "which group has N?" and zero.',
   make(c, st) {
-    if (["collect", "compose", "conserve", "quick"].includes(c.variant))
+    if (["collect", "conserve", "quick"].includes(c.variant))
       return makeNumberPlay(c, st);
     const lo = loOf(c),
       hi = hiOf(c);

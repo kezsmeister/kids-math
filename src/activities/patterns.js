@@ -1,6 +1,6 @@
 "use strict";
 
-// Different objects remain distinguishable without relying on colour alone.
+// Two animal kinds distinguish patterns without relying on colour or reading.
 const PATTERN_TOKENS = [
   ["🐱", "cat"],
   ["🐶", "dog"],
@@ -8,12 +8,7 @@ const PATTERN_TOKENS = [
   ["🐰", "rabbit"],
 ];
 const patternName = (t) => PATTERN_TOKENS.find((x) => x[0] === t)?.[1] || t;
-function patternStep(text, feedback = false, spoken = false) {
-  cancelQuestionWork();
-  R.q.spokenHelp = spoken;
-  showTeaching(text, feedback);
-}
-function patternRow(sequence, unitLength, interactive = false) {
+function patternRow(sequence, unitLength) {
   const row = el("div", "pattern-row");
   sequence.forEach((token, i) => {
     if (i % unitLength === 0)
@@ -27,11 +22,10 @@ function patternRow(sequence, unitLength, interactive = false) {
         ),
       );
     const cell = el(
-      interactive ? "button" : "span",
+      "span",
       "pattern-slot" + (!token ? " blank" : ""),
       token || "?",
     );
-    if (interactive) cell.type = "button";
     cell.setAttribute(
       "aria-label",
       `Position ${i + 1}: ${token ? patternName(token) : "empty"}`,
@@ -41,343 +35,37 @@ function patternRow(sequence, unitLength, interactive = false) {
   return row;
 }
 function makePattern(c, st) {
-  st.dataset.type = "pattern-" + c.variant;
+  st.dataset.type = "pattern-extend";
   const tokens = shuffle(PATTERN_TOKENS.map((x) => x[0]));
-  if (c.variant === "create") return createPattern(c, st, tokens);
-  const kind = pick(
-    c.lvl === 1
-      ? ["AB"]
-      : c.lvl === 2
-        ? ["AB", "AAB", "ABB"]
-        : ["AAB", "ABB", "ABC"],
-  );
+  const kind = c.lvl < 3 ? "AB" : pick(["AB", "AAB", "ABB"]);
   const unit = [...kind].map((letter) => tokens[letter.charCodeAt(0) - 65]);
   const sequence = [...unit, ...unit, ...unit];
-  R.q.mathKey = `${c.variant}:${kind}:${unit.join("")}`;
-  const panel = el("div", "pattern-play answer-widget");
-  st.appendChild(panel);
+  R.q.mathKey = `extend:${kind}:${unit.join("")}`;
+  ctl.ask("What comes next?", "Tap an item for the next empty place.");
   const note = `${unit.map(patternName).join(", ")} repeats.`;
   ctl.note(note, note);
-  if (c.variant === "unit") {
-    ctl.ask(
-      "Which part repeats?",
-      "Start at the beginning. Choose the smallest group that repeats over and over.",
-    );
-    const row = patternRow(sequence, unit.length);
-    panel.appendChild(row);
-    const opts = [
-      unit.join(""),
-      [...unit].reverse().join(""),
-      tokens[0] + tokens[2],
-    ];
-    makeChoices(panel, shuffle([...new Set(opts)]), unit.join(""), {
-      btnCls: "pattern-option",
-      label: (v) =>
-        [...v]
-          .filter((t) => t !== "\ufe0f")
-          .map(patternName)
-          .join(", "),
-    });
-    ctl.hint(() => {
-      row.classList.add("showunits");
-      patternStep(
-        "Find the smallest group that starts again.",
-        false,
-        R.q.spokenHelp,
-      );
-    });
-    ctl.reveal(() => row.classList.add("showunits"));
-    return;
-  }
-  if (c.variant === "repair") {
-    sequence.push(...unit);
-    const bad = rnd(unit.length * 3, sequence.length - 1),
-      correct = sequence[bad];
-    sequence[bad] = tokens[3];
-    R.q.mathKey += `:${bad}`;
-    ctl.ask(
-      "Find the pattern mistake",
-      "Tap the item that breaks the pattern.",
-    );
-    const row = patternRow(sequence, unit.length, true);
-    const cells = [...row.querySelectorAll("button")];
-    const bank = el("div", "pattern-bank");
-    bank.hidden = true;
-    const target = el("div", "repair-target");
-    target.hidden = true;
-    let selected = false;
-    cells.forEach((b, i) => {
-      b.classList.add("repair-item");
-      if (i === bad) b.dataset.mistake = "1";
-      b.onclick = () => {
-        if (R.q.done || selected) return;
-        if (i !== bad) {
-          ctl.wrong();
-          return;
-        }
-        selected = true;
-        cells.forEach((cell) => {
-          cell.disabled = true;
-        });
-        b.classList.add("selected");
-        target.textContent = `${sequence[bad]} → ?`;
-        target.setAttribute(
-          "aria-label",
-          `Replace ${patternName(sequence[bad])} at position ${bad + 1}`,
-        );
-        target.hidden = false;
-        bank.hidden = false;
-        bank.querySelector("button")?.focus({ preventScroll: true });
-        patternStep("Choose what belongs in this place.");
-        ctl.instruction("Choose what belongs in this place.");
-      };
-    });
-    tokens.slice(0, 3).forEach((token) => {
-      const b = activityButton(token, () => {
-        if (!selected) return;
-        if (token !== correct) {
-          ctl.wrong();
-          return;
-        }
-        cells[bad].textContent = correct;
-        cells[bad].setAttribute(
-          "aria-label",
-          `Position ${bad + 1}: ${patternName(correct)}`,
-        );
-        ctl.note("You repaired the repeating pattern.", note);
-        ctl.correct();
-      });
-      b.setAttribute("aria-label", patternName(token));
-      if (token === correct) b.dataset.correct = "1";
-      bank.appendChild(b);
-    });
-    panel.append(row, target, bank);
-    ctl.hint(() => {
-      row.classList.add("showunits");
-      patternStep(
-        "Compare each group with the first group.",
-        false,
-        R.q.spokenHelp,
-      );
-    });
-    ctl.reveal(() => {
-      cells[bad].textContent = correct;
-      cells[bad].setAttribute(
-        "aria-label",
-        `Position ${bad + 1}: ${patternName(correct)}`,
-      );
-      row.classList.add("showunits");
-    });
-    return;
-  }
-  ctl.ask(
-    "Keep the pattern going",
-    "Fill the empty spaces to make one more complete repeat.",
-  );
-  const row = patternRow([...sequence, ...unit.map(() => null)], unit.length);
-  panel.appendChild(row);
-  const blanks = [...row.querySelectorAll(".blank")];
-  let index = 0;
-  const bank = el("div", "pattern-bank");
-  const buttons = tokens.slice(0, 3).map((token) => {
-    const b = activityButton(token, () => {
-      if (token !== unit[index]) {
-        ctl.wrong();
-        return;
-      }
-      blanks[index].textContent = token;
-      blanks[index].classList.remove("blank");
-      blanks[index].setAttribute("aria-label", patternName(token));
-      index++;
-      if (index === unit.length) {
-        ctl.note("You continued a whole repeat.", note);
-        ctl.correct();
-      } else {
-        markNext();
-        patternStep("Keep going to finish the group.");
-      }
-    });
-    b.setAttribute("aria-label", patternName(token));
-    bank.appendChild(b);
-    return b;
-  });
-  function markNext() {
-    buttons.forEach((b, i) => {
-      delete b.dataset.correct;
-      if (tokens[i] === unit[index]) b.dataset.correct = "1";
-    });
-  }
-  markNext();
-  panel.appendChild(bank);
-  ctl.hint(() => {
-    row.classList.add("showunits");
-    patternStep(
-      "Look back at the first group. Follow the same order.",
-      false,
-      R.q.spokenHelp,
-    );
-  });
-  ctl.reveal(() => {
-    blanks.forEach((b, i) => {
-      b.textContent = unit[i];
-      b.classList.remove("blank");
-      b.setAttribute("aria-label", patternName(unit[i]));
-    });
-    row.classList.add("showunits");
-  });
-}
-function createPattern(c, st, tokens) {
-  const previous = R.avoidSignature?.startsWith("create:")
-    ? R.avoidSignature.slice(7)
-    : null;
-  R.q.mathKey = `create-palette:${tokens.join("")}`;
-  const limit = c.lvl === 1 ? 2 : 3;
-  const initialInstruction =
-    limit === 2
-      ? "Choose two different animals."
-      : "Choose two or three animals. Use two different kinds.";
-  ctl.ask("Make your own pattern", initialInstruction);
   const panel = el("div", "pattern-play answer-widget");
-  const preview = el("div", "pattern-preview");
-  let unit = [],
-    sequence = [],
-    building = false;
-  const bank = el("div", "pattern-bank");
-  const render = () => {
-    const row = patternRow(
-      building
-        ? [...sequence, ...Array(unit.length * 3 - sequence.length).fill(null)]
-        : [...unit, ...Array(Math.max(0, 2 - unit.length)).fill(null)],
-      building ? unit.length : Math.max(2, unit.length),
-    );
-    row.classList.toggle("unit-builder", !building);
-    preview.replaceChildren();
-    if (building) {
-      const reference = el("div", "unit-reference");
-      reference.setAttribute("aria-label", "Your repeating group");
-      reference.appendChild(patternRow(unit, unit.length));
-      preview.appendChild(reference);
-    }
-    preview.appendChild(row);
-    if (!building && limit === 3 && unit.length < 3) {
-      const optional = el("span", "optional-slot", "+ ?");
-      optional.setAttribute("aria-label", "You may add a third animal");
-      row.appendChild(optional);
-    }
-    undo.hidden = building ? sequence.length <= unit.length : !unit.length;
-    restart.hidden = !building;
-    use.disabled = unit.length < 2 || new Set(unit).size < 2;
-    check.disabled = !building || sequence.length !== unit.length * 3;
-    [...bank.children].forEach((b) => {
-      b.disabled = building
-        ? sequence.length >= unit.length * 3
-        : unit.length >= limit;
-    });
+  const row = patternRow([...sequence, null], unit.length);
+  const blank = row.querySelector(".blank");
+  const fill = () => {
+    blank.textContent = unit[0];
+    blank.classList.remove("blank");
+    blank.setAttribute("aria-label", patternName(unit[0]));
   };
-  tokens.slice(0, 3).forEach((token) => {
-    const b = activityButton(token, () => {
-      const target = building ? sequence : unit,
-        max = building ? unit.length * 3 : limit;
-      if (target.length >= max) return;
-      cancelQuestionWork();
-      target.push(token);
-      render();
-      if (b.disabled && document.activeElement === b) {
-        (building ? check : use.disabled ? undo : use).focus({
-          preventScroll: true,
-        });
-      }
-      if (!building && target.length === max && new Set(unit).size < 2) {
-        ctl.instruction(
-          "Choose at least two different items for your group.",
-          true,
-        );
-      }
-    });
-    b.setAttribute("aria-label", patternName(token));
-    bank.appendChild(b);
+  panel.appendChild(row);
+  makeChoices(panel, shuffle(tokens.slice(0, c.lvl === 1 ? 2 : 3)), unit[0], {
+    btnCls: "pattern-option",
+    label: patternName,
+    onRight: fill,
+    onReveal: fill,
   });
-  const use = activityButton("Use this group", () => {
-    if (unit.length < 2 || new Set(unit).size < 2) {
-      ctl.instruction(
-        "Choose at least two different items for your group.",
-        true,
-      );
-      return;
-    }
-    if (unit.join("") === previous) {
-      ctl.instruction("Try a different repeating group this time.", true);
-      return;
-    }
-    R.q.signature = `create:${unit.join("")}`;
-    building = true;
-    sequence = [...unit];
-    use.hidden = true;
-    check.parentElement.hidden = false;
-    render();
-    bank.querySelector("button").focus({ preventScroll: true });
-    ctl.ask("Keep it going", "Repeat your group twice more, then press Check.");
-  });
-  use.id = "useUnit";
-  pictureControl(use, "➜", "Use this group", "Ready");
-  const undo = activityButton("Undo last item", () => {
-    cancelQuestionWork();
-    if (building) {
-      if (sequence.length > unit.length) sequence.pop();
-    } else unit.pop();
-    render();
-    if (undo.hidden && document.activeElement === undo)
-      bank.querySelector("button").focus({ preventScroll: true });
-  });
-  const restart = activityButton("Choose a new group", () => {
-    cancelQuestionWork();
-    building = false;
-    unit = [];
-    sequence = [];
-    use.hidden = false;
-    check.parentElement.hidden = true;
-    render();
-    ctl.ask("Make your own pattern", initialInstruction);
-    bank.querySelector("button").focus({ preventScroll: true });
-  });
-  undo.id = "undoPattern";
-  restart.id = "restartUnit";
-  pictureControl(undo, "↶", "Undo last item", "Undo");
-  pictureControl(restart, "↻", "Choose a new group", "Start again");
-  panel.append(preview, bank, use, undo, restart);
-  const check = checkBtn(panel, () => {
-    if (sequence.length !== unit.length * 3) {
-      patternStep("Fill every empty place before checking.", true);
-      return;
-    }
-    if (!sequence.every((token, i) => token === unit[i % unit.length])) {
-      ctl.wrong();
-      return;
-    }
-    R.q.signature = `create:${unit.join("")}`;
-    ctl.note(
-      "Your group repeats three times!",
-      `${unit.map(patternName).join(", ")} repeats three times.`,
-    );
-    ctl.correct();
-  });
-  check.parentElement.hidden = true;
-  ctl.note("Repeat the same group in the same order.");
   ctl.hint(() => {
-    preview.classList.add("showunits");
-    patternStep(
-      building
-        ? "Compare the second and third groups with your first group. Undo to change an item."
-        : "Choose two different items. Each tap adds an item to your group.",
-      true,
-      R.q.spokenHelp,
-    );
+    row.classList.add("showunits");
+    showTeaching("Look back at the first group. Follow the same order.");
   });
   ctl.reveal(() => {
-    sequence = [...unit, ...unit, ...unit];
-    render();
-    preview.classList.add("showunits");
+    fill();
+    row.classList.add("showunits");
   });
   st.appendChild(panel);
-  render();
 }

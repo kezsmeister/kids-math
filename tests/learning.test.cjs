@@ -135,10 +135,9 @@ test("every skill offers enough mathematical variety for progression", (t) => {
     "compare.length",
     "compare.height",
     "compare.size",
-    "order20.next",
-    "order20.missing",
-    "order20.before",
     "order.next",
+    "order.missing",
+    "order.before",
   ]) {
     const signatures = new Set(),
       activity = topic.split(".")[0],

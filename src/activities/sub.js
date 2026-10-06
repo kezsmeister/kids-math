@@ -5,70 +5,56 @@ ACTS.sub = {
   name: "Take Away",
   color: ["#7c8cff", "#4b58d6"],
   icon: '<div style="font-size:.8em;text-shadow:0 3px 0 #0003;white-space:nowrap">🐥➖🐥</div>',
-  skill: "Subtraction as taking away with optional picture support",
-  note: "Read a story or equation, then choose how many are left. Show me crosses out the objects taken away and counts those remaining.",
+  skill: "Subtraction as taking away visible objects",
+  note: "Crossed-out objects show what was taken away. Count those left; replay the action with counting help if wanted.",
   make(c, st) {
     st.classList.add("sub-st");
     const hi = HI[c.lvl];
     const zero = Math.random() < 0.18;
     const n = rnd(2, hi);
-    const k = zero ? n : rnd(1, n - 1);
+    const k = zero && n <= 5 ? n : rnd(1, Math.min(5, n - 1));
     const left = n - k;
-    const eqType = c.variant
-      ? c.variant === "eq"
-      : c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
-    st.dataset.type = eqType ? "sub-eq" : "sub-story";
+    st.dataset.type = "sub-story";
+    R.q.mathKey = `sub:${n}:${k}`;
     const o = pick(OBJ);
     ctl.note(
       `${n} − ${k} = ${left}`,
       `${W[n]} take away ${W[k]} leaves ${W[left]}`,
     );
-    if (!eqType) {
-      ctl.ask(
-        `<b class="big">${k}</b> <span class="emo">${o.e}</span> 💨 How many left?`,
-        `${W[n]}. Take away ${W[k]}. How many are left?`,
-      );
-      st.appendChild(
-        el(
-          "div",
-          "substory",
-          `<span class="emo">${o.e}</span> ${n} ${plu(n, o)}, ${k} ${o.v}`,
-        ),
-      );
-    } else {
-      ctl.ask(
-        `<b>${n}</b> − <b>${k}</b> = <b class="big">?</b>`,
-        `${W[n]} take away ${W[k]} equals how many?`,
-      );
-    }
-    const reverse = eqType && Math.random() < 0.5;
-    const eq = el("div", "eq", equationHTML(n, "−", k, "?", reverse));
-    st.appendChild(eq);
-    const fillQ = () => {
-      const q = $(".q", eq);
-      q.textContent = left;
-      q.classList.add("filled");
-    };
-    makeChoices(st, numOpts(left, 0, Math.max(hi, n), nChoices(c)), left, {
-      onRight: fillQ,
-      onReveal: fillQ,
-    });
-    // Optional concrete model: retain the starting group, cross out the removed
-    // objects, then count only those left. Every replay restores the same story.
+    ctl.ask("How many left?", `${W[n]}. Take away ${W[k]}. How many are left?`);
+    // The model is the question itself, visible before help and without a timer.
     const pictures = el("div", "sub-pictures");
-    pictures.hidden = true;
     pictures.setAttribute("role", "img");
     const items = [];
     for (let i = 0; i < n; i++) {
       const item = mkItem(o.e);
+      if (i >= left) item.classList.add("gone");
       items.push(item);
       pictures.appendChild(item);
     }
     const caption = el("p", "sub-caption");
     const demonstration = el("div", "sub-demo");
-    demonstration.hidden = true;
+    pictures.setAttribute(
+      "aria-label",
+      `${n} ${o.p}, ${k} crossed out. How many left?`,
+    );
     demonstration.append(pictures, caption);
     st.appendChild(demonstration);
+    // Replay can cancel the demonstration between restoring and removing
+    // objects. Always leave the original question's picture intact.
+    R.q.cancel.push(() => {
+      items.forEach((item, i) => {
+        item.classList.toggle("gone", i >= left);
+        item.classList.remove("counted");
+        item.querySelector(".badge")?.remove();
+      });
+      pictures.setAttribute(
+        "aria-label",
+        `${n} ${o.p}, ${k} crossed out. How many left?`,
+      );
+      caption.textContent = "";
+    });
+    makeChoices(st, numOpts(left, 0, hi, nChoices(c)), left);
     const show = countTogether(
       st,
       () => {

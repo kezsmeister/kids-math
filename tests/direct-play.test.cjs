@@ -53,38 +53,6 @@ test("a beginner sees small groups and answers immediately with no hiding timer"
   assert.equal(g.run("learningRecord('count.quick').independent"), 1);
 });
 
-test("brief looks appear at a later level and another look is supported work", (t) => {
-  const g = setup(t);
-  g.run(
-    "learningRecord('count.quick').level=2;startRound('count','count.quick')",
-  );
-  const dots = g.document.querySelector(".quick-dots");
-  assert.equal(dots.classList.contains("covered"), false);
-  assert.equal(g.document.querySelector(".choices").hidden, false);
-  g.tick(10000);
-  assert.equal(dots.classList.contains("covered"), true);
-  assert.equal(g.run("R.q.done"), false);
-  g.document.querySelector("#showAgain").click();
-  g.tick(30000);
-  assert.equal(dots.classList.contains("covered"), false);
-  g.document.querySelector("[data-correct]").click();
-  assert.equal(g.run("learningRecord('count.quick').supported"), 1);
-});
-
-test("bowl and pattern construction keep one prompt instead of instruction paragraphs", (t) => {
-  const g = setup(t);
-  for (const topic of ["count.compose", "shapes.create"]) {
-    g.run(`startRound('${topic.split(".")[0]}','${topic}')`);
-    assert.equal(
-      g.document.querySelectorAll("#stage .instruction").length,
-      0,
-      topic,
-    );
-    assert.ok(g.run("R.q.questionSpeech.length > 0"));
-    assert.ok(g.document.querySelector("#stage button"));
-  }
-});
-
 test("requested small-group help counts the real dots aloud", (t) => {
   const g = setup(t);
   g.run("startRound('count','count.quick')");
@@ -102,7 +70,7 @@ test("requested small-group help counts the real dots aloud", (t) => {
   assert.equal(g.run("learningRecord('count.quick').supported"), 1);
 });
 
-test("successful varied practice introduces brief looks without a tutorial", (t) => {
+test("successful varied practice changes layouts while keeping the dots visible", (t) => {
   const g = setup(t);
   for (const value of [0.1, 0.35, 0.65, 0.9]) {
     g.run(`Math.random=()=>${value};startRound('count','count.quick')`);
@@ -119,23 +87,6 @@ test("successful varied practice introduces brief looks without a tutorial", (t)
   g.tick(10000);
   assert.equal(
     g.document.querySelector(".quick-dots").classList.contains("covered"),
-    true,
+    false,
   );
-});
-
-test("instruction replay during a brief look does not leave an untracked unlimited look", (t) => {
-  const g = setup(t);
-  g.run(
-    "learningRecord('count.quick').level=2;startRound('count','count.quick')",
-  );
-  g.tick(1000);
-  g.document.querySelector("#readQuestionBtn").click();
-  g.tick(10000);
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    true,
-  );
-  assert.equal(g.run("R.q.assisted"), false);
-  g.document.querySelector("#showAgain").click();
-  assert.equal(g.run("R.q.assisted"), true);
 });

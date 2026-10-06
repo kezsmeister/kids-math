@@ -8,7 +8,7 @@ ACTS.bonds = {
   skill: "Part-whole thinking with number bonds",
   note: "Finds the missing part or whole in a number bond circle diagram, with counters shown. Drag (or tap) the answer tile.",
   make(c, st) {
-    const hi = HI[c.lvl];
+    const hi = c.variant === "part" ? 5 : HI[c.lvl];
     const w = rnd(c.lvl === 1 ? 2 : 3, hi);
     const zeroOk = Math.random() < 0.12;
     const a = zeroOk ? rnd(0, w) : rnd(1, w - 1);

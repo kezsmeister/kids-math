@@ -66,104 +66,6 @@ function makeNumberPlay(c, st) {
       });
       showTeaching(`Choose ${n}; leave the rest.`);
     });
-  } else if (c.variant === "compose") {
-    ctl.ask(
-      `Make <b class="big">${n}</b> two ways`,
-      `Share ${W[n]} counters between the bowls. Then press Check.`,
-    );
-    const previous = el("p", "math-message");
-    const snapshot = el("div", "decomposition-snapshot");
-    snapshot.hidden = true;
-    const parts = el("div", "part-counters");
-    const groups = [el("div", "part-group"), el("div", "part-group")];
-    const labels = groups.map((g, i) => {
-      const label = el("div", "lbl", `Part ${i + 1}`);
-      g.appendChild(label);
-      return label;
-    });
-    const sides = Array(n).fill(0);
-    let first = null;
-    const buttons = sides.map((_, i) =>
-      activityButton("●", () => {
-        cancelQuestionWork();
-        sides[i] = 1 - sides[i];
-        render();
-      }),
-    );
-    function render() {
-      const focused = document.activeElement;
-      groups.forEach((group, side) => {
-        group.replaceChildren(labels[side]);
-        buttons.forEach((b, i) => {
-          if (sides[i] === side) {
-            b.setAttribute(
-              "aria-label",
-              `Counter ${i + 1}, part ${side + 1}. Move to part ${2 - side}`,
-            );
-            group.appendChild(b);
-          }
-        });
-      });
-      if (buttons.includes(focused)) focused.focus({ preventScroll: true });
-    }
-    render();
-    parts.append(...groups);
-    panel.append(snapshot, previous, parts);
-    const pair = () => {
-      const a = sides.filter((s) => s === 0).length;
-      return [a, n - a];
-    };
-    checkBtn(panel, () => {
-      const [a, b] = pair(),
-        key = Math.min(a, b);
-      if (first === null) {
-        first = key;
-        previous.textContent = `${n} = ${a} + ${b}`;
-        snapshot.hidden = false;
-        snapshot.setAttribute("role", "img");
-        snapshot.setAttribute(
-          "aria-label",
-          `Your first way: ${a} and ${b}. Make a different pair below.`,
-        );
-        snapshot.appendChild(el("span", "snapshot-camera", "📷"));
-        [a, b].forEach((amount) => {
-          const bowl = el("div", "snapshot-bowl");
-          for (let i = 0; i < amount; i++)
-            bowl.appendChild(el("span", "snapshot-counter", "●"));
-          snapshot.appendChild(bowl);
-        });
-        ctl.ask(
-          "Make another pair",
-          "Now make a different pair of parts. Then press Check.",
-        );
-        return;
-      }
-      if (key === first) {
-        ctl.wrong();
-        return;
-      }
-      ctl.note(
-        `${previous.textContent}; ${n} = ${a} + ${b}. Two ways!`,
-        `${W[n]} has two different pairs of parts.`,
-      );
-      ctl.correct();
-    });
-    ctl.note(`${n} stays the whole.`, `${W[n]} is the whole.`);
-    ctl.hint(() =>
-      showTeaching(
-        first === null
-          ? "Move a counter to the other part. Both parts still make the whole."
-          : "Try a different number in each part. Swapping the same two amounts is the same pair.",
-        true,
-      ),
-    );
-    ctl.reveal(() => {
-      const a = first === 0 ? 1 : 0;
-      sides.fill(1);
-      for (let i = 0; i < a; i++) sides[i] = 0;
-      render();
-      showTeaching(`${n} = ${a} + ${n - a}. The whole stays ${n}.`);
-    });
   } else if (c.variant === "conserve") {
     ctl.ask(
       `Here are <b>${n}</b> ${o.e}`,
@@ -211,42 +113,12 @@ function makeNumberPlay(c, st) {
     dots.setAttribute("role", "img");
     dots.setAttribute("aria-label", `${n} dots`);
     panel.appendChild(dots);
-    // Beginners answer with the real objects in view. Later levels introduce
-    // a brief look; the answer itself never has a time limit.
-    let briefLook = c.lvl > 1;
-    const cover = () => {
-      briefLook = false;
-      dots.classList.add("covered");
-      dots.setAttribute("aria-label", "Dots covered. You can show them again.");
-      show.hidden = false;
-    };
-    const reveal = () => {
-      cancelQuestionWork();
-      dots.classList.remove("covered");
-      dots.setAttribute("aria-label", `${n} dots`);
-      show.hidden = true;
-    };
-    const show = activityButton("", () => {
-      ctl.assist();
-      reveal();
-      choices.box.querySelector("button")?.focus({ preventScroll: true });
-    });
-    show.id = "showAgain";
-    pictureControl(show, "👀", "Show the dots again", "Show dots");
-    show.hidden = true;
-    panel.appendChild(show);
-    const choices = makeChoices(panel, numOpts(n, 0, 6, nChoices(c)), n);
-    R.q.cancel.push(() => {
-      if (briefLook) cover();
-    });
-    if (briefLook) later(cover, 4000);
+    // A visible quantity task at every level; no memory or speed requirement.
+    makeChoices(panel, numOpts(n, 0, 5, nChoices(c)), n);
     ctl.note(`${n} dots.`, `${W[n]} dots.`);
     ctl.hint(() => {
-      const spoken = R.q.spokenHelp;
-      reveal();
-      R.q.spokenHelp = spoken;
       countAll(items);
     });
-    ctl.reveal(reveal);
+    ctl.reveal(() => countAll(items));
   }
 }

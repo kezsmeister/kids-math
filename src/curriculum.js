@@ -14,11 +14,6 @@ const CURRICULUM = {
       "Ask for four spoons from a larger pile. Put any extra spoons back.",
     ],
     [
-      "compose",
-      "Make a number two ways",
-      "Split six buttons between two bowls. Find another pair of parts with the same whole.",
-    ],
-    [
       "conserve",
       "Keep a quantity when objects move",
       "Count five toys, spread them out, and ask whether there are still five.",
@@ -26,7 +21,7 @@ const CURRICULUM = {
     [
       "quick",
       "Recognize small groups",
-      "Briefly show one to five fingers. Talk about what you saw; look again whenever needed.",
+      "Show one to five fingers. Notice the amount, then count together to check.",
     ],
     [
       "give",
@@ -37,7 +32,7 @@ const CURRICULUM = {
   count20: [
     [
       "count",
-      "Count a ten and extra ones",
+      "Count larger groups",
       "Make a group of ten buttons. Add a few more and count on from ten.",
     ],
   ],
@@ -54,25 +49,15 @@ const CURRICULUM = {
     ],
     [
       "more",
-      "Complete ten",
-      "Put seven objects in ten spaces. Ask how many spaces are empty.",
+      "Count empty spaces",
+      "Put seven objects in ten spaces. Count the empty spaces together.",
     ],
   ],
   tenframe20: [
     [
       "read",
-      "Read tens and ones",
+      "Count two frames",
       "Make a bundle of ten sticks and put three loose sticks beside it.",
-    ],
-    [
-      "ones",
-      "Find the extra ones",
-      "Show ten buttons and four more. Ask how many are outside the ten.",
-    ],
-    [
-      "build",
-      "Build tens and ones",
-      "Make fourteen with one full group of ten and four extra objects.",
     ],
   ],
   bonds: [
@@ -126,11 +111,6 @@ const CURRICULUM = {
       "Use a short number track. Take one step back and name the number.",
     ],
     [
-      "sort",
-      "Order numbers",
-      "Put three number cards in order and match a group of objects to each.",
-    ],
-    [
       "bigger",
       "Compare numerals",
       "Match two number cards to groups of objects and compare the groups.",
@@ -142,34 +122,12 @@ const CURRICULUM = {
       "Join groups",
       "Put three toys together with two more. Describe what changed.",
     ],
-    [
-      "eq",
-      "Connect addition and equations",
-      "Build 3 + 2 with counters and show that 5 = 3 + 2 says the same thing.",
-    ],
-    [
-      "miss",
-      "Find how many more",
-      "Put out four cups for six toys. Ask how many more cups are needed.",
-    ],
-  ],
-  add20: [
-    [
-      "teen",
-      "Add to a full ten",
-      "Show ten objects as one group, then add three. Start counting at ten.",
-    ],
   ],
   sub: [
     [
       "story",
       "Act out taking away",
       "Start with five toys, move two away, and describe the three left.",
-    ],
-    [
-      "eq",
-      "Connect subtraction and equations",
-      "Show 5 − 2 with objects, then match the remaining group to 3.",
     ],
   ],
   shapes: [
@@ -184,50 +142,48 @@ const CURRICULUM = {
       "Trace the boundary of a cardboard shape, counting each side once.",
     ],
     [
-      "unit",
-      "Find the repeating group",
-      "Make a spoon-fork-spoon-fork pattern. Point to the smallest group that repeats.",
-    ],
-    [
-      "repair",
-      "Repair a pattern",
-      "Make a repeating toy pattern, change one item, and ask how to repair it.",
-    ],
-    [
-      "create",
-      "Create a repeating pattern",
-      "Choose two different actions and repeat the same group of actions three times.",
-    ],
-    [
       "extend",
       "Continue a repeating pattern",
-      "Make a spoon-fork pattern and continue it for three complete repeats.",
+      "Make a spoon-fork-spoon-fork pattern. Choose which object comes next.",
     ],
   ],
 };
-CURRICULUM.order20 = CURRICULUM.order;
+// Retain historical evidence without exposing retired questions in play.
+const RETIRED_TOPICS = [
+  "count.compose",
+  "tenframe20.ones",
+  "tenframe20.build",
+  "order.sort",
+  "order20.next",
+  "order20.missing",
+  "order20.before",
+  "order20.sort",
+  "order20.bigger",
+  "add.eq",
+  "add.miss",
+  "add20.teen",
+  "sub.eq",
+  "shapes.unit",
+  "shapes.repair",
+  "shapes.create",
+];
 // Read only when words supply the rule, direction, or construction instructions.
-// Quantities, equations and visible gaps already express their question visually.
+// Quantities and visible gaps already express their question visually.
 const NARRATED_TOPICS = new Set([
   "count.collect",
-  "count.compose",
   "count.conserve",
   "count.quick",
   "tenframe.build",
-  "tenframe20.build",
+  "tenframe.more",
+  "bonds.whole",
+  "bonds.part",
   "compare.quantity",
   "compare.length",
   "compare.height",
   "compare.size",
-  "order.sort",
   "order.bigger",
-  "order20.sort",
-  "order20.bigger",
   "shapes.find",
   "shapes.sides",
-  "shapes.unit",
-  "shapes.repair",
-  "shapes.create",
 ]);
 const TOPICS = Object.fromEntries(
   Object.entries(CURRICULUM).flatMap(([activity, rows]) =>

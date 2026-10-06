@@ -97,7 +97,7 @@ function normalizeState(raw) {
       rounds: boundedInt(value.rounds, 0),
     };
   }
-  for (const key of Object.keys(TOPICS)) {
+  for (const key of [...Object.keys(TOPICS), ...RETIRED_TOPICS]) {
     const value = raw.learning?.[key];
     if (!value || typeof value !== "object" || Array.isArray(value)) continue;
     const history = Array.isArray(value.history)

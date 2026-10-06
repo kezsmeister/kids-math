@@ -89,7 +89,7 @@ test("every narrated Shapes & Patterns question has complete recorded coverage a
     "function",
     "Offline question reader exists",
   );
-  for (const variant of ["find", "sides", "unit", "repair", "create"]) {
+  for (const variant of ["find", "sides", "extend"]) {
     for (const lvl of [1, 2, 3]) {
       for (let i = 0; i < 12; i++) {
         g.run(
@@ -123,7 +123,7 @@ test("Read question works while automatic reading is off and keeps the original 
 
 test("leaving during audio decoding prevents stale question playback", async (t) => {
   const { g, sources } = audioGame(t);
-  g.run("unlockSpeech();startRound('shapes','shapes.unit')");
+  g.run("unlockSpeech();startRound('shapes','shapes.find')");
   g.tick(300);
   g.run("goHome()");
   await settle();
@@ -132,7 +132,7 @@ test("leaving during audio decoding prevents stale question playback", async (t)
 
 test("replay replaces scheduled question audio and Home stops it", async (t) => {
   const { g, sources } = audioGame(t);
-  g.run("unlockSpeech();startRound('count','count.compose')");
+  g.run("unlockSpeech();startRound('count','count.collect')");
   g.tick(300);
   await settle();
   assert.ok(
