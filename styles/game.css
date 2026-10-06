@@ -228,11 +228,6 @@ button {
   line-height: 1.05;
   text-align: center;
 }
-.card .lv {
-  display: flex;
-  gap: 5px;
-  margin-top: 4px;
-}
 .lvd {
   display: inline-block;
   width: clamp(10px, 2vmin, 15px);
@@ -1938,14 +1933,6 @@ h1#prompt {
 }
 .card .nm {
   font-size: clamp(20px, 3.5vmin, 30px);
-}
-.card .lv .lvd {
-  border-color: #3b2f6380;
-  background: transparent;
-}
-.card .lv .lvd.on {
-  background: var(--ink);
-  border-color: var(--ink);
 }
 .cards {
   grid-template-columns: repeat(2, minmax(0, 1fr));

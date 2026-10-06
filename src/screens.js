@@ -31,17 +31,12 @@ function renderHome() {
   ORDER.forEach((id) => {
     const a = ACTS[id];
     if (S.mode === 20 && !a.m20) return;
-    const key = id + (S.mode === 20 ? "20" : "");
-    const explored = Object.keys(TOPICS).filter(
-      (topic) =>
-        TOPICS[topic].activity === key && learningRecord(topic).history.length,
-    ).length;
     const b = el("button", "card");
     b.type = "button";
     b.dataset.act = id;
     b.style.setProperty("--c", a.color[0]);
     b.style.setProperty("--d", a.color[1]);
-    b.innerHTML = `<div class="ic">${a.icon}</div><div class="nm">${S.mode === 20 && a.m20name ? a.m20name : a.name}</div><div class="lv">${explored ? `${explored} skills explored` : "Let’s explore"}</div>`;
+    b.innerHTML = `<div class="ic">${a.icon}</div><div class="nm">${S.mode === 20 && a.m20name ? a.m20name : a.name}</div>`;
     b.setAttribute(
       "aria-label",
       `${S.mode === 20 && a.m20name ? a.m20name : a.name}`,
