@@ -40,6 +40,7 @@ ACTS.tenframe = {
           (cell, i) => {
             f.badge(i, i + 1);
             sfx.tap(i + 1);
+            helpSpeak(W[i + 1]);
           },
           countGap(),
         );
@@ -84,6 +85,7 @@ ACTS.tenframe = {
             f.set(i, true, "ghost");
             f.badge(i, k + 1, "b2");
             sfx.tap(k + 1);
+            helpSpeak(W[k + 1]);
           },
           countGap(),
         );
@@ -192,9 +194,10 @@ function teenFrames(c, st) {
           (i) => {
             f2.badge(i, 11 + i);
             sfx.tap(11 + i);
+            helpSpeak(W[11 + i]);
           },
           countGap(),
-          1500,
+          helpDelay(1500),
         );
     };
     ctl.hint(hint);
@@ -223,6 +226,7 @@ function teenFrames(c, st) {
         (i) => {
           f2.badge(i, i + 1);
           sfx.tap(i + 1);
+          helpSpeak(W[i + 1]);
         },
         countGap(),
       );

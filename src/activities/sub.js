@@ -26,7 +26,7 @@ ACTS.sub = {
     if (!eqType) {
       ctl.ask(
         `<b class="big">${k}</b> <span class="emo">${o.e}</span> 💨 How many left?`,
-        `${W[n]} ${o.p}. ${W[k]} ${o.v}. How many are left?`,
+        `${W[n]}. Take away ${W[k]}. How many are left?`,
       );
       st.appendChild(
         el(
@@ -80,6 +80,7 @@ ACTS.sub = {
         });
         pictures.setAttribute("aria-label", `${n} ${o.p}. Take away ${k}.`);
         caption.textContent = `Start with ${n}. Take away ${k}.`;
+        helpSpeak(caption.textContent);
         later(() => {
           items.slice(left).forEach((item) => item.classList.add("gone"));
           pictures.setAttribute(
@@ -89,10 +90,10 @@ ACTS.sub = {
           caption.textContent = `${n} − ${k} = ${left}. ${left} left!`;
           if (left) countAll(items.slice(0, left));
           else showTeaching("None left. That is zero.");
-        }, 1200);
+        }, helpDelay(1200));
       },
       () => 1500 + left * countGap(),
-      "Show me",
+      "Take away with me",
     );
     ctl.hint(show);
     ctl.reveal(show);

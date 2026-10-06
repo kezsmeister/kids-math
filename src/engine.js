@@ -22,6 +22,8 @@ function cancelQuestionWork() {
   R.pending.clear();
   if (R.q) {
     R.q.epoch++;
+    R.q.spokenHelp = false;
+    R.q.helpSpeechDuration = 0;
     R.q.cancel.forEach((fn) => fn());
   }
   stopSpeaking();
@@ -29,7 +31,7 @@ function cancelQuestionWork() {
 function seqRun(list, fn, gap, start = 300) {
   list.forEach((x, i) => later(() => fn(x, i), start + i * gap));
 }
-const countGap = () => 700;
+const countGap = () => (R?.q?.spokenHelp ? 1100 : 700);
 function show(id) {
   document
     .querySelectorAll(".screen")
@@ -151,8 +153,11 @@ function nextQ() {
     $("#hintBtn").onclick = () => {
       if (!R?.q || R.q.done) return;
       cancelQuestionWork();
+      R.q.spokenHelp = true;
       R.q.hint?.();
     };
+    mountPlayGuide();
+    if (R.guidesEnabled) offerPlayGuide();
   } catch (e) {
     console.error("question error", e);
     R.marks[R.idx] = 1;
@@ -191,9 +196,9 @@ ctl.instruction = (speech, essential = TOPICS[R.q.topic].narrate) => {
   clearTimeout(q.narrationTimer);
   R.pending.delete(q.narrationTimer);
   stopSpeaking();
-  q.questionSpeech = essential ? speech || "" : "";
+  q.questionSpeech = speech || "";
   refreshQuestionReader();
-  if (q.questionSpeech)
+  if (q.questionSpeech && essential)
     q.narrationTimer = later(() => {
       if (S.voice && !q.done) speak(q.questionSpeech);
     }, 250);
@@ -255,6 +260,7 @@ ctl.correct = () => {
 ctl.wrong = () => {
   const q = R.q;
   if (q.done) return;
+  cancelQuestionWork();
   q.tries++;
   if (q.tries === 1) {
     recSkill(false);
@@ -277,6 +283,7 @@ ctl.wrong = () => {
 function finishQ() {
   refreshQuestionReader();
   $("#hintBtn").hidden = true;
+  $("#demoBtn").hidden = true;
   $("#nextBtn").classList.add("show");
   // Explanations and counting have no time limit. The child chooses Next.
 }
@@ -369,7 +376,10 @@ function finishRound() {
   show("res");
   sfx.win();
   burst();
-  $("#againBtn").onclick = () => startRound(id);
+  $("#againBtn").onclick = () => {
+    startRound(id);
+    offerPlayGuide();
+  };
   $("#resHome").onclick = goHome;
 }
 function goHome() {

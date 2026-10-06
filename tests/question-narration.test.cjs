@@ -73,14 +73,10 @@ test("word-dependent tasks are read; quantities, equations and visible gaps stay
       assert.equal(g.spoken.length, expected ? 1 : 0, topic);
       assert.equal(
         g.document.querySelector("#readQuestionBtn").hidden,
-        !expected,
+        false,
         topic,
       );
-      assert.equal(
-        g.document.querySelector("#replayBtn").hidden,
-        !expected,
-        topic,
-      );
+      assert.equal(g.document.querySelector("#replayBtn").hidden, false, topic);
       assert.equal(g.run("R.q.assisted"), false, topic);
     }
   }
@@ -119,11 +115,11 @@ test("praise, answers and automatic hints do not speak after an answer", (t) => 
   }
 });
 
-test("Read question repeats only the task after a visual hint, even with automatic reading off", (t) => {
+test("Read question repeats the task after spoken help, even with automatic reading off", (t) => {
   const g = setup(t, { voice: false });
   start(g, "shapes.find");
   g.document.querySelector("#hintBtn").click();
-  assert.equal(g.spoken.length, 0);
+  assert.ok(g.spoken.length > 0);
   g.document.querySelector("#readQuestionBtn").click();
   assert.match(g.spoken.at(-1), /^Tap the/);
   assert.doesNotMatch(g.spoken.at(-1), /corners|straight sides/);
@@ -146,9 +142,7 @@ test("pattern taps and Undo are quiet, but a new required task is read once", (t
   ]);
   g.spoken.length = 0;
   bank[0].click();
-  [...g.document.querySelectorAll("button")]
-    .find((b) => b.textContent === "Undo last item")
-    .click();
+  g.document.querySelector("#undoPattern").click();
   g.tick(300);
   assert.equal(g.spoken.length, 0);
   g.document.querySelector("#replayBtn").click();
@@ -161,7 +155,7 @@ test("switching to a visual-only subquestion cancels its earlier spoken instruct
   g.document.querySelector("#moveObjects").click();
   g.tick(1000);
   assert.equal(g.spoken.length, 0);
-  assert.equal(g.document.querySelector("#readQuestionBtn").hidden, true);
+  assert.equal(g.document.querySelector("#readQuestionBtn").hidden, false);
 });
 
 test("all narrated tasks have offline recordings at every level", (t) => {

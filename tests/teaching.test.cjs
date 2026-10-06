@@ -38,7 +38,7 @@ test("teen addition help recognizes the ten and counts on from eleven", (t) => {
   g.spoken.length = 0;
   g.document.querySelector("#countBtn").click();
   g.tick(20000);
-  assert.equal(g.spoken.length, 0);
+  assert.ok(g.spoken.some((text) => text === "eleven"));
   assert.match(
     g.document.querySelector("#helpStatus").textContent,
     /full frame.*ten/i,

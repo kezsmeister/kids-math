@@ -72,14 +72,24 @@
         <div class="promptbar"><h1 id="prompt" tabindex="-1"></h1></div>
         <div class="lesson-help">
           <button id="readQuestionBtn" class="text-button" hidden>
-            🔊 Read question
+            <span class="control-icon" aria-hidden="true">🔊</span
+            ><span>Listen</span>
+          </button>
+          <button
+            id="demoBtn"
+            class="text-button"
+            aria-label="Show how to play"
+          >
+            <span class="control-icon" aria-hidden="true">👆▶</span
+            ><span>Show me</span>
           </button>
           <button
             id="hintBtn"
             class="text-button"
             aria-label="Help with this question"
           >
-            💡 Help
+            <span class="control-icon" aria-hidden="true">💡</span
+            ><span>Help</span>
           </button>
         </div>
         <div
@@ -95,6 +105,7 @@
           aria-live="polite"
         ></div>
         <div class="stageOuter"><div id="stage"></div></div>
+        <div id="playDemo" class="play-demo" hidden></div>
         <div class="fb">
           <div
             class="fbtext"
@@ -144,6 +155,7 @@
     <script defer src="src/learning.js"></script>
     <script defer src="src/engine.js"></script>
     <script defer src="src/widgets.js"></script>
+    <script defer src="src/play-guides.js"></script>
     <script defer src="src/activities/number-play.js"></script>
     <script defer src="src/activities/patterns.js"></script>
     <script defer src="src/activities/count.js"></script>

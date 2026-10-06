@@ -145,7 +145,7 @@ test("a brief look starts when the child is ready, with no answer deadline", (t)
     true,
   );
   assert.equal(
-    g.document.querySelector("#showAgain").textContent,
+    g.document.querySelector("#showAgain").getAttribute("aria-label"),
     "Look at the dots",
   );
   g.document.querySelector("#showAgain").click();

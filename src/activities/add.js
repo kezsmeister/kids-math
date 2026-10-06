@@ -37,7 +37,7 @@ ACTS.add = {
     if (type === "miss") {
       ctl.ask(
         `<b>${a}</b> + <b class="big">?</b> = <b>${tot}</b>`,
-        `${W[a]} and how many more make ${W[tot]}? You can press the button and we will count together.`,
+        `${W[a]} and how many more make ${W[tot]}?`,
       );
       const eq = el(
         "div",
@@ -66,6 +66,7 @@ ACTS.add = {
               x.className = "cnt yellow";
               x.appendChild(badgeEl(i + 1, "b2"));
               sfx.tap(i + 1);
+              helpSpeak(W[i + 1]);
             },
             gap(),
           );
@@ -91,7 +92,7 @@ ACTS.add = {
     if (type === "story") {
       ctl.ask(
         `<span class="emo">${o.e}</span> How many altogether?`,
-        `${W[a]} ${plu(a, o)}. ${W[b]} more ${plu(b, o)} come. How many ${o.p} altogether? You can press the button and we will count together.`,
+        `${W[a]} and ${W[b]} more. How many altogether?`,
       );
       grp = addGroups(a, b, o.e, o.e, kind);
       st.appendChild(grp.row);
@@ -105,7 +106,7 @@ ACTS.add = {
     } else {
       ctl.ask(
         `<b>${a}</b> + <b>${b}</b> = <b class="big">?</b>`,
-        `${W[a]} plus ${W[b]} equals how many? You can press the button and we will count together.`,
+        `${W[a]} plus ${W[b]} equals how many?`,
       );
       eq = el("div", "eq", equationHTML(a, "+", b, "?", Math.random() < 0.5));
       st.appendChild(eq);
@@ -171,7 +172,7 @@ function addTeen(c, st) {
   );
   ctl.ask(
     `<b>10</b> + <b>${k}</b> = <b class="big">?</b>`,
-    `Ten plus ${W[k]} equals how many? You can press the button and we will count together.`,
+    `Ten plus ${W[k]} equals how many?`,
   );
   const wrap = el("div", "tfpair");
   const f1 = tenFrame({ n: 10 }),
@@ -190,7 +191,7 @@ function addTeen(c, st) {
     `<span class="a">10</span><span class="op">+</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`,
   );
   st.appendChild(eq);
-  const gap = () => countGap() * 0.8;
+  const gap = () => countGap();
   const hint = countTogether(
     st,
     () => {
@@ -203,9 +204,10 @@ function addTeen(c, st) {
         (i) => {
           f2.badge(i, 11 + i, "b2");
           sfx.tap(11 + i);
+          helpSpeak(W[11 + i]);
         },
         gap(),
-        1500,
+        helpDelay(1500),
       );
     },
     () => k * gap() + 1800,

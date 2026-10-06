@@ -23,37 +23,53 @@ function makeNumberPlay(c, st) {
   if (c.variant === "collect") {
     ctl.ask(
       `Collect <b class="big">${n}</b> ${o.e}`,
-      `Collect ${W[n]}. Tap to choose or put back. Then press Check.`,
-    );
-    panel.appendChild(
-      el("p", "instruction", "Tap to choose. Tap again to put back."),
+      `Put ${W[n]} in the basket. Then press Check.`,
     );
     const bank = el("div", "collection");
+    const source = el("div", "collection-source");
+    const basket = el("div", "collection-basket");
+    source.setAttribute("aria-label", "Objects to collect");
+    basket.setAttribute(
+      "aria-label",
+      "Your basket. Tap an object to return it.",
+    );
+    basket.setAttribute("role", "group");
+    const symbol = el("span", "basket-symbol", "🧺");
+    symbol.setAttribute("aria-hidden", "true");
+    basket.appendChild(symbol);
+    bank.append(source, basket);
     const selected = new Set();
+    const buttons = [];
     for (let i = 0; i < n + 3; i++) {
       const b = activityButton(o.e, () => {
+        cancelQuestionWork();
+        const focused = document.activeElement === b;
         if (selected.has(i)) selected.delete(i);
         else selected.add(i);
         b.setAttribute("aria-pressed", String(selected.has(i)));
+        (selected.has(i) ? basket : source).appendChild(b);
+        if (focused) b.focus({ preventScroll: true });
       });
       b.setAttribute("aria-label", `${o.s} ${i + 1}`);
       b.setAttribute("aria-pressed", "false");
-      bank.appendChild(b);
+      source.appendChild(b);
+      buttons.push(b);
     }
     panel.appendChild(bank);
     checkBtn(panel, () => (selected.size === n ? ctl.correct() : ctl.wrong()));
     ctl.note(`You collected ${n}.`, `${W[n]} ${plu(n, o)}.`);
     ctl.hint(() => buildingHint(selected.size, n));
     ctl.reveal(() => {
-      [...bank.children].forEach((b, i) =>
-        b.setAttribute("aria-pressed", String(i < n)),
-      );
+      buttons.forEach((b, i) => {
+        b.setAttribute("aria-pressed", String(i < n));
+        (i < n ? basket : source).appendChild(b);
+      });
       showTeaching(`Choose ${n}; leave the rest.`);
     });
   } else if (c.variant === "compose") {
     ctl.ask(
       `Make <b class="big">${n}</b> two ways`,
-      `Split ${W[n]} counters into two parts. Then make a different pair of parts.`,
+      `Share ${W[n]} counters between the bowls. Then press Check.`,
     );
     const description = el(
       "p",
@@ -61,6 +77,8 @@ function makeNumberPlay(c, st) {
       "Move counters between the two parts. Then press Check.",
     );
     const previous = el("p", "math-message");
+    const snapshot = el("div", "decomposition-snapshot");
+    snapshot.hidden = true;
     const parts = el("div", "part-counters");
     const groups = [el("div", "part-group"), el("div", "part-group")];
     const labels = groups.map((g, i) => {
@@ -72,6 +90,7 @@ function makeNumberPlay(c, st) {
     let first = null;
     const buttons = sides.map((_, i) =>
       activityButton("●", () => {
+        cancelQuestionWork();
         sides[i] = 1 - sides[i];
         render();
       }),
@@ -94,7 +113,7 @@ function makeNumberPlay(c, st) {
     }
     render();
     parts.append(...groups);
-    panel.append(description, previous, parts);
+    panel.append(description, snapshot, previous, parts);
     const pair = () => {
       const a = sides.filter((s) => s === 0).length;
       return [a, n - a];
@@ -105,10 +124,25 @@ function makeNumberPlay(c, st) {
       if (first === null) {
         first = key;
         previous.textContent = `${n} = ${a} + ${b}`;
+        snapshot.hidden = false;
+        snapshot.setAttribute("role", "img");
+        snapshot.setAttribute(
+          "aria-label",
+          `Your first way: ${a} and ${b}. Make a different pair below.`,
+        );
+        snapshot.appendChild(el("span", "snapshot-camera", "📷"));
+        [a, b].forEach((amount) => {
+          const bowl = el("div", "snapshot-bowl");
+          for (let i = 0; i < amount; i++)
+            bowl.appendChild(el("span", "snapshot-counter", "●"));
+          snapshot.appendChild(bowl);
+        });
         description.textContent =
           "Keep the same total. Make a different pair of parts.";
         showTeaching("Now make a different pair of parts.");
-        ctl.instruction("Now make a different pair of parts.");
+        ctl.instruction(
+          "Now make a different pair of parts. Then press Check.",
+        );
         return;
       }
       if (key === first) {
@@ -145,13 +179,15 @@ function makeNumberPlay(c, st) {
     const objects = el("div", "conservation");
     for (let i = 0; i < n; i++) objects.appendChild(mkItem(o.e));
     panel.appendChild(objects);
-    const move = activityButton("Move them around", () => {
+    const move = activityButton("", () => {
+      cancelQuestionWork();
       objects.classList.toggle("spread");
       choices.box.hidden = false;
       ctl.ask("How many now?", "How many are there now?", false);
-      move.textContent = "Move them again";
+      pictureControl(move, "↔", "Move them again", "Move again");
     });
     move.id = "moveObjects";
+    pictureControl(move, "↔", "Move them around", "Move");
     panel.appendChild(move);
     const choices = makeChoices(panel, numOpts(n, 0, max + 1, nChoices(c)), n);
     choices.box.hidden = true;
@@ -161,13 +197,13 @@ function makeNumberPlay(c, st) {
     );
     ctl.hint(() => {
       showTeaching("We moved them. We did not add any or take any away.");
-      countAll([...objects.children]);
+      countAll([...objects.children], undefined, helpDelay());
     });
     ctl.reveal(() => showTeaching(`Still ${n}. None added, none taken away.`));
   } else {
     ctl.ask(
       "How many did you see?",
-      "Press Look at the dots when you are ready. How many did you see?",
+      "Tap the eyes when you are ready. How many dots did you see?",
     );
     const dots = el("div", "quick-dots");
     const items = [];
@@ -188,23 +224,35 @@ function makeNumberPlay(c, st) {
       dots.classList.add("covered");
       dots.setAttribute("aria-label", "Dots covered. You can show them again.");
     };
-    let started = false;
+    let started = false,
+      briefLook = false;
     cover();
+    R.q.cancel.push(() => {
+      if (briefLook) cover();
+      briefLook = false;
+    });
     const reveal = () => {
       cancelQuestionWork();
       dots.classList.remove("covered");
       dots.setAttribute("aria-label", `${n} dots`);
       started = true;
       choices.box.hidden = false;
-      show.textContent = "Show again";
+      pictureControl(show, "👀↻", "Show again", "Again");
     };
-    const show = activityButton("Look at the dots", () => {
+    const show = activityButton("", () => {
       const first = !started;
       if (!first) ctl.assist();
       reveal();
-      if (first) later(cover, 2500);
+      if (first) {
+        briefLook = true;
+        later(() => {
+          briefLook = false;
+          cover();
+        }, 2500);
+      }
     });
     show.id = "showAgain";
+    pictureControl(show, "👀", "Look at the dots", "Look");
     panel.appendChild(show);
     const choices = makeChoices(panel, numOpts(n, 0, 6, nChoices(c)), n);
     choices.box.hidden = true;

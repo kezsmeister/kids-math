@@ -26,9 +26,7 @@ ACTS.count = {
       st.classList.add("cnt-st");
       ctl.ask(
         `<span class="emo">${o.e}</span> How many?`,
-        n === 0
-          ? `How many ${o.p} are on the plate?`
-          : `How many ${o.p} can you see? You can press the button and we will count together.`,
+        "How many can you see?",
       );
       ctl.note(
         n === 0 ? "0 – none!" : `${n} ${plu(n, o)}`,
@@ -82,7 +80,7 @@ ACTS.count = {
         : "frame";
       ctl.ask(
         `Find <b class="big">${t}</b> <span class="emo">${o.e}</span>`,
-        `Which group has ${W[t]} ${o.p}? Tap the group.`,
+        `Which group has ${W[t]}? Tap the group.`,
       );
       ctl.note(`${t} ${plu(t, o)}`, `${W[t]} ${plu(t, o)}`);
       const box = el("div", "gpick");

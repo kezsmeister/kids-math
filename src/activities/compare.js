@@ -108,6 +108,7 @@ ACTS.compare = {
       sameBtn = sb;
     }
     ctl.hint(() => {
+      showTeaching("Match one object with one object. Look for any left over.");
       const m = Math.min(a, b);
       seqRun(
         [...Array(m).keys()],
@@ -218,6 +219,7 @@ function measureQ(c, st) {
     });
     st.appendChild(box);
     ctl.hint(() => {
+      showTeaching("Compare the ends. They start at the same place.");
       box.appendChild(guide);
       guide.style.left = `calc(17px + (100% - 34px) * ${short / 100})`;
     });
@@ -244,6 +246,11 @@ function measureQ(c, st) {
         box.appendChild(b);
       });
       ctl.hint(() => {
+        showTeaching(
+          kind === "v"
+            ? "Compare how high they reach from the same ground."
+            : "Compare how much space each animal takes up.",
+        );
         box.appendChild(guide);
         guide.style.bottom = `calc(${H} * ${short / 100})`;
       });
@@ -265,6 +272,11 @@ function measureQ(c, st) {
         box.appendChild(b);
       });
       ctl.hint(() => {
+        showTeaching(
+          kind === "v"
+            ? "Compare how high they reach from the same ground."
+            : "Compare how much space each animal takes up.",
+        );
         box.appendChild(guide);
         const sh = measurementUnits(short);
         guide.style.bottom = `min(${sh}vmin, ${sh * 7}px, ${(sh / measurementUnits(95)) * 30}vw)`;

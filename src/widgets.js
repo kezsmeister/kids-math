@@ -117,6 +117,7 @@ function checkBtn(parent, fn) {
   b.setAttribute("aria-label", "Check");
   b.addEventListener("click", () => {
     if (!R || R.q.done) return;
+    cancelQuestionWork();
     sfx.pop();
     fn();
   });
@@ -209,7 +210,7 @@ function field(n, emoji, o = {}) {
   }
   return { el: f, items };
 }
-function countAll(items, split) {
+function countAll(items, split, delay = 300) {
   items.forEach((i) => {
     i.classList.remove("counted");
     const b = i.querySelector(".badge");
@@ -221,8 +222,10 @@ function countAll(items, split) {
       it.classList.add("counted");
       it.appendChild(badgeEl(i + 1, split != null && i >= split ? "b2" : ""));
       sfx.tap(i + 1);
+      helpSpeak(W[i + 1]);
     },
     countGap(),
+    delay,
   );
 }
 const DICE = {
@@ -340,63 +343,34 @@ function countTogether(st, fn, duration, label = "Count with me") {
     cb.setAttribute("aria-busy", "false");
   };
   question.cancel.push(reset);
-  const run = () => {
+  const run = (explicit = false) => {
     if (R !== round || R.q !== question || busy) return;
     ctl.assist();
+    const spoken = explicit || question.spokenHelp;
     cancelQuestionWork();
+    question.spokenHelp = spoken;
     busy = true;
     cb.disabled = true;
     cb.classList.add("busy");
     cb.setAttribute("aria-busy", "true");
     fn();
-    later(reset, duration() + 600);
+    later(reset, duration() + helpDelay() + 600);
   };
   cb.addEventListener("click", () => {
     sfx.pop();
-    run();
+    run(true);
   });
   st.appendChild(cb);
   return run;
 }
 
 // A separate example teaches the gesture without changing the child's answer.
-function frameGuide(st) {
-  const guide = el("div", "frame-guide");
-  const details = el("details");
-  details.open = !S.frameHelpSeen;
-  const summary = el("summary", "", "How to play");
-  details.append(
-    summary,
-    el(
-      "p",
-      "",
-      "Tap a box to add a counter. Tap it again to remove it. Then press Check.",
-    ),
-  );
-  const demo = el("div", "demo-frame");
-  demo.setAttribute("aria-hidden", "true");
-  for (let i = 0; i < 3; i++) demo.appendChild(el("span", "demo-cell"));
-  const button = el("button", "text-button", "Show how");
-  button.type = "button";
-  button.onclick = () => {
-    cancelQuestionWork();
-    demo.children[0].classList.add("on");
-    $("#helpStatus").textContent = "Tap once to add a counter.";
-    later(() => {
-      demo.children[0].classList.remove("on");
-      $("#helpStatus").textContent = "Tap again to remove it.";
-    }, 1500);
-  };
-  R.q.cancel.push(() => {
-    demo.children[0].classList.remove("on");
-    $("#helpStatus").textContent = "";
-  });
-  details.append(demo, button);
-  guide.appendChild(details);
-  st.appendChild(guide);
+function frameGuide() {
+  // The shared Show me control uses a separate example for this gesture.
   S.frameHelpSeen = true;
   save();
 }
+
 function addGroups(a, b, e1, e2, kind) {
   const mk = (n, e, cls) => {
     const items = [];
@@ -426,14 +400,30 @@ function countOn(known, extra, start) {
       item.classList.add("counted");
       item.appendChild(badgeEl(start + i + 1, "b2"));
       sfx.tap(start + i + 1);
+      helpSpeak(W[start + i + 1]);
     },
     countGap(),
-    1300,
+    helpDelay(1300),
   );
 }
 function showTeaching(text, feedback = false) {
   const target = feedback ? $("#fbtext") : $("#helpStatus");
   target.textContent = text;
+  helpSpeak(text);
+}
+function speechDuration(text) {
+  return (
+    (recordedPlan(text)?.reduce((total, cue) => total + cue.duration, 0) ||
+      String(text).split(/\s+/).length * 0.5) * 1000
+  );
+}
+function helpSpeak(text) {
+  if (!R?.q?.spokenHelp) return;
+  R.q.helpSpeechDuration = speechDuration(text);
+  speak(text);
+}
+function helpDelay(silent = 300) {
+  return R?.q?.spokenHelp ? (R.q.helpSpeechDuration || 0) + 400 : silent;
 }
 function buildingHint(current, target) {
   const difference = target - current;

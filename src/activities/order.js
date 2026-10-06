@@ -85,6 +85,7 @@ ACTS.order = {
         { drop: blankEl, onRight: fill, onReveal: fill },
       );
       ctl.hint(() => {
+        showTeaching("Use the dots to count along the number path.");
         boxes.forEach((bx, i) =>
           later(
             () => {
@@ -147,6 +148,7 @@ ACTS.order = {
       });
       st.appendChild(bank);
       ctl.hint(() => {
+        showTeaching("Find the smallest number that is still waiting.");
         const t = tiles.find((b) => +b.dataset.v === sorted[placed]);
         if (t) t.classList.add("glow");
       });
@@ -178,6 +180,7 @@ ACTS.order = {
       R.q.mathKey = `numerals:${a}:${b}:${big}`;
       const ch = makeChoices(st, [a, b], ans, { btnCls: "huge" });
       ctl.hint(() => {
+        showTeaching("Compare the dots under each number.");
         ch.btns.forEach((bt) => {
           if (!bt.querySelector(".mdots"))
             bt.appendChild(miniDots(+bt.dataset.v));

@@ -5,6 +5,10 @@
 const voiceWords = (text) =>
   String(text)
     .toLowerCase()
+    .replace(/\b\d+\b/g, (n) => W[+n] || n)
+    .replace(/−/g, " minus ")
+    .replace(/\+/g, " plus ")
+    .replace(/=/g, " equals ")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
 const recordedCues = QUESTION_VOICE_DATA.clips

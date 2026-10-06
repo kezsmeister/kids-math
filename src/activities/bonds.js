@@ -67,7 +67,7 @@ ACTS.bonds = {
     if (miss === "w")
       ctl.ask(
         "Put the parts together",
-        "The two parts. What do they make together? Drag the number to the question mark.",
+        "Put the parts together. Tap the missing number.",
       );
     else
       ctl.ask(
@@ -76,7 +76,7 @@ ACTS.bonds = {
           W[w] +
           ". One part is " +
           W[miss === "a" ? b : a] +
-          ". What is the missing part? Drag the number to the question mark.",
+          ". What is the missing part? Tap the number.",
       );
     ctl.note(`${a} + ${b} = ${w}`, `${W[a]} and ${W[b]} make ${W[w]}`);
     const fill = () => {
@@ -111,9 +111,10 @@ ACTS.bonds = {
         (x, i) => {
           x.appendChild(badgeEl(i + 1));
           sfx.tap(i + 1);
+          helpSpeak(W[i + 1]);
         },
         countGap(),
-        1500,
+        helpDelay(1500),
       );
     });
     ctl.reveal(() => {

@@ -8,8 +8,9 @@ const PATTERN_TOKENS = [
   ["🐰", "rabbit"],
 ];
 const patternName = (t) => PATTERN_TOKENS.find((x) => x[0] === t)?.[1] || t;
-function patternStep(text, feedback = false) {
+function patternStep(text, feedback = false, spoken = false) {
   cancelQuestionWork();
+  R.q.spokenHelp = spoken;
   showTeaching(text, feedback);
 }
 function patternRow(sequence, unitLength, interactive = false) {
@@ -79,7 +80,11 @@ function makePattern(c, st) {
     });
     ctl.hint(() => {
       row.classList.add("showunits");
-      patternStep("Find the smallest group that starts again.");
+      patternStep(
+        "Find the smallest group that starts again.",
+        false,
+        R.q.spokenHelp,
+      );
     });
     ctl.reveal(() => row.classList.add("showunits"));
     return;
@@ -92,24 +97,35 @@ function makePattern(c, st) {
     R.q.mathKey += `:${bad}`;
     ctl.ask(
       "Find the pattern mistake",
-      "Tap the item that breaks the pattern, then choose its replacement.",
+      "Tap the item that breaks the pattern.",
     );
     const row = patternRow(sequence, unit.length, true);
     const cells = [...row.querySelectorAll("button")];
     const bank = el("div", "pattern-bank");
     bank.hidden = true;
+    const target = el("div", "repair-target");
+    target.hidden = true;
     let selected = false;
     cells.forEach((b, i) => {
       b.classList.add("repair-item");
       if (i === bad) b.dataset.mistake = "1";
       b.onclick = () => {
-        if (R.q.done) return;
+        if (R.q.done || selected) return;
         if (i !== bad) {
           ctl.wrong();
           return;
         }
         selected = true;
+        cells.forEach((cell) => {
+          cell.disabled = true;
+        });
         b.classList.add("selected");
+        target.textContent = `${sequence[bad]} → ?`;
+        target.setAttribute(
+          "aria-label",
+          `Replace ${patternName(sequence[bad])} at position ${bad + 1}`,
+        );
+        target.hidden = false;
         bank.hidden = false;
         bank.querySelector("button")?.focus({ preventScroll: true });
         patternStep("Choose what belongs in this place.");
@@ -135,10 +151,14 @@ function makePattern(c, st) {
       if (token === correct) b.dataset.correct = "1";
       bank.appendChild(b);
     });
-    panel.append(row, bank);
+    panel.append(row, target, bank);
     ctl.hint(() => {
       row.classList.add("showunits");
-      patternStep("Compare each group with the first group.");
+      patternStep(
+        "Compare each group with the first group.",
+        false,
+        R.q.spokenHelp,
+      );
     });
     ctl.reveal(() => {
       cells[bad].textContent = correct;
@@ -174,7 +194,7 @@ function makePattern(c, st) {
         ctl.correct();
       } else {
         markNext();
-        patternStep(`${patternName(token)}. Keep going to finish the group.`);
+        patternStep("Keep going to finish the group.");
       }
     });
     b.setAttribute("aria-label", patternName(token));
@@ -191,7 +211,11 @@ function makePattern(c, st) {
   panel.appendChild(bank);
   ctl.hint(() => {
     row.classList.add("showunits");
-    patternStep("Look back at the first group. Follow the same order.");
+    patternStep(
+      "Look back at the first group. Follow the same order.",
+      false,
+      R.q.spokenHelp,
+    );
   });
   ctl.reveal(() => {
     blanks.forEach((b, i) => {
@@ -208,7 +232,10 @@ function createPattern(c, st, tokens) {
     : null;
   R.q.mathKey = `create-palette:${tokens.join("")}`;
   const limit = c.lvl === 1 ? 2 : 3;
-  const initialInstruction = `Choose ${limit === 2 ? "two" : "two or three"} items for your repeating group. Use at least two different items.`;
+  const initialInstruction =
+    limit === 2
+      ? "Choose two different animals."
+      : "Choose two or three animals. Use two different kinds.";
   ctl.ask("Make your own pattern", initialInstruction);
   const panel = el("div", "pattern-play answer-widget"),
     message = el(
@@ -223,17 +250,35 @@ function createPattern(c, st, tokens) {
   const bank = el("div", "pattern-bank");
   message.textContent = `Choose ${limit === 2 ? "2" : "2 or 3"} items. Use at least two different items.`;
   const render = () => {
-    preview.replaceChildren(
-      patternRow(
-        building
-          ? [
-              ...sequence,
-              ...Array(unit.length * 3 - sequence.length).fill(null),
-            ]
-          : unit,
-        unit.length || 1,
-      ),
+    const row = patternRow(
+      building
+        ? [...sequence, ...Array(unit.length * 3 - sequence.length).fill(null)]
+        : [...unit, ...Array(Math.max(0, 2 - unit.length)).fill(null)],
+      building ? unit.length : Math.max(2, unit.length),
     );
+    row.classList.toggle("unit-builder", !building);
+    preview.replaceChildren();
+    if (building) {
+      const reference = el("div", "unit-reference");
+      reference.setAttribute("aria-label", "Your repeating group");
+      reference.appendChild(patternRow(unit, unit.length));
+      preview.appendChild(reference);
+    }
+    preview.appendChild(row);
+    if (!building && limit === 3 && unit.length < 3) {
+      const optional = el("span", "optional-slot", "+ ?");
+      optional.setAttribute("aria-label", "You may add a third animal");
+      row.appendChild(optional);
+    }
+    undo.hidden = building ? sequence.length <= unit.length : !unit.length;
+    restart.hidden = !building;
+    use.disabled = unit.length < 2 || new Set(unit).size < 2;
+    check.disabled = !building || sequence.length !== unit.length * 3;
+    [...bank.children].forEach((b) => {
+      b.disabled = building
+        ? sequence.length >= unit.length * 3
+        : unit.length >= limit;
+    });
   };
   tokens.slice(0, 3).forEach((token) => {
     const b = activityButton(token, () => {
@@ -243,17 +288,31 @@ function createPattern(c, st, tokens) {
       cancelQuestionWork();
       target.push(token);
       render();
+      if (b.disabled && document.activeElement === b) {
+        (building ? check : use.disabled ? undo : use).focus({
+          preventScroll: true,
+        });
+      }
+      if (!building && target.length === max && new Set(unit).size < 2) {
+        ctl.instruction(
+          "Choose at least two different items for your group.",
+          true,
+        );
+      }
     });
     b.setAttribute("aria-label", patternName(token));
     bank.appendChild(b);
   });
   const use = activityButton("Use this group", () => {
     if (unit.length < 2 || new Set(unit).size < 2) {
-      patternStep("Choose at least two different items for your group.", true);
+      ctl.instruction(
+        "Choose at least two different items for your group.",
+        true,
+      );
       return;
     }
     if (unit.join("") === previous) {
-      patternStep("Try a different repeating group this time.", true);
+      ctl.instruction("Try a different repeating group this time.", true);
       return;
     }
     R.q.signature = `create:${unit.join("")}`;
@@ -267,14 +326,18 @@ function createPattern(c, st, tokens) {
     ctl.instruction("Repeat your group twice more, then press Check.");
   });
   use.id = "useUnit";
+  pictureControl(use, "➜", "Use this group", "Ready");
   const undo = activityButton("Undo last item", () => {
     cancelQuestionWork();
     if (building) {
       if (sequence.length > unit.length) sequence.pop();
     } else unit.pop();
     render();
+    if (undo.hidden && document.activeElement === undo)
+      bank.querySelector("button").focus({ preventScroll: true });
   });
   const restart = activityButton("Choose a new group", () => {
+    cancelQuestionWork();
     building = false;
     unit = [];
     sequence = [];
@@ -283,7 +346,12 @@ function createPattern(c, st, tokens) {
     message.textContent = `Choose ${limit === 2 ? "2" : "2 or 3"} items. Use at least two different items.`;
     render();
     ctl.instruction(initialInstruction);
+    bank.querySelector("button").focus({ preventScroll: true });
   });
+  undo.id = "undoPattern";
+  restart.id = "restartUnit";
+  pictureControl(undo, "↶", "Undo last item", "Undo");
+  pictureControl(restart, "↻", "Choose a new group", "Start again");
   panel.append(message, preview, bank, use, undo, restart);
   const check = checkBtn(panel, () => {
     if (sequence.length !== unit.length * 3) {
@@ -310,6 +378,7 @@ function createPattern(c, st, tokens) {
         ? "Compare the second and third groups with your first group. Undo to change an item."
         : "Choose two different items. Each tap adds an item to your group.",
       true,
+      R.q.spokenHelp,
     );
   });
   ctl.reveal(() => {

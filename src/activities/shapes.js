@@ -189,9 +189,10 @@ ACTS.shapes = {
           (i) => {
             big.querySelector(`.sb[data-i="${i}"]`).classList.add("vis");
             sfx.tap(i + 1);
+            helpSpeak(W[i + 1]);
           },
           countGap(),
-          2000,
+          helpDelay(2000),
         );
       };
       ctl.hint(hint);

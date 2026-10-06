@@ -170,12 +170,10 @@ test("subtraction help removes the stated quantity and shows what remains", (t) 
     .textContent.match(/(\d+)−(\d+)=/);
   const total = Number(equation[1]),
     removed = Number(equation[2]);
-  const show = [...g.document.querySelectorAll("button")].find((b) =>
-    b.textContent.includes("Show me"),
-  );
+  const show = g.document.querySelector("#countBtn");
   assert.ok(show, "A visible demonstration is available");
   show.click();
-  g.tick(1500);
+  g.tick(20000);
   assert.equal(
     g.document.querySelectorAll(".sub-pictures .item").length,
     total,

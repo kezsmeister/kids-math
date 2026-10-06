@@ -4,7 +4,7 @@ Reviewed against merged main `fc55b9d8bf9b168c0cb879f8fd20705ddd67e082`.
 
 ## Automated checks
 
-70 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
+84 tests pass using the actual application scripts, jsdom, seeded question generation and a controllable timer queue. The normal development commands remain `npm ci`, `npm test` and `npm run build`. GitHub Actions runs the same tests and build.
 
 Coverage includes:
 
@@ -18,17 +18,17 @@ Coverage includes:
 
 New defects were reproduced as failing tests before fixes. An independent whole-branch review identified unreachable progression in seven skill variants, lost counter focus, and an empty-frame hint that did nothing; all were fixed with regression coverage.
 
-## Selective question narration
+## Non-reader play update — 2026-10-06
 
-Narration is now limited across the game to tasks whose rule or instruction depends on words. Tests cover the selection for all 41 skills and the conditional question about leftover ones in two full tens. Visual counting, equations, number gaps and pattern continuation stay quiet. Tests also cover short pattern instructions, silent taps/Undo/praise/answers, essential new-stage instructions, explicit replay with automatic voice off, and cancellation when a subquestion becomes visual-only. Reading never marks mathematical assistance.
+The new interaction checks first failed against `9d28bc4`, then passed after implementation. They cover a real basket with focus-preserving object movement, an immutable picture of the first decomposition, empty pattern-unit slots, staged repair, three-item units with Undo/restart, always-available instruction replay, and separate control examples that do not mark assistance or change answers. First-use examples start from the home cards and stop on Home; calm mode keeps their storyboard still. Opening an example during a brief look covers the dots so cancelled timers cannot expose them indefinitely without recording support. A fresh reviewer found that a routine pattern tap could inherit speech from earlier requested help. A failing regression reproduced it; only hint callbacks now preserve permission to speak.
 
-All narrated tasks use bundled English recordings: 56 cues, 80.5 seconds, 674,466 bytes including the encoded asset and cue metadata. The generator encoded, decoded and verified every cue contains sound. Hosted and single-file builds include the same data without network requests. Recording coverage is checked for every narrated skill at all three levels.
+Automatic reading remains selective across all 41 skills, including the special leftover-ones question at twenty. Explicit Listen works on every unfinished question. Explicit mathematical help and counting are spoken, even with automatic reading off; automatic hints, routine taps and praise remain quiet. Instruction replay interrupts counting while preserving the supported learning record. Count-on sequences wait for the introductory sentence before speaking the numbers.
 
-Playback regressions exercise missing browser speech support, muted automatic reading with explicit replay, cancellation during decoding and replay, and visible messages for failed decoding, suspended audio and rejected activation. The Web Audio boundary is simulated in jsdom; these checks verify application behavior, not physical speaker output. The full 70-test suite and offline build pass.
+The offline voice contains 171 cues, 257.7 seconds, 2,141,045 bytes including audio and metadata. The generator encoded, decoded and verified sound in every compressed cue. Regression coverage checks recorded plans for all control examples and shape descriptions, plus 492 generated question/help combinations across all 41 skills and three levels, and the forced twenty-leftover-ones case. Hosted and single-file builds use the same recordings without network requests.
 
-The former tests requiring spoken animals, hints and praise were replaced with assertions for the new question-only contract. Visual teaching tests still check grouping, counting support, zero explanations, feedback and progression.
+Playback regressions simulate the Web Audio boundary: missing browser speech support, explicit replay with automatic reading off, cancellation during decoding and replay, and visible retry messages for failed decoding or blocked activation. These verify application scheduling and cleanup, not physical speaker output.
 
-Browser-tool access to the user's open local file was blocked by URL policy during the previous audio fix. No attempt was made to bypass that block; audible playback and the latest UI in that embedded browser remain unverified.
+Browser-tool access to the open local file was blocked by URL policy during the previous audio fix. That block was not bypassed. **Audible playback and the latest non-reader UI in the embedded browser remain unverified.** The browser checks below describe the earlier learning update, before these changes.
 
 ## Browser checks
 
