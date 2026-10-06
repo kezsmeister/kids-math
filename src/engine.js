@@ -122,7 +122,6 @@ function nextQ() {
     nsay: "",
     mathKey: "",
   };
-  $("#skillLabel").textContent = TOPICS[selected.topic].label;
   drawProgress();
   const c = { ...selected, m20: R.m20, idx: R.idx };
   if (R.m20) st.classList.add("small");
@@ -156,8 +155,6 @@ function nextQ() {
       R.q.spokenHelp = true;
       R.q.hint?.();
     };
-    mountPlayGuide();
-    if (R.guidesEnabled) offerPlayGuide();
   } catch (e) {
     console.error("question error", e);
     R.marks[R.idx] = 1;
@@ -174,7 +171,6 @@ function organize(st) {
   kids.forEach((k) => {
     const isAns =
       k.matches(ANS_SEL) ||
-      k.matches(".frame-guide") ||
       k.matches(".tf-int") ||
       !!k.querySelector(".tf-int");
     (isAns ? tray : card).appendChild(k);
@@ -283,7 +279,6 @@ ctl.wrong = () => {
 function finishQ() {
   refreshQuestionReader();
   $("#hintBtn").hidden = true;
-  $("#demoBtn").hidden = true;
   $("#nextBtn").classList.add("show");
   // Explanations and counting have no time limit. The child chooses Next.
 }
@@ -378,7 +373,6 @@ function finishRound() {
   burst();
   $("#againBtn").onclick = () => {
     startRound(id);
-    offerPlayGuide();
   };
   $("#resHome").onclick = goHome;
 }

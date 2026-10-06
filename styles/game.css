@@ -2770,12 +2770,6 @@ h1#prompt {
     gap: 8px;
   }
 }
-.skill-label {
-  text-align: center;
-  color: #50694e;
-  margin: 4px 0 0;
-  font-size: 15px;
-}
 .learning-section {
   background: #fffdf4;
   border: 2px solid #d9dfc7;
@@ -2838,7 +2832,7 @@ h1#prompt {
   font-size: 16px;
 }
 
-/* Picture controls and separate examples for children who are not yet reading. */
+/* Picture controls and concrete activities for children who are not yet reading. */
 .control-icon {
   display: block;
   font-size: 30px;
@@ -2855,60 +2849,6 @@ h1#prompt {
 .text-button:disabled {
   opacity: 0.45;
   cursor: default;
-}
-.play-demo {
-  width: min(94%, 760px);
-  margin: 12px auto;
-  padding: 18px;
-  border: 3px solid #a7c39c;
-  border-radius: 24px;
-  background: #fffdf4;
-}
-.play-demo h2 {
-  margin: 0 0 12px;
-  text-align: center;
-}
-.demo-examples {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  justify-content: center;
-}
-.demo-step {
-  flex: 1 1 180px;
-  min-width: 0;
-  padding: 12px;
-  border: 3px solid #e5e8d7;
-  border-radius: 18px;
-  background: white;
-}
-.demo-step.demo-active {
-  border-color: #3f7951;
-}
-.demo-step p {
-  font-size: 16px;
-  line-height: 1.4;
-  text-align: center;
-}
-.demo-art {
-  display: grid;
-  gap: 12px;
-  min-height: 150px;
-  align-content: center;
-  text-align: center;
-  font-size: clamp(22px, 4vmin, 32px);
-}
-.demo-controls {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 18px;
-}
-.demo-controls button {
-  min-width: 110px;
-  min-height: 64px;
-  font-size: 20px;
 }
 .collection {
   width: 100%;
@@ -3029,12 +2969,6 @@ h1#prompt {
   display: contents;
 }
 @media (max-width: 400px) {
-  .play-demo {
-    padding: 12px;
-  }
-  .demo-step {
-    flex-basis: 100%;
-  }
   .collection-source,
   .collection-basket {
     gap: 8px;

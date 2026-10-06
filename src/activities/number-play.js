@@ -71,11 +71,6 @@ function makeNumberPlay(c, st) {
       `Make <b class="big">${n}</b> two ways`,
       `Share ${W[n]} counters between the bowls. Then press Check.`,
     );
-    const description = el(
-      "p",
-      "instruction",
-      "Move counters between the two parts. Then press Check.",
-    );
     const previous = el("p", "math-message");
     const snapshot = el("div", "decomposition-snapshot");
     snapshot.hidden = true;
@@ -113,7 +108,7 @@ function makeNumberPlay(c, st) {
     }
     render();
     parts.append(...groups);
-    panel.append(description, snapshot, previous, parts);
+    panel.append(snapshot, previous, parts);
     const pair = () => {
       const a = sides.filter((s) => s === 0).length;
       return [a, n - a];
@@ -137,10 +132,8 @@ function makeNumberPlay(c, st) {
             bowl.appendChild(el("span", "snapshot-counter", "●"));
           snapshot.appendChild(bowl);
         });
-        description.textContent =
-          "Keep the same total. Make a different pair of parts.";
-        showTeaching("Now make a different pair of parts.");
-        ctl.instruction(
+        ctl.ask(
+          "Make another pair",
           "Now make a different pair of parts. Then press Check.",
         );
         return;
@@ -201,10 +194,7 @@ function makeNumberPlay(c, st) {
     });
     ctl.reveal(() => showTeaching(`Still ${n}. None added, none taken away.`));
   } else {
-    ctl.ask(
-      "How many did you see?",
-      "Tap the eyes when you are ready. How many dots did you see?",
-    );
+    ctl.ask("How many?", "How many?");
     const dots = el("div", "quick-dots");
     const items = [];
     if (c.lvl === 1) dots.appendChild(diceEl(n, "●", items));
@@ -216,48 +206,47 @@ function makeNumberPlay(c, st) {
         showEmpty: true,
       });
       dots.appendChild(layout.el);
+      items.push(...layout.items);
     }
     dots.setAttribute("role", "img");
     dots.setAttribute("aria-label", `${n} dots`);
     panel.appendChild(dots);
+    // Beginners answer with the real objects in view. Later levels introduce
+    // a brief look; the answer itself never has a time limit.
+    let briefLook = c.lvl > 1;
     const cover = () => {
+      briefLook = false;
       dots.classList.add("covered");
       dots.setAttribute("aria-label", "Dots covered. You can show them again.");
+      show.hidden = false;
     };
-    let started = false,
-      briefLook = false;
-    cover();
-    R.q.cancel.push(() => {
-      if (briefLook) cover();
-      briefLook = false;
-    });
     const reveal = () => {
       cancelQuestionWork();
       dots.classList.remove("covered");
       dots.setAttribute("aria-label", `${n} dots`);
-      started = true;
-      choices.box.hidden = false;
-      pictureControl(show, "👀↻", "Show again", "Again");
+      show.hidden = true;
     };
     const show = activityButton("", () => {
-      const first = !started;
-      if (!first) ctl.assist();
+      ctl.assist();
       reveal();
-      if (first) {
-        briefLook = true;
-        later(() => {
-          briefLook = false;
-          cover();
-        }, 2500);
-      }
+      choices.box.querySelector("button")?.focus({ preventScroll: true });
     });
     show.id = "showAgain";
-    pictureControl(show, "👀", "Look at the dots", "Look");
+    pictureControl(show, "👀", "Show the dots again", "Show dots");
+    show.hidden = true;
     panel.appendChild(show);
     const choices = makeChoices(panel, numOpts(n, 0, 6, nChoices(c)), n);
-    choices.box.hidden = true;
+    R.q.cancel.push(() => {
+      if (briefLook) cover();
+    });
+    if (briefLook) later(cover, 4000);
     ctl.note(`${n} dots.`, `${W[n]} dots.`);
-    ctl.hint(reveal);
+    ctl.hint(() => {
+      const spoken = R.q.spokenHelp;
+      reveal();
+      R.q.spokenHelp = spoken;
+      countAll(items);
+    });
     ctl.reveal(reveal);
   }
 }

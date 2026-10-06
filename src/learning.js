@@ -112,8 +112,8 @@ function learningRange(key, level) {
   }
   if (variant === "quick")
     return level === 1
-      ? "Groups of 1–5 in familiar layouts"
-      : "Groups of 1–5 in varied layouts";
+      ? "Visible groups of 1–5 in familiar layouts"
+      : "Brief looks at groups of 1–5, with another look available";
   if (activity === "compare" && variant !== "quantity")
     return [
       "",

@@ -57,7 +57,6 @@ ACTS.tenframe = {
       ctl.note(`${n}`, W[n]);
       st.dataset.target = n;
       st.appendChild(f.el);
-      frameGuide(st);
       checkBtn(st, () => {
         f.count() === n ? ctl.correct() : ctl.wrong();
       });
@@ -147,7 +146,6 @@ function teenFrames(c, st) {
       `Make ${W[n]}. Fill the first ten frame, then add ones. Then press the check.`,
     );
     st.dataset.target = n;
-    frameGuide(st);
     checkBtn(st, () => {
       f1.count() === 10 && f2.count() === k ? ctl.correct() : ctl.wrong();
     });

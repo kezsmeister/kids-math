@@ -237,18 +237,12 @@ function createPattern(c, st, tokens) {
       ? "Choose two different animals."
       : "Choose two or three animals. Use two different kinds.";
   ctl.ask("Make your own pattern", initialInstruction);
-  const panel = el("div", "pattern-play answer-widget"),
-    message = el(
-      "p",
-      "instruction",
-      "Choose 2 or 3 items. Use at least two different items.",
-    );
+  const panel = el("div", "pattern-play answer-widget");
   const preview = el("div", "pattern-preview");
   let unit = [],
     sequence = [],
     building = false;
   const bank = el("div", "pattern-bank");
-  message.textContent = `Choose ${limit === 2 ? "2" : "2 or 3"} items. Use at least two different items.`;
   const render = () => {
     const row = patternRow(
       building
@@ -320,10 +314,9 @@ function createPattern(c, st, tokens) {
     sequence = [...unit];
     use.hidden = true;
     check.parentElement.hidden = false;
-    message.textContent = "Repeat your group twice more. Then press Check.";
     render();
     bank.querySelector("button").focus({ preventScroll: true });
-    ctl.instruction("Repeat your group twice more, then press Check.");
+    ctl.ask("Keep it going", "Repeat your group twice more, then press Check.");
   });
   use.id = "useUnit";
   pictureControl(use, "➜", "Use this group", "Ready");
@@ -343,16 +336,15 @@ function createPattern(c, st, tokens) {
     sequence = [];
     use.hidden = false;
     check.parentElement.hidden = true;
-    message.textContent = `Choose ${limit === 2 ? "2" : "2 or 3"} items. Use at least two different items.`;
     render();
-    ctl.instruction(initialInstruction);
+    ctl.ask("Make your own pattern", initialInstruction);
     bank.querySelector("button").focus({ preventScroll: true });
   });
   undo.id = "undoPattern";
   restart.id = "restartUnit";
   pictureControl(undo, "↶", "Undo last item", "Undo");
   pictureControl(restart, "↻", "Choose a new group", "Start again");
-  panel.append(message, preview, bank, use, undo, restart);
+  panel.append(preview, bank, use, undo, restart);
   const check = checkBtn(panel, () => {
     if (sequence.length !== unit.length * 3) {
       patternStep("Fill every empty place before checking.", true);

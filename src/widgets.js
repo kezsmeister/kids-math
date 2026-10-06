@@ -1,6 +1,11 @@
 "use strict";
 
 /* ---------- shared widgets ---------- */
+function pictureControl(button, icon, label, caption = label) {
+  button.setAttribute("aria-label", label);
+  button.innerHTML = `<span class="control-icon" aria-hidden="true">${icon}</span><span>${caption}</span>`;
+  return button;
+}
 function makeChoices(parent, opts, ans, o = {}) {
   const box = el("div", "choices" + (o.cls ? " " + o.cls : ""));
   const btns = [];
@@ -362,13 +367,6 @@ function countTogether(st, fn, duration, label = "Count with me") {
   });
   st.appendChild(cb);
   return run;
-}
-
-// A separate example teaches the gesture without changing the child's answer.
-function frameGuide() {
-  // The shared Show me control uses a separate example for this gesture.
-  S.frameHelpSeen = true;
-  save();
 }
 
 function addGroups(a, b, e1, e2, kind) {

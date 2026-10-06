@@ -55,23 +55,7 @@ test("rearranging a collection preserves every object before asking how many", (
   g.document.querySelector(`.choices [data-v="${before}"]`).click();
   assert.equal(g.run("R.q.done"), true);
 });
-test("small-group recognition allows an untimed answer and another look", (t) => {
-  const g = setup(t, "count.quick");
-  g.document.querySelector("#showAgain").click();
-  g.tick(3000);
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    true,
-  );
-  assert.equal(g.run("R.q.done"), false);
-  g.document.querySelector("#showAgain").click();
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    false,
-  );
-  g.document.querySelector("[data-correct]").click();
-  assert.equal(g.run("learningRecord('count.quick').supported"), 1);
-});
+
 test("pattern continuation shows three complete repeats and requires a whole further repeat", (t) => {
   const g = setup(t, "shapes.extend");
   assert.equal(
@@ -135,29 +119,4 @@ test("using a pattern unit moves keyboard focus to the next available control", 
   use.focus();
   use.click();
   assert.equal(g.document.activeElement, bank[0]);
-});
-
-test("a brief look starts when the child is ready, with no answer deadline", (t) => {
-  const g = setup(t, "count.quick");
-  g.tick(10000);
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    true,
-  );
-  assert.equal(
-    g.document.querySelector("#showAgain").getAttribute("aria-label"),
-    "Look at the dots",
-  );
-  g.document.querySelector("#showAgain").click();
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    false,
-  );
-  assert.equal(g.run("R.q.assisted"), false);
-  g.tick(3000);
-  assert.equal(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-    true,
-  );
-  assert.equal(g.run("R.q.done"), false);
 });

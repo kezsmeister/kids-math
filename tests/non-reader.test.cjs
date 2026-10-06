@@ -19,31 +19,7 @@ test("every unfinished task can be heard even when its automatic prompt is quiet
   assert.match(g.spoken.at(-1), /plus/);
   assert.equal(g.run("R.q.assisted"), false);
 });
-test("a separate play example teaches controls without changing an answer or learning evidence", (t) => {
-  const g = setup(t, "shapes.create");
-  const before = g.document.querySelector("#stage").innerHTML;
-  const button = g.document.querySelector("#demoBtn");
-  assert.ok(button, "A picture demonstration control is available");
-  button.click();
-  g.tick(20000);
-  assert.equal(g.document.querySelector("#stage").innerHTML, before);
-  assert.equal(g.run("R.q.assisted"), false);
-  assert.equal(g.run("R.q.tries"), 0);
-  g.document.querySelector("#demoDone").click();
-  assert.equal(g.document.querySelector("#playDemo").hidden, true);
-  assert.equal(g.document.querySelector(".stageOuter").hidden, false);
-});
-test("a first visit teaches the interaction and Home cancels the demonstration", (t) => {
-  const g = game();
-  t.after(g.close);
-  g.document.querySelector('[data-act="shapes"]').click();
-  assert.equal(g.document.querySelector("#playDemo")?.hidden, false);
-  g.document.querySelector("#homeBtn").click();
-  const speech = g.spoken.length;
-  g.tick(20000);
-  assert.equal(g.spoken.length, speech);
-  assert.equal(g.document.querySelector("#playDemo").hidden, true);
-});
+
 test("requested help speaks and counts, while instruction replay remains unassisted", (t) => {
   const g = setup(t, "count.count", { saved: { voice: false } });
   g.document.querySelector("#replayBtn").click();
@@ -109,32 +85,6 @@ test("repair choices appear only after finding the mistake and old selection is 
   assert.equal(g.run("R.q.assisted"), false);
 });
 
-test("replaying an example respects calm motion and never earns assistance", (t) => {
-  const g = setup(t, "count.collect", { reducedMotion: true });
-  g.document.querySelector("#demoBtn").click();
-  g.document.querySelector("#demoReplay").click();
-  g.tick(30000);
-  assert.equal(g.document.querySelectorAll(".demo-active").length, 0);
-  assert.equal(g.document.querySelectorAll(".demo-step").length, 2);
-  assert.equal(g.run("R.q.assisted"), false);
-  g.document.querySelector("#demoDone").click();
-  assert.equal(g.document.activeElement.id, "prompt");
-});
-
-test("an example cannot leave brief-look dots exposed without recording support", (t) => {
-  const g = setup(t, "count.quick");
-  g.document.querySelector("#showAgain").click();
-  g.document.querySelector("#demoBtn").click();
-  g.tick(20000);
-  g.document.querySelector("#demoDone").click();
-  assert.ok(
-    g.document.querySelector(".quick-dots").classList.contains("covered"),
-  );
-  assert.equal(g.run("R.q.assisted"), false);
-  g.document.querySelector("#showAgain").click();
-  assert.equal(g.run("R.q.assisted"), true);
-});
-
 test("a three-item pattern keeps its unit through Undo and can restart cleanly", (t) => {
   const g = setup(t, "shapes.create");
   g.run(
@@ -177,7 +127,7 @@ test("replaying the task stops requested counting and preserves its learning evi
   assert.equal(g.run("R.q.assisted"), true);
 });
 
-test("questions, requested teaching and control examples all have bundled recordings", (t) => {
+test("questions and requested teaching have bundled recordings", (t) => {
   const g = game({ seed: 81, saved: { voice: false } });
   t.after(g.close);
   g.run("unlockSpeech()");
@@ -186,9 +136,6 @@ test("questions, requested teaching and control examples all have bundled record
       g.run(`recordedPlan(${JSON.stringify(text)})?.length > 0`),
       `${where}: ${text}`,
     );
-  g.run("Object.values(PLAY_GUIDES).flat().map(step => step[0])").forEach(
-    (text) => check(text, "control example"),
-  );
   g.run("Object.values(SHAPE_DESCRIPTION)").forEach((text) =>
     check(text, "shape properties"),
   );

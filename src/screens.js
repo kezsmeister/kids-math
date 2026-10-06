@@ -45,7 +45,6 @@ function renderHome() {
       ac();
       unlockSpeech();
       startRound(id);
-      offerPlayGuide();
     });
     box.appendChild(b);
   });
@@ -185,7 +184,6 @@ function renderParent(focusSelector) {
           save();
           unlockSpeech();
           startRound(activity.replace(/20$/, ""), key);
-          offerPlayGuide();
         }),
     );
   $("#parBody")
