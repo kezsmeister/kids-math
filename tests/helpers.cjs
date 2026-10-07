@@ -4,7 +4,13 @@ const vm = require("node:vm");
 const { JSDOM } = require(process.env.MATH_GARDEN_JSDOM || "jsdom");
 const root = process.env.MATH_GARDEN_SOURCE || path.resolve(__dirname, "..");
 
-function game({ seed = 7, saved, reducedMotion = false, built = false } = {}) {
+function game({
+  seed = 7,
+  saved,
+  reducedMotion = false,
+  built = false,
+  beforeScripts,
+} = {}) {
   const html = fs.readFileSync(
     path.join(root, built ? "dist/math-garden.html" : "index.html"),
     "utf8",
@@ -50,6 +56,7 @@ function game({ seed = 7, saved, reducedMotion = false, built = false } = {}) {
   window.SpeechSynthesisUtterance = function (text) {
     this.text = text;
   };
+  beforeScripts?.(window);
   const context = dom.getInternalVMContext();
   const run = (source) => vm.runInContext(source, context);
   for (const script of window.document.querySelectorAll("script")) {

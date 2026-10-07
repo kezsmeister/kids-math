@@ -45,7 +45,7 @@ function starPts() {
   }
   return p;
 }
-function shapeSVG(name, fill, rot = 0, extra = "") {
+function shapeSVG(name, fill, rot = 0, extra = "", points = null) {
   let inner;
   const st = `fill="${fill}" stroke="#0002" stroke-width="3" stroke-linejoin="round"`;
   if (name === "circle") inner = `<circle cx="50" cy="50" r="42" ${st}/>`;
@@ -54,34 +54,29 @@ function shapeSVG(name, fill, rot = 0, extra = "") {
       .map((p) => p.join(","))
       .join(" ")}" ${st}/>`;
   else
-    inner = `<polygon points="${POLY[name].map((p) => p.join(",")).join(" ")}" ${st}/>`;
-  return `<svg viewBox="0 0 100 100"><g transform="rotate(${rot} 50 50)">${inner}</g>${extra}</svg>`;
+    inner = `<polygon points="${(points || POLY[name]).map((p) => p.join(",")).join(" ")}" ${st}/>`;
+  return `<svg viewBox="-15 -15 130 130"><g transform="rotate(${rot} 50 50)">${inner}</g>${extra}</svg>`;
 }
-const TOKENS = [
-  ["🔴", "🔵", "🟡", "🟢", "🟣", "🟠"],
-  ["🐱", "🐶", "🐸", "🐰", "🐥", "🐟"],
-  ["🍎", "🍌", "🍇", "🍓", "🍊"],
-  ["🔺", "🟦", "⭕", "⭐", "💗", "🟩"],
-];
+const SHAPE_DESCRIPTION = {
+  circle: "A circle has a curved edge and no corners.",
+  triangle: "A triangle has three straight sides and three corners.",
+  square:
+    "A square has four equal straight sides and four right-angle corners.",
+  rectangle:
+    "A rectangle has four straight sides and four right-angle corners. A square is a special rectangle too.",
+  hexagon: "A hexagon has six straight sides.",
+  star: "This star has five points. Look for the pointed tips.",
+};
 ACTS.shapes = {
   name: "Shapes & Patterns",
   color: ["#f0b429", "#c48a00"],
   icon: '<svg viewBox="0 0 120 50"><circle cx="20" cy="26" r="18" fill="#ff86b9"/><rect x="45" y="8" width="34" height="34" rx="4" fill="#5cc6ff"/><polygon points="102,6 120,44 84,44" fill="#4fd08a"/></svg>',
   skill:
-    "Shapes (circle, square, triangle, rectangle…) and repeating patterns (AB, AAB, ABB, ABC)",
-  note: "Finds named shapes, counts sides, and completes AB / AAB / ABB / ABC patterns.",
+    "Shapes (circle, square, triangle, rectangle…) and repeating patterns (AB, AAB, ABB)",
+  note: "Finds named shapes, counts sides, and chooses the next item in AB / AAB / ABB patterns.",
   make(c, st) {
-    const r = Math.random();
-    const type =
-      c.lvl < 3
-        ? r < 0.35
-          ? "find"
-          : "pat"
-        : r < 0.3
-          ? "find"
-          : r < 0.45
-            ? "sides"
-            : "pat";
+    if (c.variant === "extend") return makePattern(c, st);
+    const type = c.variant === "sides" ? "sides" : "find";
     st.dataset.type = "shape-" + type;
     if (type === "find") {
       const pool =
@@ -95,34 +90,68 @@ ACTS.shapes = {
       const ans = pick(opts);
       const cols = shuffle(SHAPE_COL);
       ctl.ask(`Tap the <b class="big">${ans}</b>`, `Tap the ${ans}.`);
-      ctl.note(ans, `This is a ${ans}`);
+      ctl.note(ans, `This is a ${ans}. ${SHAPE_DESCRIPTION[ans]}`);
       const rots = {};
       opts.forEach((o) => {
-        rots[o] =
-          c.lvl === 3
-            ? rnd(-25, 25)
-            : o === "rectangle" && Math.random() < 0.5
-              ? 90
-              : 0;
+        rots[o] = rnd(-180, 180);
       });
       const ch = makeChoices(st, opts, ans, {
         btnCls: "shb",
-        render: (v, i) => shapeSVG(v, cols[i], rots[v]),
+        accept: (v) => v === ans || (ans === "rectangle" && v === "square"),
+        onRight: (b) => {
+          if (ans === "rectangle" && b.dataset.v === "square")
+            ctl.note(
+              "A square is a rectangle too.",
+              "A square is a special rectangle. It has four right-angle corners.",
+            );
+        },
+        render: (v, i) =>
+          shapeSVG(
+            v,
+            cols[i],
+            rots[v],
+            "",
+            v === "triangle"
+              ? pick([
+                  POLY.triangle,
+                  [
+                    [15, 15],
+                    [15, 85],
+                    [85, 85],
+                  ],
+                  [
+                    [50, 5],
+                    [66, 88],
+                    [34, 88],
+                  ],
+                  [
+                    [10, 65],
+                    [88, 82],
+                    [69, 12],
+                  ],
+                ])
+              : null,
+          ),
       });
       const lab = () =>
         ch.btns.forEach((b) => {
           if (!b.querySelector(".lab"))
             b.appendChild(el("span", "lab", b.dataset.v));
         });
-      ctl.hint(lab);
+      ctl.hint(() => {
+        lab();
+        R.q.speech = SHAPE_DESCRIPTION[ans];
+        showTeaching(R.q.speech);
+      });
       ctl.reveal(lab);
     } else if (type === "sides") {
-      const nm = pick(["triangle", "square", "rectangle", "hexagon"]);
-      const n = POLY[nm].length;
-      ctl.ask(
-        "How many <b>sides</b>?",
-        "How many sides does this shape have? Count along the edges.",
+      const nm = pick(
+        c.lvl < 3
+          ? ["triangle", "square", "rectangle"]
+          : ["triangle", "square", "rectangle", "hexagon"],
       );
+      const n = POLY[nm].length;
+      ctl.ask("How many <b>sides</b>?", "How many sides does this shape have?");
       ctl.note(`${n} sides`, `${W[n]} sides`);
       const pts = POLY[nm];
       let extra = "";
@@ -140,6 +169,8 @@ ACTS.shapes = {
       st.appendChild(big);
       makeChoices(st, numOpts(n, 3, 6, nChoices(c)), n);
       const hint = () => {
+        R.q.speech = `Count the straight sides: ${Array.from({ length: n }, (_, i) => W[i + 1]).join(", ")}. ${W[n]} sides.`;
+        showTeaching("Let’s count each straight side once.");
         [...big.querySelectorAll(".sb")].forEach((g) =>
           g.classList.remove("vis"),
         );
@@ -148,70 +179,18 @@ ACTS.shapes = {
           (i) => {
             big.querySelector(`.sb[data-i="${i}"]`).classList.add("vis");
             sfx.tap(i + 1);
-            say(W[i + 1]);
+            helpSpeak(W[i + 1]);
           },
           countGap(),
+          helpDelay(2000),
         );
       };
       ctl.hint(hint);
-      ctl.reveal(hint);
-    } else {
-      const units =
-        c.lvl === 1
-          ? ["AB"]
-          : c.lvl === 2
-            ? ["AB", "AAB", "ABB"]
-            : ["AAB", "ABB", "ABC", "AB"];
-      const u = pick(units);
-      const toks = shuffle(pick(TOKENS));
-      const map = { A: toks[0], B: toks[1], C: toks[2] };
-      const total = Math.max(6, u.length * 2);
-      const seq = [];
-      for (let i = 0; i < total; i++) seq.push(map[u[i % u.length]]);
-      const bi = c.lvl === 1 ? total - 1 : rnd(u.length, total - 1);
-      const ans = seq[bi];
-      ctl.ask(
-        bi === total - 1
-          ? "What comes <b>next</b>?"
-          : "What is <b>missing</b>?",
-        bi === total - 1
-          ? "What comes next in the pattern?"
-          : "What is missing in the pattern?",
-      );
-      ctl.note("It repeats!", "The pattern repeats.");
-      const pat = el("div", "pat");
-      let unit = null,
-        blank = null;
-      seq.forEach((t, i) => {
-        if (i % u.length === 0) {
-          unit = el("div", "punit");
-          pat.appendChild(unit);
-        }
-        const x = el("div", "ptok", i === bi ? "?" : t);
-        if (i === bi) {
-          x.classList.add("blank");
-          blank = x;
-        }
-        unit.appendChild(x);
+      ctl.reveal(() => {
+        big
+          .querySelectorAll(".sb")
+          .forEach((side) => side.classList.add("vis"));
       });
-      st.appendChild(pat);
-      const uniq = [...new Set(u.split("").map((k) => map[k]))];
-      const dis = toks.find((t) => !uniq.includes(t));
-      const opts = [...uniq, dis];
-      const fill = () => {
-        blank.textContent = ans;
-        blank.classList.remove("blank");
-        blank.classList.add("filled");
-      };
-      makeChoices(st, shuffle(opts), ans, {
-        btnCls: "tok",
-        drop: blank,
-        onRight: fill,
-        onReveal: fill,
-      });
-      const units2 = () => pat.classList.add("showunits");
-      ctl.hint(units2);
-      ctl.reveal(units2);
     }
   },
 };

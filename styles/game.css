@@ -228,11 +228,6 @@ button {
   line-height: 1.05;
   text-align: center;
 }
-.card .lv {
-  display: flex;
-  gap: 5px;
-  margin-top: 4px;
-}
 .lvd {
   display: inline-block;
   width: clamp(10px, 2vmin, 15px);
@@ -1939,14 +1934,6 @@ h1#prompt {
 .card .nm {
   font-size: clamp(20px, 3.5vmin, 30px);
 }
-.card .lv .lvd {
-  border-color: #3b2f6380;
-  background: transparent;
-}
-.card .lv .lvd.on {
-  background: var(--ink);
-  border-color: var(--ink);
-}
 .cards {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
@@ -2580,4 +2567,494 @@ h1#prompt {
   animation: none !important;
   transition: none !important;
   scroll-behavior: auto !important;
+}
+
+/* Hands-on mathematical activities share the same large native controls. */
+[hidden] {
+  display: none !important;
+}
+.teaching-status {
+  text-align: center;
+  font-size: clamp(16px, 2.5vmin, 22px);
+  color: #385443;
+  padding: 0 12px;
+}
+.teaching-status:empty {
+  display: none;
+}
+.number-play,
+.pattern-play {
+  width: min(100%, 640px);
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+}
+.instruction,
+.math-message {
+  margin: 0;
+  text-align: center;
+  line-height: 1.4;
+  font-size: clamp(17px, 2.8vmin, 23px);
+}
+.math-message {
+  color: #36563f;
+  font-weight: 800;
+}
+.collection,
+.pattern-bank {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.collection button,
+.pattern-bank button,
+.part-counters button,
+.repair-item {
+  min-width: 48px;
+  min-height: 48px;
+  border: 3px solid #789c83;
+  border-radius: 14px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1.1;
+  padding: 8px;
+}
+.collection button[aria-pressed="true"] {
+  background: #d5f0bf;
+  border-color: #346743;
+  box-shadow: 0 0 0 3px #7fab62;
+  transform: translateY(-3px);
+}
+.part-counters {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+}
+.part-group {
+  min-height: 140px;
+  padding: 12px;
+  border: 3px dashed #74947f;
+  border-radius: 18px;
+  display: flex;
+  justify-content: center;
+  align-content: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.part-group .lbl {
+  width: 100%;
+  margin-bottom: 8px;
+}
+.part-group:first-child {
+  background: #fff0df;
+}
+.part-group:last-child {
+  background: #e2f2ff;
+}
+.part-counters button {
+  color: #356288;
+}
+.conservation {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 2px;
+  width: 100%;
+  min-height: 90px;
+  align-content: center;
+}
+.conservation.spread {
+  gap: 14px 26px;
+}
+.conservation .item {
+  width: 36px;
+  height: 40px;
+  font-size: 32px;
+}
+.quick-dots {
+  position: relative;
+  padding: 12px;
+  border-radius: 18px;
+  background: #fff;
+}
+.quick-dots.covered > * {
+  visibility: hidden;
+}
+.quick-dots.covered::after {
+  content: "?";
+  display: grid;
+  place-items: center;
+  position: absolute;
+  inset: 0;
+  background: #e0eacb;
+  border-radius: 18px;
+  font-size: 65px;
+  font-weight: 900;
+}
+.pattern-row {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.pattern-repeat {
+  display: flex;
+  padding: 4px 2px 8px;
+  border-bottom: 4px solid transparent;
+  gap: 3px;
+}
+.pattern-slot {
+  display: grid;
+  place-items: center;
+  width: clamp(42px, 7vmin, 58px);
+  height: clamp(46px, 7vmin, 62px);
+  font-size: clamp(26px, 4.5vmin, 38px);
+  border-radius: 12px;
+  background: #fff;
+}
+.pattern-slot.blank {
+  border: 2px dashed #748779;
+  color: #526557;
+}
+.showunits .pattern-repeat {
+  border-bottom-color: #517d5d;
+  background: #dfedcd;
+  border-radius: 10px;
+}
+.pattern-repeat .repair-item {
+  min-width: 44px;
+  min-height: 48px;
+  padding: 4px;
+}
+.repair-item.selected {
+  outline: 4px solid #3b7656;
+}
+.pattern-option {
+  font-size: clamp(24px, 5vmin, 38px);
+  padding: 12px;
+}
+.pattern-preview {
+  min-height: 65px;
+  width: 100%;
+}
+.pattern-play .text-button {
+  margin: 0;
+}
+.known-ten {
+  outline: 4px solid #598555;
+  outline-offset: 3px;
+}
+@media (max-width: 400px) {
+  .part-group {
+    padding: 8px;
+    gap: 6px;
+  }
+  .part-counters {
+    gap: 8px;
+  }
+  .pattern-row {
+    gap: 6px;
+  }
+  .pattern-repeat {
+    gap: 2px;
+  }
+  .pattern-slot {
+    width: 42px;
+  }
+  .collection {
+    gap: 8px;
+  }
+}
+.learning-section {
+  background: #fffdf4;
+  border: 2px solid #d9dfc7;
+  border-radius: 16px;
+  padding: 14px;
+  margin: 12px 0;
+}
+.learning-section > summary {
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 20px;
+  padding: 6px;
+}
+.learning-skill {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  justify-content: space-between;
+  padding: 18px 4px;
+  border-top: 1px solid #d9dfc7;
+}
+.learning-skill h3 {
+  font-size: 19px;
+  margin: 0 0 8px;
+}
+.learning-skill p {
+  margin: 6px 0;
+  line-height: 1.45;
+}
+.learning-summary {
+  color: #346044;
+  font-weight: 800;
+}
+.home-practice {
+  background: #ecf3df;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 16px;
+}
+.learning-skill .text-button {
+  flex: none;
+  margin: 0;
+}
+@media (max-width: 500px) {
+  .learning-skill {
+    flex-direction: column;
+  }
+  .learning-section {
+    padding: 10px;
+  }
+}
+.lesson-help {
+  display: flex;
+  justify-content: center;
+}
+.lesson-help .text-button {
+  margin: 4px 0;
+  padding: 8px 14px;
+  min-height: 44px;
+  font-size: 16px;
+}
+
+/* Picture controls and concrete activities for children who are not yet reading. */
+.control-icon {
+  display: block;
+  font-size: 30px;
+  line-height: 1.2;
+}
+.lesson-help {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.lesson-help .text-button {
+  min-width: 76px;
+  min-height: 66px;
+}
+.text-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.collection {
+  width: 100%;
+  display: grid;
+  gap: 18px;
+}
+.collection-source,
+.collection-basket {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-content: center;
+  min-height: 76px;
+  padding: 14px;
+}
+.collection-source {
+  border-radius: 16px;
+  background: #edf5e2;
+  border: 2px dashed #789c83;
+}
+.collection-basket {
+  position: relative;
+  padding-top: 46px;
+  min-height: 126px;
+  border: 5px solid #b58d54;
+  border-radius: 12px 12px 48px 48px;
+  background: repeating-linear-gradient(
+    90deg,
+    #fff1d2 0 16px,
+    #f6e1b8 16px 19px
+  );
+}
+.basket-symbol {
+  position: absolute;
+  top: 4px;
+  left: calc(50% - 20px);
+  font-size: 32px;
+}
+.collection button[aria-pressed="true"] {
+  transform: none;
+  box-shadow: none;
+  background: white;
+}
+.part-group {
+  border-style: solid;
+  border-width: 4px;
+  border-radius: 12px 12px 52px 52px;
+}
+.part-group .lbl {
+  font-size: 14px;
+}
+.decomposition-snapshot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px;
+  background: #fffdf3;
+  border: 2px solid #b8c8a9;
+  border-radius: 14px;
+}
+.snapshot-camera {
+  font-size: 24px;
+}
+.snapshot-bowl {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+  justify-content: center;
+  gap: 4px;
+  width: 40%;
+  min-height: 56px;
+  padding: 8px;
+  border: 3px solid #789c83;
+  border-radius: 8px 8px 28px 28px;
+}
+.snapshot-counter {
+  font-size: 22px;
+  color: #356288;
+  line-height: 1;
+}
+.unit-reference {
+  width: fit-content;
+  margin: 0 auto 18px;
+  border: 3px solid #698456;
+  border-radius: 14px;
+  padding: 6px;
+  background: #edf4df;
+}
+.optional-slot {
+  align-self: center;
+  padding: 10px;
+  border: 2px dotted #87917c;
+  border-radius: 12px;
+  font-size: 24px;
+}
+.repair-target {
+  font-size: 36px;
+  border: 3px solid #537c5e;
+  border-radius: 14px;
+  padding: 8px 20px;
+}
+.repair-item:disabled {
+  opacity: 1;
+  cursor: default;
+}
+/* Identifying a repeating unit must not be answered by the spacing itself. */
+#stage[data-type="pattern-unit"] .pattern-row:not(.showunits),
+#stage[data-type="pattern-repair"] .pattern-row:not(.showunits) {
+  gap: 4px;
+}
+#stage[data-type="pattern-unit"] .pattern-row:not(.showunits) .pattern-repeat,
+#stage[data-type="pattern-repair"]
+  .pattern-row:not(.showunits)
+  .pattern-repeat {
+  display: contents;
+}
+@media (max-width: 400px) {
+  .collection-source,
+  .collection-basket {
+    gap: 8px;
+    padding-left: 6px;
+    padding-right: 6px;
+  }
+  .lesson-help {
+    gap: 6px;
+  }
+}
+
+/* Take Away: act first, then count the balloons that remain. */
+.take-play {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+.take-goal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.take-hand {
+  font-size: 30px;
+  margin-right: 4px;
+}
+.take-goal-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 36px;
+  border: 2px dashed #8f80bd;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 24px;
+}
+.take-goal-mark.done {
+  border-style: solid;
+  border-color: #348352;
+  color: #24673f;
+  background: #e1f5e4;
+}
+.take-scene {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  width: min(100%, 320px);
+  min-height: 120px;
+  padding: 14px;
+  border: 3px solid #a9d4eb;
+  border-radius: 24px;
+  background: #e8f6ff;
+}
+.take-balloon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 74px;
+  padding: 4px 0;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 4px 0 #98c9e2;
+  font-size: clamp(42px, 9vmin, 64px);
+  line-height: 1.2;
+}
+.take-balloon:not(:disabled):active {
+  transform: scale(0.95);
+}
+.take-balloon.popped {
+  visibility: hidden;
+  pointer-events: none;
+}
+.take-balloon:disabled:not(.popped) {
+  background: transparent;
+  box-shadow: none;
+}
+.take-balloon.counted,
+.show-tap .take-balloon:not(.popped) {
+  outline: 4px solid #986ae6;
+  outline-offset: -2px;
+}
+.take-answers {
+  width: 100%;
 }

@@ -19,7 +19,7 @@ test("a corrected retry records one question and does not immediately lower diff
 test("a callback from an abandoned round cannot overwrite the next round", (t) => {
   const g = useGame(t);
   g.run(
-    "startRound('sub'); later(()=>document.querySelector('#fbtext').textContent='stale hint', 100); goHome(); startRound('add')",
+    "startRound('sub'); later(()=>document.querySelector('#fbtext').textContent='stale hint', 100); goHome(); startRound('add','add.story')",
   );
   g.tick(110);
   assert.notEqual(
@@ -41,7 +41,7 @@ test("answer feedback remains until the child chooses Next", (t) => {
 
 test("addition counting can be replayed after finishing", (t) => {
   const g = useGame(t);
-  g.run("startRound('add')");
+  g.run("startRound('add','add.story')");
   const button = g.document.querySelector("#countBtn");
   button.click();
   g.tick(20000);
@@ -58,7 +58,7 @@ test("addition counting can be replayed after finishing", (t) => {
 
 test("answering correctly cancels counting before it interrupts the feedback", (t) => {
   const g = useGame(t);
-  g.run("startRound('add')");
+  g.run("startRound('add','add.story')");
   g.document.querySelector("#countBtn").click();
   g.run("ctl.correct()");
   g.tick(2000);
@@ -67,7 +67,9 @@ test("answering correctly cancels counting before it interrupts the feedback", (
 
 test("revealing a group after an interrupted hint counts every object", (t) => {
   const g = useGame(t);
-  g.run("Math.random=()=>.2; sk('count').lvl=3; startRound('count')");
+  g.run(
+    "Math.random=()=>.2; learningRecord('count.give').level=3; startRound('count','count.give')",
+  );
   const wrong = [...g.document.querySelectorAll(".gbtn:not([data-correct])")];
   assert.equal(wrong.length, 2);
   wrong[0].click();
@@ -160,34 +162,6 @@ test("ten-frame cells can be activated as labeled native buttons", (t) => {
   assert.equal(cells[0].getAttribute("aria-pressed"), "false");
 });
 
-test("subtraction help removes the stated quantity and shows what remains", (t) => {
-  const g = useGame(t);
-  g.run("startRound('sub')");
-  const equation = g.document
-    .querySelector(".eq")
-    .textContent.match(/(\d+)−(\d+)=/);
-  const total = Number(equation[1]),
-    removed = Number(equation[2]);
-  const show = [...g.document.querySelectorAll("button")].find((b) =>
-    b.textContent.includes("Show me"),
-  );
-  assert.ok(show, "A visible demonstration is available");
-  show.click();
-  g.tick(1500);
-  assert.equal(
-    g.document.querySelectorAll(".sub-pictures .item").length,
-    total,
-  );
-  assert.equal(
-    g.document.querySelectorAll(".sub-pictures .gone").length,
-    removed,
-  );
-  assert.match(
-    g.document.querySelector(".sub-caption").textContent,
-    new RegExp(`${total - removed} left`),
-  );
-});
-
 test("shape choices have names before any hint is requested", (t) => {
   const g = useGame(t);
   for (
@@ -218,7 +192,7 @@ test("different measurement values stay visibly different on narrow portrait scr
   g.run(`startRound('compare'); document.querySelector('#stage').replaceChildren();
     { const samples=[.7, (78-35+.5)/58, (94-30+.5)/66, .1];
       Math.random=()=>samples.length?samples.shift():.1;
-      measureQ({lvl:2}, document.querySelector('#stage')); }`);
+      measureQ({lvl:3}, document.querySelector('#stage')); }`);
   const animals = [...g.document.querySelectorAll(".msz")];
   assert.equal(animals.length, 2);
   function pixels(style, width, height) {
@@ -247,48 +221,44 @@ test("different measurement values stay visibly different on narrow portrait scr
 
 test("every activity generates complete questions with valid distinct answer choices", (t) => {
   const g = useGame(t);
-  for (const id of [
-    "count",
-    "tenframe",
-    "bonds",
-    "compare",
-    "order",
-    "add",
-    "sub",
-    "shapes",
-  ]) {
-    for (const mode of [10, 20]) {
-      if (mode === 20 && !g.run(`ACTS.${id}.m20`)) continue;
-      for (const level of [1, 2, 3])
-        for (let sample = 0; sample < 12; sample++) {
-          g.run(
-            `S.mode=${mode}; sk('${id}${mode === 20 ? "20" : ""}').lvl=${level}; startRound('${id}')`,
+  for (const topic of g.run("Object.keys(TOPICS)")) {
+    const activity = topic.split(".")[0],
+      id = activity.replace(/20$/, "");
+    for (const level of [1, 2, 3])
+      for (let sample = 0; sample < 8; sample++) {
+        g.run(
+          `S.mode=${activity.endsWith("20") ? 20 : 10};learningRecord('${topic}').level=${level};startRound('${id}','${topic}')`,
+        );
+        assert.equal(
+          g.run("R.idx"),
+          0,
+          `${topic}/${level} must generate a question`,
+        );
+        assert.equal(g.run("R.q.level"), level);
+        assert.ok(g.document.querySelector("#prompt").textContent.trim());
+        const choices = [...g.document.querySelectorAll(".choices button")].map(
+          (b) => b.dataset.v,
+        );
+        assert.equal(new Set(choices).size, choices.length, topic);
+        choices
+          .filter((v) => !Number.isNaN(Number(v)))
+          .forEach((v) =>
+            assert.ok(
+              Number.isInteger(Number(v)) && Number(v) >= 0 && Number(v) <= 21,
+              topic,
+            ),
           );
-          assert.equal(
-            g.run("R.idx"),
-            0,
-            `${id}/${mode}/${level} must not skip a broken question`,
-          );
-          assert.ok(g.document.querySelector("#prompt").textContent.trim());
-          const choices = [
-            ...g.document.querySelectorAll(".choices button"),
-          ].map((b) => b.dataset.v);
-          assert.equal(new Set(choices).size, choices.length);
-          choices
-            .filter((v) => !Number.isNaN(Number(v)))
-            .forEach((v) =>
-              assert.ok(
-                Number.isInteger(Number(v)) &&
-                  Number(v) >= 0 &&
-                  Number(v) <= 21,
-              ),
-            );
-          assert.equal(
-            g.document.querySelector("#stage").textContent.includes("NaN"),
-            false,
-          );
-        }
-    }
+        assert.equal(
+          g.document.querySelector("#stage").textContent.includes("NaN"),
+          false,
+          topic,
+        );
+        assert.equal(
+          g.document.querySelector("#stage").textContent.includes("undefined"),
+          false,
+          topic,
+        );
+      }
   }
 });
 

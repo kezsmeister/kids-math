@@ -15,10 +15,6 @@ $("#tVoice").onclick = () => {
   if (!S.voice) stopSpeaking();
   save();
   renderHome();
-  if (S.voice) {
-    unlockSpeech();
-    say("Hello, friend! Let us play with numbers together.");
-  }
 };
 $("#m10").onclick = () => {
   S.mode = 10;
@@ -37,14 +33,14 @@ $("#stkBtn").onclick = () => {
 $("#stkBack").onclick = goHome;
 $("#parBack").onclick = goHome;
 $("#homeBtn").onclick = goHome;
-$("#replayBtn").onclick = () => {
-  if (R && R.q) {
-    const v = S.voice;
-    S.voice = true;
-    say(R.q.speech);
-    S.voice = v;
-  }
-};
+function readQuestion() {
+  if (!R?.q?.questionSpeech || R.q.done) return;
+  cancelQuestionWork();
+  unlockSpeech();
+  speak(R.q.questionSpeech);
+}
+$("#readQuestionBtn").onclick = readQuestion;
+$("#replayBtn").onclick = readQuestion;
 $("#nextBtn").onclick = () => {
   if (R && R.q && R.q.done) advance();
 };

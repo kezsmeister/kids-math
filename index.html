@@ -25,11 +25,18 @@
             <button class="rbtn" id="tSound" aria-label="Sound effects">
               🔔
             </button>
-            <button class="rbtn" id="tVoice" aria-label="Read aloud">🗣️</button>
+            <button
+              class="rbtn"
+              id="tVoice"
+              aria-label="Read essential questions aloud"
+              title="Read essential questions aloud"
+            >
+              🗣️
+            </button>
           </div>
         </div>
         <div class="modebar">
-          <button class="modebtn" id="m10">1 – 10</button>
+          <button class="modebtn" id="m10">0 – 10</button>
           <button class="modebtn" id="m20">11 – 20</button>
         </div>
         <div class="cards" id="cards"></div>
@@ -57,14 +64,34 @@
             <span id="roundLabel" aria-hidden="true"></span>
           </div>
           <div class="lvpill" id="lvpill" role="img"></div>
-          <button class="rbtn" id="replayBtn" aria-label="Say it again">
+          <button class="rbtn" id="replayBtn" aria-label="Read question" hidden>
             🔊
           </button>
         </div>
         <div class="promptbar"><h1 id="prompt" tabindex="-1"></h1></div>
+        <div class="lesson-help">
+          <button id="readQuestionBtn" class="text-button" hidden>
+            <span class="control-icon" aria-hidden="true">🔊</span
+            ><span>Listen</span>
+          </button>
+          <button
+            id="hintBtn"
+            class="text-button"
+            aria-label="Help with this question"
+          >
+            <span class="control-icon" aria-hidden="true">💡</span
+            ><span>Help</span>
+          </button>
+        </div>
+        <div
+          id="speechStatus"
+          class="teaching-status"
+          role="status"
+          aria-live="polite"
+        ></div>
         <div
           id="helpStatus"
-          class="sr-only"
+          class="teaching-status"
           role="status"
           aria-live="polite"
         ></div>
@@ -109,11 +136,17 @@
     <div id="fx" aria-hidden="true"></div>
 
     <script defer src="src/dom.js"></script>
+    <script defer src="src/curriculum.js"></script>
     <script defer src="src/state.js"></script>
+    <script defer src="src/question-voice-data.js"></script>
+    <script defer src="src/recorded-voice.js"></script>
     <script defer src="src/audio.js"></script>
     <script defer src="src/questions.js"></script>
+    <script defer src="src/learning.js"></script>
     <script defer src="src/engine.js"></script>
     <script defer src="src/widgets.js"></script>
+    <script defer src="src/activities/number-play.js"></script>
+    <script defer src="src/activities/patterns.js"></script>
     <script defer src="src/activities/count.js"></script>
     <script defer src="src/activities/tenframe.js"></script>
     <script defer src="src/activities/bonds.js"></script>

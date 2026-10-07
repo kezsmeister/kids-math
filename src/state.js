@@ -46,6 +46,8 @@ const DEFAULTS = () => ({
   stars: 0,
   stickers: [],
   skills: {},
+  learning: {},
+  pendingPractice: {},
   sound: true,
   voice: true,
   voiceName: "",
@@ -94,6 +96,49 @@ function normalizeState(raw) {
       ok: boundedInt(value.ok, 0, 0, att),
       rounds: boundedInt(value.rounds, 0),
     };
+  }
+  for (const key of [...Object.keys(TOPICS), ...RETIRED_TOPICS]) {
+    const value = raw.learning?.[key];
+    if (!value || typeof value !== "object" || Array.isArray(value)) continue;
+    const history = Array.isArray(value.history)
+      ? value.history
+          .filter(
+            (item) =>
+              item &&
+              ["independent", "supported", "shown"].includes(item.outcome) &&
+              typeof item.day === "string" &&
+              /^\d{4}-\d{2}-\d{2}$/.test(item.day) &&
+              [1, 2, 3].includes(item.level) &&
+              typeof item.signature === "string",
+          )
+          .slice(-20)
+          .map((item) => ({ ...item, signature: item.signature.slice(0, 180) }))
+      : [];
+    state.learning[key] = {
+      level: boundedInt(value.level, 1, 1, 3),
+      independent: boundedInt(value.independent, 0),
+      supported: boundedInt(value.supported, 0),
+      shown: boundedInt(value.shown, 0),
+      history,
+      lastSeen: history.at(-1)?.day || "",
+      verifiedLevel:
+        [1, 2, 3].includes(value.verifiedLevel) &&
+        history.some((item) => item.outcome === "independent")
+          ? value.verifiedLevel
+          : 0,
+    };
+  }
+  for (const key of SKILL_KEYS) {
+    const pending = raw.pendingPractice?.[key];
+    if (
+      pending &&
+      TOPICS[pending.topic]?.activity === key &&
+      typeof pending.signature === "string"
+    )
+      state.pendingPractice[key] = {
+        topic: pending.topic,
+        signature: pending.signature.slice(0, 180),
+      };
   }
   return state;
 }

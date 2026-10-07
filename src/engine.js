@@ -22,6 +22,8 @@ function cancelQuestionWork() {
   R.pending.clear();
   if (R.q) {
     R.q.epoch++;
+    R.q.spokenHelp = false;
+    R.q.helpSpeechDuration = 0;
     R.q.cancel.forEach((fn) => fn());
   }
   stopSpeaking();
@@ -29,7 +31,7 @@ function cancelQuestionWork() {
 function seqRun(list, fn, gap, start = 300) {
   list.forEach((x, i) => later(() => fn(x, i), start + i * gap));
 }
-const countGap = () => (S.voice ? 700 : 420);
+const countGap = () => (R?.q?.spokenHelp ? 1100 : 700);
 function show(id) {
   document
     .querySelectorAll(".screen")
@@ -44,15 +46,21 @@ function lvDots(n) {
     .join("");
 }
 
-function startRound(id) {
+function startRound(id, focus = null) {
   cancelQuestionWork();
   const a = ACTS[id];
   const m20 = S.mode === 20 && !!a.m20;
+  const key = id + (m20 ? "20" : "");
+  const pending = S.pendingPractice[key];
   R = {
     id,
     a,
+    focus,
+    usedTopics: new Set(),
+    followUp: pending && (!focus || focus === pending.topic) ? pending : null,
+    avoidSignature: null,
     m20,
-    key: id + (m20 ? "20" : ""),
+    key,
     idx: 0,
     total: S.perRound,
     ok: 0,
@@ -76,7 +84,7 @@ function drawProgress() {
     } else if (i === R.idx) d.classList.add("cur");
     p.appendChild(d);
   }
-  const level = sk(R.key).lvl;
+  const level = R.q?.level || 1;
   $("#lvpill").innerHTML = lvDots(level);
   $("#lvpill").setAttribute("aria-label", `Level ${level} of 3`);
   $("#lvpill").title = `Level ${level} of 3`;
@@ -93,8 +101,14 @@ function nextQ() {
   st.removeAttribute("data-type");
   $("#prompt").innerHTML = "";
   $("#fbtext").innerHTML = "";
+  $("#helpStatus").textContent = "";
   $("#nextBtn").classList.remove("show");
+  const selected = chooseLearning(R);
   R.q = {
+    ...selected,
+    level: selected.lvl,
+    assisted: false,
+    learningRecorded: false,
     tries: 0,
     done: false,
     recorded: false,
@@ -106,13 +120,41 @@ function nextQ() {
     note: "",
     speech: "",
     nsay: "",
+    mathKey: "",
   };
   drawProgress();
-  const c = { lvl: sk(R.key).lvl, m20: R.m20, idx: R.idx };
+  const c = { ...selected, m20: R.m20, idx: R.idx };
   if (R.m20) st.classList.add("small");
   try {
-    R.a.make(c, st);
+    for (let attempt = 0; attempt < 20; attempt++) {
+      if (attempt) {
+        cancelQuestionWork();
+        st.replaceChildren();
+        R.q.cancel = [];
+        R.q.mathKey = "";
+        R.q.hint = null;
+        R.q.reveal = null;
+        R.q.glow = null;
+        R.q.note = "";
+        R.q.nsay = "";
+      }
+      R.a.make(c, st);
+      R.q.signature = (
+        R.q.mathKey ||
+        R.q.note ||
+        $("#prompt").textContent
+      ).slice(0, 180);
+      if (R.q.signature !== R.avoidSignature) break;
+    }
+    R.avoidSignature = null;
     organize(st);
+    $("#hintBtn").hidden = !R.q.hint;
+    $("#hintBtn").onclick = () => {
+      if (!R?.q || R.q.done) return;
+      cancelQuestionWork();
+      R.q.spokenHelp = true;
+      R.q.hint?.();
+    };
   } catch (e) {
     console.error("question error", e);
     R.marks[R.idx] = 1;
@@ -121,7 +163,7 @@ function nextQ() {
   }
 }
 /* Split every question into a calm QUESTION CARD (look, don't press) and a bright ANSWER TRAY (press these). */
-const ANS_SEL = ".choices,.gpick,.cmp,.mh,.mv,.checkrow,.numbtn";
+const ANS_SEL = ".choices,.gpick,.cmp,.mh,.mv,.checkrow,.numbtn,.answer-widget";
 function organize(st) {
   const kids = [...st.children];
   const card = el("div", "qcard"),
@@ -129,7 +171,6 @@ function organize(st) {
   kids.forEach((k) => {
     const isAns =
       k.matches(ANS_SEL) ||
-      k.matches(".frame-guide") ||
       k.matches(".tf-int") ||
       !!k.querySelector(".tf-int");
     (isAns ? tray : card).appendChild(k);
@@ -141,13 +182,39 @@ function organize(st) {
   st.append(card, tray);
   $("#prompt").focus({ preventScroll: true });
 }
-ctl.ask = (html, speech) => {
+function refreshQuestionReader() {
+  const available = !!R?.q?.questionSpeech && !R.q.done;
+  $("#readQuestionBtn").hidden = !available;
+  $("#replayBtn").hidden = !available;
+}
+ctl.instruction = (speech, essential = TOPICS[R.q.topic].narrate) => {
+  const q = R.q;
+  clearTimeout(q.narrationTimer);
+  R.pending.delete(q.narrationTimer);
+  stopSpeaking();
+  q.questionSpeech = speech || "";
+  refreshQuestionReader();
+  if (q.questionSpeech && essential)
+    q.narrationTimer = later(() => {
+      if (S.voice && !q.done) speak(q.questionSpeech);
+    }, 250);
+};
+ctl.ask = (html, speech, essential) => {
   $("#prompt").innerHTML = html;
   R.q.speech = speech || "";
-  later(() => say(speech), 250);
+  ctl.instruction(speech, essential);
+};
+ctl.assist = () => {
+  if (R?.q && !R.q.done) R.q.assisted = true;
 };
 ctl.hint = (fn) => {
-  R.q.hint = fn;
+  const round = R,
+    question = R.q;
+  question.hint = () => {
+    if (R !== round || R.q !== question) return;
+    ctl.assist();
+    fn();
+  };
 };
 ctl.reveal = (fn) => {
   R.q.reveal = fn;
@@ -161,53 +228,57 @@ ctl.correct = () => {
   if (q.done) return;
   cancelQuestionWork();
   q.done = true;
+  $("#helpStatus").textContent = "";
   const first = q.tries === 0;
-  if (first) {
-    R.ok++;
-    S.stars++;
-  }
+  R.ok++;
+  S.stars++;
   recSkill(first);
-  R.marks[R.idx] = first ? 2 : 1;
+  const independent = first && !q.assisted;
+  recordLearning(independent ? "independent" : "supported");
+  R.marks[R.idx] = independent ? 2 : 1;
   sfx.ok();
   burst();
-  const pr = pick([
-    "Great job!",
-    "Wonderful!",
-    "You did it!",
-    "Lovely!",
-    "That is right!",
-    "Yay, well done!",
-    "Super!",
-  ]);
+  const pr = q.tries
+    ? "You checked and tried again!"
+    : pick([
+        "Great job!",
+        "Wonderful!",
+        "You did it!",
+        "Lovely!",
+        "That is right!",
+        "Yay, well done!",
+        "Super!",
+      ]);
   $("#fbtext").innerHTML =
     `<span class="praise">${pr}</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
-  say(pr + " " + q.nsay);
   finishQ();
 };
 ctl.wrong = () => {
   const q = R.q;
   if (q.done) return;
+  cancelQuestionWork();
   q.tries++;
   if (q.tries === 1) {
     recSkill(false);
     sfx.oops();
     $("#fbtext").innerHTML = `<span class="oops">Let’s look together 💛</span>`;
-    say("Oops, not quite. Let us look together, then try again.");
     if (q.hint) later(q.hint, 150);
   } else {
     cancelQuestionWork();
     q.done = true;
     R.marks[R.idx] = 1;
     sfx.oops();
+    recordLearning("shown");
     if (q.reveal) q.reveal();
     if (q.glow) q.glow();
     $("#fbtext").innerHTML =
       `<span class="oops">Here it is!</span>${q.note ? `<span class="note">${q.note}</span>` : ""}`;
-    say("That is okay. Here it is. " + q.nsay);
     finishQ();
   }
 };
 function finishQ() {
+  refreshQuestionReader();
+  $("#hintBtn").hidden = true;
   $("#nextBtn").classList.add("show");
   // Explanations and counting have no time limit. The child chooses Next.
 }
@@ -216,7 +287,7 @@ function advance() {
   R.idx++;
   nextQ();
 }
-/* adaptive: 3 first-try answers in a row -> level up; 2 misses in a row -> easier */
+/* Historical activity totals; progression uses the separate learning records. */
 function recSkill(first) {
   if (R.q.recorded) return;
   R.q.recorded = true;
@@ -226,20 +297,10 @@ function recSkill(first) {
     s.ok++;
     s.streak++;
     s.miss = 0;
-    if (s.streak >= 3 && s.lvl < 3) {
-      s.lvl++;
-      s.streak = 0;
-      toast("Level up! 🚀");
-      sfx.up();
-    }
   } else {
     if (R.q.tries <= 1) s.att++;
     s.miss++;
     s.streak = 0;
-    if (s.miss >= 2 && s.lvl > 1) {
-      s.lvl--;
-      s.miss = 0;
-    }
   }
   save();
 }
@@ -310,11 +371,9 @@ function finishRound() {
   show("res");
   sfx.win();
   burst();
-  say(
-    `Well done, you! You earned ${W[Math.min(stars, 20)]} stars.` +
-      (newSt ? " And look, a new sticker!" : ""),
-  );
-  $("#againBtn").onclick = () => startRound(id);
+  $("#againBtn").onclick = () => {
+    startRound(id);
+  };
   $("#resHome").onclick = goHome;
 }
 function goHome() {

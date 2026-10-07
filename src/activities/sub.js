@@ -1,102 +1,131 @@
 "use strict";
 
-/* 7. SUBTRACT */
 ACTS.sub = {
   name: "Take Away",
   color: ["#7c8cff", "#4b58d6"],
-  icon: '<div style="font-size:.8em;text-shadow:0 3px 0 #0003;white-space:nowrap">🐥➖🐥</div>',
-  skill: "Subtraction as taking away with optional picture support",
-  note: "Read a story or equation, then choose how many are left. Show me crosses out the objects taken away and counts those remaining.",
+  icon: '<div style="font-size:.8em;white-space:nowrap">🎈👆</div>',
+  skill: "Act out subtraction with small groups",
+  note: "Pop the requested balloons, then count those still there. The child controls the action; groups stay within five.",
   make(c, st) {
     st.classList.add("sub-st");
-    const hi = HI[c.lvl];
-    const zero = c.lvl === 3 && Math.random() < 0.1;
-    const n = rnd(2, hi);
-    const k = zero ? n : rnd(1, n - 1);
+    st.dataset.type = "sub-story";
+    const n = rnd(2, 5);
+    const k = Math.random() < 0.2 ? n : rnd(1, n - 1);
     const left = n - k;
-    const eqType = c.lvl > 1 && Math.random() < (c.lvl === 2 ? 0.4 : 0.6);
-    st.dataset.type = eqType ? "sub-eq" : "sub-story";
-    const o = pick(OBJ);
+    const round = R,
+      question = R.q;
+    question.mathKey = `sub:${n}:${k}`;
     ctl.note(
       `${n} − ${k} = ${left}`,
       `${W[n]} take away ${W[k]} leaves ${W[left]}`,
     );
-    if (!eqType) {
-      ctl.ask(
-        `<b class="big">${k}</b> <span class="emo">${o.e}</span> 💨 How many left?`,
-        `${W[n]} ${o.p}. ${W[k]} ${o.v}. How many are left?`,
-      );
-      st.appendChild(
-        el(
-          "div",
-          "substory",
-          `<span class="emo">${o.e}</span> ${n} ${plu(n, o)}, ${k} ${o.v}`,
-        ),
-      );
-    } else {
-      ctl.ask(
-        `<b>${n}</b> − <b>${k}</b> = <b class="big">?</b>`,
-        `${W[n]} take away ${W[k]} equals how many?`,
-      );
-    }
-    const eq = el(
-      "div",
-      "eq",
-      `<span class="a">${n}</span><span class="op">−</span><span class="b">${k}</span><span class="op">=</span><span class="q">?</span>`,
-    );
-    st.appendChild(eq);
-    const fillQ = () => {
-      const q = $(".q", eq);
-      q.textContent = left;
-      q.classList.add("filled");
-    };
-    makeChoices(st, numOpts(left, 0, Math.max(hi, n), nChoices(c)), left, {
-      onRight: fillQ,
-      onReveal: fillQ,
+
+    const panel = el("div", "take-play answer-widget");
+    const goal = el("div", "take-goal");
+    goal.setAttribute("role", "img");
+    const hand = el("span", "take-hand", "👆");
+    hand.setAttribute("aria-hidden", "true");
+    goal.appendChild(hand);
+    const marks = Array.from({ length: k }, () => {
+      const mark = el("span", "take-goal-mark", "🎈");
+      mark.setAttribute("aria-hidden", "true");
+      goal.appendChild(mark);
+      return mark;
     });
-    // Optional concrete model: retain the starting group, cross out the removed
-    // objects, then count only those left. Every replay restores the same story.
-    const pictures = el("div", "sub-pictures");
-    pictures.hidden = true;
-    pictures.setAttribute("role", "img");
-    const items = [];
+    const scene = el("div", "take-scene");
+    scene.setAttribute("role", "group");
+    scene.setAttribute("aria-label", "Balloons to pop");
+    panel.append(goal, scene);
+    st.appendChild(panel);
+
+    let popped = 0;
+    let counting = false;
+    const balloons = [];
+    const popPrompt = (automatic) => {
+      const remaining = k - popped;
+      goal.setAttribute(
+        "aria-label",
+        `${remaining} ${remaining === 1 ? "balloon" : "balloons"} to pop`,
+      );
+      ctl.ask(
+        `Pop <b class="big">${remaining}</b> 🎈`,
+        `Pop ${W[remaining]} ${remaining === 1 ? "balloon" : "balloons"}.`,
+        automatic,
+      );
+    };
     for (let i = 0; i < n; i++) {
-      const item = mkItem(o.e);
-      items.push(item);
-      pictures.appendChild(item);
-    }
-    const caption = el("p", "sub-caption");
-    const demonstration = el("div", "sub-demo");
-    demonstration.hidden = true;
-    demonstration.append(pictures, caption);
-    st.appendChild(demonstration);
-    const show = countTogether(
-      st,
-      () => {
-        demonstration.hidden = false;
-        pictures.hidden = false;
-        items.forEach((item) => {
-          item.classList.remove("gone", "counted");
-          item.querySelector(".badge")?.remove();
-        });
-        pictures.setAttribute("aria-label", `${n} ${o.p}. Take away ${k}.`);
-        caption.textContent = `Start with ${n}. Take away ${k}.`;
-        say(`Start with ${W[n]} ${o.p}. Take away ${W[k]}.`);
-        later(() => {
-          items.slice(left).forEach((item) => item.classList.add("gone"));
-          pictures.setAttribute(
+      const balloon = el(
+        "button",
+        "take-balloon",
+        '<span aria-hidden="true">🎈</span>',
+      );
+      balloon.type = "button";
+      balloon.setAttribute("aria-label", `Pop balloon ${i + 1}`);
+      balloon.addEventListener("click", () => {
+        if (
+          R !== round ||
+          R.q !== question ||
+          question.done ||
+          counting ||
+          balloon.disabled
+        )
+          return;
+        const focused = document.activeElement === balloon;
+        cancelQuestionWork();
+        $("#helpStatus").textContent = "";
+        scene.classList.remove("show-tap");
+        balloon.disabled = true;
+        balloon.classList.add("popped");
+        balloon.setAttribute("aria-hidden", "true");
+        marks[popped].textContent = "✓";
+        marks[popped].classList.add("done");
+        popped++;
+        sfx.pop();
+        if (popped === k) {
+          counting = true;
+          goal.hidden = true;
+          balloons.forEach((b) => {
+            b.disabled = true;
+            if (!b.classList.contains("popped"))
+              b.setAttribute("aria-label", "Balloon remaining");
+          });
+          scene.classList.add("counting");
+          scene.setAttribute(
             "aria-label",
-            `${n} ${o.p}, ${k} crossed out, ${left} left.`,
+            "Balloons remaining. How many are left?",
           );
-          caption.textContent = `${n} − ${k} = ${left}. ${left} left!`;
-          if (left) countAll(items.slice(0, left));
-          else say("None left. That is zero.");
-        }, 1200);
-      },
-      () => 1500 + left * countGap(),
-      "Show me",
-    );
-    ctl.hint(show);
-    ctl.reveal(show);
+          answers.box.hidden = false;
+          answers.btns.forEach((b) => (b.disabled = false));
+          ctl.ask("How many left?", "How many balloons are left?");
+          if (focused) answers.btns[0].focus({ preventScroll: true });
+        } else {
+          // The next tap and Listen refer to what still needs to be popped.
+          // Routine taps stay quiet; entering the counting phase is narrated.
+          popPrompt(false);
+          if (focused)
+            balloons.find((b) => !b.disabled)?.focus({ preventScroll: true });
+        }
+      });
+      scene.appendChild(balloon);
+      balloons.push(balloon);
+    }
+    const answers = makeChoices(panel, numOpts(left, 0, 5, nChoices(c)), left, {
+      cls: "take-answers",
+    });
+    answers.box.hidden = true;
+    answers.btns.forEach((b) => (b.disabled = true));
+    popPrompt(TOPICS[question.topic].narrate);
+
+    const help = () => {
+      if (!counting) {
+        scene.classList.add("show-tap");
+        showTeaching("Tap the balloons to pop them.");
+        return;
+      }
+      if (!left) showTeaching("None left. That is zero.");
+      else countAll(balloons.filter((b) => !b.classList.contains("popped")));
+    };
+    ctl.hint(help);
+    ctl.reveal(help);
   },
 };

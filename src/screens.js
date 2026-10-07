@@ -31,17 +31,15 @@ function renderHome() {
   ORDER.forEach((id) => {
     const a = ACTS[id];
     if (S.mode === 20 && !a.m20) return;
-    const key = id + (S.mode === 20 ? "20" : "");
-    const s = sk(key);
     const b = el("button", "card");
     b.type = "button";
     b.dataset.act = id;
     b.style.setProperty("--c", a.color[0]);
     b.style.setProperty("--d", a.color[1]);
-    b.innerHTML = `<div class="ic">${a.icon}</div><div class="nm">${S.mode === 20 && a.m20name ? a.m20name : a.name}</div><div class="lv">${lvDots(s.lvl)}</div>`;
+    b.innerHTML = `<div class="ic">${a.icon}</div><div class="nm">${S.mode === 20 && a.m20name ? a.m20name : a.name}</div>`;
     b.setAttribute(
       "aria-label",
-      `${S.mode === 20 && a.m20name ? a.m20name : a.name}, level ${s.lvl} of 3`,
+      `${S.mode === 20 && a.m20name ? a.m20name : a.name}`,
     );
     b.addEventListener("click", () => {
       ac();
@@ -89,7 +87,7 @@ function refreshVoiceList() {
   );
   if (!en.length)
     h +=
-      '<div class="small-note">No English voices found on this device yet – the default voice is used. Try again in a moment.</div>';
+      '<div class="small-note">No extra device voices found. Built-in question recordings can still play.</div>';
   en.forEach((v, i) => {
     h += row(
       v.name,
@@ -137,31 +135,57 @@ function renderParent(focusSelector) {
     else if (active.dataset.pr)
       focusSelector = `[data-pr="${active.dataset.pr}"]`;
   }
-  const rows = [];
-  const add = (id, m20) => {
-    const a = ACTS[id];
-    const key = id + (m20 ? "20" : "");
-    const s = S.skills[key] || { lvl: 1, att: 0, ok: 0, rounds: 0 };
-    const pct = s.att ? Math.round((100 * s.ok) / s.att) : 0;
-    rows.push(
-      `<tr><td><b>${m20 ? "11–20 " : ""}${a.name}</b><div class="small-note">${a.note}</div></td><td><span role="img" aria-label="Level ${s.lvl} of 3">${lvDots(s.lvl)}</span></td><td>${s.rounds}</td><td>${s.att}</td><td>${s.att ? pct + "%" : "–"}<div class="bar2"><i style="width:${pct}%"></i></div></td></tr>`,
-    );
-  };
-  ORDER.forEach((id) => add(id, false));
-  ORDER.forEach((id) => {
-    if (ACTS[id].m20) add(id, true);
-  });
+  const sections = Object.entries(CURRICULUM)
+    .map(([activity, skills]) => {
+      const id = activity.replace(/20$/, ""),
+        a = ACTS[id];
+      const rows = skills
+        .map(([variant, label, home]) => {
+          const key = `${activity}.${variant}`,
+            r = learningRecord(key);
+          const range = learningRange(key, r.level);
+          const retention = r.verifiedLevel
+            ? `Checked independently on different days: ${learningRange(key, r.verifiedLevel)}.`
+            : "Check again on another day to see what is remembered.";
+          return `<article class="learning-skill" data-learning="${key}"><div><h3>${label}</h3><p class="learning-summary">${learningSummary(key)}</p><p>${range}</p><p class="small-note">${r.independent} independent · ${r.supported} supported · ${r.shown} shown</p>${r.history.length ? `<p class="small-note">${retention}</p>` : ""}<p class="home-practice"><b>Try together:</b> ${home}</p></div><button class="text-button" data-practice="${key}" aria-label="Practice ${label}${activity.endsWith("20") ? " with numbers 11 to 20" : ""}">Practice</button></article>`;
+        })
+        .join("");
+      return `<details class="learning-section"><summary>${activity.endsWith("20") ? "11–20 · " : ""}${a.name}</summary>${rows}</details>`;
+    })
+    .join("");
+  const totals = Object.entries(S.skills)
+    .filter(([, r]) => r.att)
+    .map(
+      ([key, r]) =>
+        `<tr><td>${key.endsWith("20") ? "11–20 · " : ""}${ACTS[key.replace(/20$/, "")].name}</td><td>${r.rounds}</td><td>${r.att}</td><td>${Math.round((100 * r.ok) / r.att)}%</td></tr>`,
+    )
+    .join("");
   $("#parBody").innerHTML = `
-   <p class="small-note">Progress is saved on this device only. "Correct on first answer" means correct before submitting a wrong answer. Counting help and demonstrations are allowed. Levels adapt: 3 correct first answers in a row → harder; 2 misses in a row → easier. A wrong answer offers help; a second wrong answer shows the solution. Press Next when ready. Stars are earned for correct first answers, plus one for completing a round. Every completed round earns a new sticker until the collection is full.</p>
-   <div class="table-scroll" role="region" aria-label="Skill progress" tabindex="0"><table class="ptable"><tr><th>Skill</th><th>Level (1–3)</th><th>Rounds</th><th>Questions answered</th><th>Correct on first answer</th></tr>${rows.join("")}</table></div>
+   <p class="small-note">Progress is saved on this device. Independent means correct without a wrong answer, hint or counting help. Supported includes help and successful retries. Shown means the game demonstrated the solution after two tries; the next practice question checks that skill again.</p>
+   <p class="small-note">Difficulty grows after at least four independent answers among the latest five at that level, covering at least three different questions. A later-day independent check is recorded separately. These observations guide practice; they are not a formal assessment.</p>
+   <div class="learning-sections">${sections}</div>
+   <details class="learning-section"><summary>Activity totals, including earlier play</summary><p class="small-note">These totals preserve earlier progress. First-answer accuracy can include counting help, so it does not measure independence.</p><div class="table-scroll"><table class="ptable"><tr><th>Activity</th><th>Rounds</th><th>Questions</th><th>Correct on first answer</th></tr>${totals || '<tr><td colspan="4">No completed questions yet.</td></tr>'}</table></div></details>
    <div class="pset"><b>⭐ ${S.stars}</b> stars · <b>🎁 ${S.stickers.length}/${STICKERS.length}</b> stickers</div>
    <div class="pset"><span>Questions per round:</span>${[6, 8, 10].map((n) => `<button class="modebtn${S.perRound === n ? " on" : ""}" aria-pressed="${S.perRound === n}" data-pr="${n}">${n}</button>`).join("")}</div>
-   <div class="pset"><button class="modebtn${S.sound ? " on" : ""}" id="pSound" aria-pressed="${S.sound}">🔔 Sounds ${S.sound ? "on" : "off"}</button><button class="modebtn${S.voice ? " on" : ""}" id="pVoice" aria-pressed="${S.voice}">🗣️ Voice ${S.voice ? "on" : "off"}</button></div>
-   <div class="pset vpick"><b>🗣️ Voice</b><div id="voiceList" class="vlist"></div>
+   <div class="pset"><button class="modebtn${S.sound ? " on" : ""}" id="pSound" aria-pressed="${S.sound}">🔔 Sounds ${S.sound ? "on" : "off"}</button><button class="modebtn${S.voice ? " on" : ""}" id="pVoice" aria-pressed="${S.voice}">🗣️ Read essential questions ${S.voice ? "on" : "off"}</button></div>
+   <div class="pset vpick"><b>🗣️ Backup voice</b><p class="small-note">Questions use the built-in voice when available. Choose a backup voice below.</p><div id="voiceList" class="vlist"></div>
     <div class="small-note">On iPhone: Settings &gt; Accessibility &gt; Spoken Content &gt; Voices &gt; English &gt; download Samantha (Enhanced)</div></div>
-   <p class="small-note">The dots on each activity show its level (1–3). During play, the numbered progress label shows the current question. Stars mark a correct first answer; hearts mark a question completed with a retry.</p>
+   <p class="small-note">Every solved question earns a star, including corrections and answers with help. Completing a round earns another star and a sticker until the collection is full. During play, stars mark independent answers; hearts mark supported or shown answers. The three dots show the current skill’s challenge level.</p>
    <div class="pset"><label for="motionChoice">Animation:</label><select id="motionChoice"><option value="system">Follow device preference</option><option value="calm">Calm · less motion</option><option value="full">Playful · full motion</option></select></div>
    <div class="pset" id="resetArea"><button class="bigbtn orange" id="resetBtn" style="font-size:20px">Reset all progress</button></div>`;
+  $("#parBody")
+    .querySelectorAll("[data-practice]")
+    .forEach(
+      (b) =>
+        (b.onclick = () => {
+          const key = b.dataset.practice,
+            activity = TOPICS[key].activity;
+          S.mode = activity.endsWith("20") ? 20 : 10;
+          save();
+          unlockSpeech();
+          startRound(activity.replace(/20$/, ""), key);
+        }),
+    );
   $("#parBody")
     .querySelectorAll("[data-pr]")
     .forEach(
