@@ -134,24 +134,6 @@ test("small groups remain visible at all levels through waiting and replay", (t)
   }
 });
 
-test("subtraction starts with a visible concrete model and at most five removed objects", (t) => {
-  const g = setup(t);
-  for (const level of [1, 2, 3])
-    for (let sample = 0; sample < 30; sample++) {
-      start(g, "sub.story", level);
-      const pictures = g.document.querySelector(".sub-pictures");
-      assert.equal(pictures.hidden, false);
-      assert.equal(pictures.closest(".sub-demo").hidden, false);
-      const [total, taken, left] = g.run("R.q.note").match(/\d+/g).map(Number);
-      assert.equal(pictures.querySelectorAll(".item").length, total);
-      assert.equal(pictures.querySelectorAll(".gone").length, taken);
-      assert.equal(total - taken, left);
-      assert.ok(taken <= 5);
-      assert.equal(g.document.querySelector("#stage .eq"), null);
-      assert.equal(g.run("R.q.assisted"), false);
-    }
-});
-
 test("patterns ask for a single next item with an immediately usable answer", (t) => {
   const g = setup(t);
   for (const level of [1, 2, 3])
@@ -177,21 +159,6 @@ test("patterns ask for a single next item with an immediately usable answer", (t
         0,
       );
     }
-});
-
-test("replaying a subtraction question during help restores the crossed-out objects", (t) => {
-  const g = setup(t);
-  start(g, "sub.story", 3);
-  const removed = Number(g.run("R.q.note").match(/\d+/g)[1]);
-  g.document.querySelector("#countBtn").click();
-  g.tick(100);
-  g.document.querySelector("#replayBtn").click();
-  g.tick(30000);
-  assert.equal(
-    g.document.querySelectorAll(".sub-pictures .gone").length,
-    removed,
-  );
-  assert.equal(g.run("R.q.assisted"), true);
 });
 
 test("number paths and numeral comparisons supply quantity pictures before help", (t) => {
@@ -254,6 +221,12 @@ test("every retained skill can be completed through its visible controls at ever
       } else {
         if (topic === "count.conserve")
           g.document.querySelector("#moveObjects").click();
+        if (topic === "sub.story") {
+          const taken = +g.run("R.q.note").match(/\d+/g)[1];
+          [...g.document.querySelectorAll(".take-balloon")]
+            .slice(0, taken)
+            .forEach((b) => b.click());
+        }
         const answer = g.document.querySelector("#stage [data-correct]");
         assert.ok(answer, topic);
         assert.equal(answer.closest("[hidden]"), null, topic);

@@ -184,6 +184,7 @@ const NARRATED_TOPICS = new Set([
   "order.bigger",
   "shapes.find",
   "shapes.sides",
+  "sub.story",
 ]);
 const TOPICS = Object.fromEntries(
   Object.entries(CURRICULUM).flatMap(([activity, rows]) =>

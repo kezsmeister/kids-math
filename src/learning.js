@@ -106,6 +106,7 @@ function learningRange(key, level) {
       ? "One next item in an AB pattern"
       : "One next item in an AB, AAB or ABB pattern";
   }
+  if (activity === "sub") return "Pop and count balloons within 5";
   if (variant === "quick")
     return level === 1
       ? "Visible groups of 1–5 in familiar layouts"

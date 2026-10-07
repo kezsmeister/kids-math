@@ -34,6 +34,7 @@ test("word-dependent tasks are read; quantities and visible gaps stay quiet", (t
     "order.bigger",
     "shapes.find",
     "shapes.sides",
+    "sub.story",
   ];
   const quiet = [
     "count.count",
@@ -45,7 +46,6 @@ test("word-dependent tasks are read; quantities and visible gaps stay quiet", (t
     "order.missing",
     "order.before",
     "add.story",
-    "sub.story",
     "shapes.extend",
   ];
   for (const [topics, expected] of [

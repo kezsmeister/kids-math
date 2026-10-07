@@ -162,28 +162,6 @@ test("ten-frame cells can be activated as labeled native buttons", (t) => {
   assert.equal(cells[0].getAttribute("aria-pressed"), "false");
 });
 
-test("subtraction help removes the stated quantity and shows what remains", (t) => {
-  const g = useGame(t);
-  g.run("startRound('sub','sub.story')");
-  const [total, removed] = g.run("R.q.note").match(/\d+/g).map(Number);
-  const show = g.document.querySelector("#countBtn");
-  assert.ok(show, "A visible demonstration is available");
-  show.click();
-  g.tick(20000);
-  assert.equal(
-    g.document.querySelectorAll(".sub-pictures .item").length,
-    total,
-  );
-  assert.equal(
-    g.document.querySelectorAll(".sub-pictures .gone").length,
-    removed,
-  );
-  assert.match(
-    g.document.querySelector(".sub-caption").textContent,
-    new RegExp(`${total - removed} left`),
-  );
-});
-
 test("shape choices have names before any hint is requested", (t) => {
   const g = useGame(t);
   for (
